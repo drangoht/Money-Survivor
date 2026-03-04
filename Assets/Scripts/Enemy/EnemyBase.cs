@@ -1,0 +1,130 @@
+using UnityEngine;
+
+/// <summary>
+/// Base enemy behaviour: move toward the player, deal contact damage, die and drop XP.
+/// Attach an EnemyData ScriptableObject in the Inspector.
+/// </summary>
+[RequireComponent(typeof(Rigidbody2D))]
+[RequireComponent(typeof(CircleCollider2D))]
+public class EnemyBase : MonoBehaviour, IPoolable
+{
+    [Header("Data")]
+    public EnemyData data;
+    public GameObject xpOrbPrefab; // assign in Inspector or via GameSetup
+
+    // Runtime
+    private float        _currentHP;
+    private int          _difficultyTier; // set by spawner
+    private Rigidbody2D  _rb;
+    private Transform    _playerTransform;
+    private SpriteRenderer _sr;
+    private bool         _isDead;
+
+    // Pool tag (set by spawner so we can return to the correct pool)
+    [HideInInspector] public string poolTag;
+
+    // ── IPoolable ────────────────────────────────────────────────────────────
+
+    public void OnSpawn()
+    {
+        _isDead = false;
+        float hpMult = Mathf.Pow(data.hpScaleFactor, _difficultyTier);
+        _currentHP   = data.hp * hpMult;
+
+        if (_sr != null) _sr.color = data.bodyColor;
+    }
+
+    public void OnDespawn() { }
+
+    // ── Unity lifecycle ──────────────────────────────────────────────────────
+
+    private void Awake()
+    {
+        _rb = GetComponent<Rigidbody2D>();
+        _rb.gravityScale   = 0f;
+        _rb.freezeRotation = true;
+
+        _sr = GetComponentInChildren<SpriteRenderer>();
+
+        var col = GetComponent<CircleCollider2D>();
+        col.isTrigger = true;
+    }
+
+    private void Start()
+    {
+        // Fallback initialization if OnSpawn wasn't called (e.g., initial spawns)
+        if (_currentHP <= 0f && data != null)
+        {
+            float hpMult = Mathf.Pow(data.hpScaleFactor, _difficultyTier);
+            _currentHP   = data.hp * hpMult;
+            if (_sr != null) _sr.color = data.bodyColor;
+        }
+    }
+
+    private void Update()
+    {
+        if (_isDead) return;
+
+        // Lazy player lookup
+        if (_playerTransform == null)
+        {
+            var ps = FindFirstObjectByType<PlayerStats>();
+            if (ps == null) return;
+            _playerTransform = ps.transform;
+        }
+
+        float speedMult = Mathf.Pow(data.speedScaleFactor, _difficultyTier);
+        Vector2 dir = ((Vector2)_playerTransform.position - _rb.position).normalized;
+        _rb.linearVelocity = dir * (data.moveSpeed * speedMult);
+    }
+
+    private void OnTriggerStay2D(Collider2D other)
+    {
+        if (_isDead) return;
+        var stats = other.GetComponent<PlayerStats>();
+        if (stats == null) return;
+        stats.TakeDamage(data.contactDamage);
+    }
+
+    // ── Public API ───────────────────────────────────────────────────────────
+
+    public void SetDifficultyTier(int tier) => _difficultyTier = tier;
+
+    public void TakeDamage(float amount)
+    {
+        if (_isDead) return;
+
+        _currentHP -= amount;
+
+        // Quick damage flash
+        if (_sr != null) StartCoroutine(DamageFlash());
+
+        if (_currentHP <= 0f) Die();
+    }
+
+    private void Die()
+    {
+        _isDead = true;
+        EventBus.RaiseEnemyKilled(transform.position, data.xpValue);
+
+        // Spawn XP orb — direct instantiate, no pool needed
+        if (xpOrbPrefab != null)
+            Instantiate(xpOrbPrefab, transform.position, Quaternion.identity);
+
+        // Return self to pool or destroy
+        if (ObjectPool.Instance != null && !string.IsNullOrEmpty(poolTag))
+            ObjectPool.Instance.Return(poolTag, gameObject);
+        else
+            Destroy(gameObject);
+    }
+
+    // Simple red flash coroutine
+    private System.Collections.IEnumerator DamageFlash()
+    {
+        if (_sr == null) yield break;
+        var original = _sr.color;
+        _sr.color = Color.red;
+        yield return new WaitForSeconds(0.08f);
+        _sr.color = original;
+    }
+}

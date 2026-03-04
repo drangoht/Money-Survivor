@@ -1,0 +1,53 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 145f69880f6b2f949b44667bf30b9360, type: 3}
+  m_Name: CreditCardData
+  m_EditorClassIdentifier: Assembly-CSharp::WeaponData
+  weaponName: Credit Card
+  description: Throws a piercing credit card that boomerangs back to you.
+  icon: {fileID: 0}
+  levels:
+  - damage: 15
+    fireRate: 1.5
+    projectileSpeed: 12
+    projectileCount: 1
+    pierceCount: 3
+    aoeRadius: 0
+    duration: 2
+  - damage: 20
+    fireRate: 1.4
+    projectileSpeed: 14
+    projectileCount: 2
+    pierceCount: 4
+    aoeRadius: 0
+    duration: 2
+  - damage: 25
+    fireRate: 1.3
+    projectileSpeed: 14
+    projectileCount: 3
+    pierceCount: 4
+    aoeRadius: 0
+    duration: 2
+  - damage: 35
+    fireRate: 1.2
+    projectileSpeed: 16
+    projectileCount: 3
+    pierceCount: 99
+    aoeRadius: 0
+    duration: 2.5
+  - damage: 50
+    fireRate: 1
+    projectileSpeed: 18
+    projectileCount: 4
+    pierceCount: 99
+    aoeRadius: 0
+    duration: 2.5
