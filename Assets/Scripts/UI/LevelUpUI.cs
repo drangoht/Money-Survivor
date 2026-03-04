@@ -7,6 +7,7 @@ using UnityEngine;
 /// </summary>
 public class LevelUpUI : MonoBehaviour
 {
+    public Texture2D splashScreen;
     private bool   _visible;
     private Action<UpgradeOption> _callback;
     private List<UpgradeOption>   _options = new();
@@ -52,8 +53,14 @@ public class LevelUpUI : MonoBehaviour
 
         float sw = Screen.width, sh = Screen.height;
 
-        // Dim overlay
-        GUI.color = new Color(0, 0, 0, 0.6f);
+        // Background image
+        if (splashScreen != null)
+        {
+            GUI.DrawTexture(new Rect(0, 0, sw, sh), splashScreen, ScaleMode.ScaleAndCrop);
+        }
+
+        // Dim overlay so cards pop
+        GUI.color = new Color(0, 0, 0, 0.75f);
         GUI.DrawTexture(new Rect(0, 0, sw, sh), Texture2D.whiteTexture);
         GUI.color = Color.white;
 

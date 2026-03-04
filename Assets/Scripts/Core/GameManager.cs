@@ -42,7 +42,14 @@ public class GameManager : MonoBehaviour
     private void Update()
     {
         if (State == GameState.Playing)
+        {
             TimeSurvived += Time.deltaTime;
+            if (Input.GetKeyDown(KeyCode.Escape)) PauseGame();
+        }
+        else if (State == GameState.Paused)
+        {
+            if (Input.GetKeyDown(KeyCode.Escape)) ResumeGame();
+        }
     }
 
     // ── State transitions ────────────────────────────────────────────────────

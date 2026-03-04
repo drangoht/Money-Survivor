@@ -5,6 +5,7 @@ using UnityEngine;
 /// </summary>
 public class GameOverUI : MonoBehaviour
 {
+    public Texture2D splashScreen;
     private bool   _visible;
     private GUIStyle _titleStyle, _statStyle, _btnStyle, _panelStyle;
     private bool   _stylesReady;
@@ -46,6 +47,16 @@ public class GameOverUI : MonoBehaviour
         float sw = Screen.width, sh = Screen.height;
         float pw = 480f, ph = 360f;
         float px = (sw - pw) / 2f, py = (sh - ph) / 2f;
+
+        // Background (fullscreen)
+        if (splashScreen != null)
+        {
+            GUI.DrawTexture(new Rect(0, 0, sw, sh), splashScreen, ScaleMode.ScaleAndCrop);
+            // Very dark tint over splash screen for Game Over clarity
+            GUI.color = new Color(0, 0, 0, 0.8f);
+            GUI.DrawTexture(new Rect(0, 0, sw, sh), Texture2D.whiteTexture);
+            GUI.color = Color.white;
+        }
 
         // Panel
         GUI.Box(new Rect(px, py, pw, ph), GUIContent.none, _panelStyle);

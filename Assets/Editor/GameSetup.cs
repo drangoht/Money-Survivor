@@ -114,7 +114,7 @@ public static class GameSetup
 
     private static Sprite _circle, _square;
     private static Sprite _playerSprite, _enemySprite, _coinSprite, _bgSprite;
-    private static Sprite _xpOrbSprite, _boomerangSprite, _shieldSprite;
+    private static Sprite _xpOrbSprite, _boomerangSprite, _shieldSprite, _splashSprite;
 
     private static void GenerateSprites()
     {
@@ -128,6 +128,7 @@ public static class GameSetup
         _xpOrbSprite     = LoadSingleSprite(SpritesPath + "/xp_orb_sprite.png",        "xporb");
         _boomerangSprite = LoadSingleSprite(SpritesPath + "/boomerang_sprite.png",      "boomerang");
         _shieldSprite    = LoadSingleSprite(SpritesPath + "/shield_sprite.png",         "shield");
+        _splashSprite    = LoadSingleSprite(SpritesPath + "/splash_screen.png",         "splash");
 
         Log($"  Sprites ready");
     }
@@ -690,7 +691,8 @@ public static class GameSetup
         new GameObject("_GameManager").AddComponent<GameManager>();
 
         // UI
-        new GameObject("_UI").AddComponent<MainMenuUI>();
+        var ui = new GameObject("_UI").AddComponent<MainMenuUI>();
+        if (_splashSprite != null) ui.splashScreen = _splashSprite.texture;
 
         bool ok = EditorSceneManager.SaveScene(scene, path);
         Log(ok ? "  MainMenu scene saved" : "  WARNING: MainMenu scene save returned false");
@@ -771,10 +773,15 @@ public static class GameSetup
 
         // UI (all OnGUI-based)
         var ui = new GameObject("_UI");
-        ui.AddComponent<HUDController>();
-        ui.AddComponent<ChestRewardUI>();
-        ui.AddComponent<GameOverUI>();
-        ui.AddComponent<LevelUpUI>();
+        var hud = ui.AddComponent<HUDController>();
+        var cru = ui.AddComponent<ChestRewardUI>();
+        var gou = ui.AddComponent<GameOverUI>();
+        var luu = ui.AddComponent<LevelUpUI>();
+
+        Texture2D tex = _splashSprite != null ? _splashSprite.texture : null;
+        hud.splashScreen = tex;
+        gou.splashScreen = tex;
+        luu.splashScreen = tex;
 
         bool ok = EditorSceneManager.SaveScene(scene, path);
         Log(ok ? "  Game scene saved" : "  WARNING: Game scene save returned false");

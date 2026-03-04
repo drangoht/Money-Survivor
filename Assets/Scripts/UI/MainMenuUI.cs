@@ -6,6 +6,7 @@ using UnityEngine;
 /// </summary>
 public class MainMenuUI : MonoBehaviour
 {
+    public Texture2D splashScreen;
     private GUIStyle _titleStyle, _subStyle, _btnStyle, _bgStyle;
     private bool     _stylesReady;
 
@@ -36,7 +37,18 @@ public class MainMenuUI : MonoBehaviour
         float sw = Screen.width, sh = Screen.height;
 
         // Background
-        GUI.Box(new Rect(0, 0, sw, sh), GUIContent.none, _bgStyle);
+        if (splashScreen != null)
+        {
+            GUI.DrawTexture(new Rect(0, 0, sw, sh), splashScreen, ScaleMode.ScaleAndCrop);
+            // Add a slight dark tint so text remains readable
+            GUI.color = new Color(0, 0, 0, 0.4f);
+            GUI.DrawTexture(new Rect(0, 0, sw, sh), Texture2D.whiteTexture);
+            GUI.color = Color.white;
+        }
+        else
+        {
+            GUI.Box(new Rect(0, 0, sw, sh), GUIContent.none, _bgStyle);
+        }
 
         // Gold accent bar
         GUI.color = new Color(1f, 0.82f, 0f, 0.6f);
