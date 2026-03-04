@@ -16,11 +16,11 @@ A showcase of the AI-generated pixel art assets that give the game its juicy, sy
 
 ### The CEO
 The player character. A stylized banker in a sharp suit and sunglasses.
-<img src="Assets/Sprites/player_sprite.png" width="128" />
+<img src="Assets/ReadmeImages/player_sprite.png" width="128" />
 
 ### The Opposition
 Hordes of enemies representing the corrupted factions of the financial world (Bankmen, Loan Sharks, Tax Collectors, Auditors).
-<img src="Assets/Sprites/enemy_sprite.png" width="128" />
+<img src="Assets/ReadmeImages/enemy_sprite.png" width="128" />
 
 ### The Corporate Floor
 A seamlessly tileable cyberpunk neon financial company office floor, featuring glowing lines and data server tiles.
@@ -36,13 +36,13 @@ Expand your portfolio by leveling up to get new items.
 
 * **Single Shot:** Reliable initial investment. Fires a high-speed projectile at the nearest enemy.
 * **Coin Toss:** Throw heavy, physics-enabled coins into the fray that deal collateral damage.
-  <br><img src="Assets/Sprites/coin_sprite.png" width="64" />
+  <br><img src="Assets/ReadmeImages/coin_sprite.png" width="64" />
 * **Boomerang Card:** Fling a heavy credit card that slices through enemies, stops, and returns to your hand.
-  <br><img src="Assets/Sprites/boomerang_sprite.png" width="64" />
+  <br><img src="Assets/ReadmeImages/boomerang_sprite.png" width="64" />
 * **Bill Whip:** Sweep a massive arc of dollar bills in the direction you are moving to clear space.
 * **Compound Interest:** A persistent aura of damaging energy surrounding the player.
 * **Dividend Shield:** Equip floating geometric neon shields that orbit around you, damaging any enemies that try to crash the market.
-  <br><img src="Assets/Sprites/shield_sprite.png" width="64" />
+  <br><img src="Assets/ReadmeImages/shield_sprite.png" width="64" />
 
 ## 📈 Mechanics & Systems
 

@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &5524415920935485422
+--- !u!1 &925637128674056943
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,9 +8,9 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 5918631766500988216}
-  - component: {fileID: 2866835099389681677}
-  - component: {fileID: 4320923248344729886}
+  - component: {fileID: 2356094099721022797}
+  - component: {fileID: 8602742473287706706}
+  - component: {fileID: 775862458782697307}
   m_Layer: 0
   m_Name: Chest
   m_TagString: Untagged
@@ -18,29 +18,29 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &5918631766500988216
+--- !u!4 &2356094099721022797
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5524415920935485422}
+  m_GameObject: {fileID: 925637128674056943}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 8674923290699561646}
+  - {fileID: 543851182024510833}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!58 &2866835099389681677
+--- !u!58 &8602742473287706706
 CircleCollider2D:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5524415920935485422}
+  m_GameObject: {fileID: 925637128674056943}
   m_Enabled: 1
   serializedVersion: 3
   m_Density: 1
@@ -70,13 +70,13 @@ CircleCollider2D:
   m_CompositeOrder: 0
   m_Offset: {x: 0, y: 0}
   m_Radius: 2
---- !u!114 &4320923248344729886
+--- !u!114 &775862458782697307
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5524415920935485422}
+  m_GameObject: {fileID: 925637128674056943}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 12013d7c61bf9f24cbfd6106337df3c6, type: 3}
@@ -88,7 +88,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: a7fdcd032d3faa144820495a9628eecc, type: 2}
   - {fileID: 11400000, guid: a83362058908c1c4f9be697b1b41c876, type: 2}
   - {fileID: 11400000, guid: b3b174f8a44234e4eafc777a605ceae6, type: 2}
---- !u!1 &8695530602030498322
+--- !u!1 &5036317603123396859
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -96,8 +96,8 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 8674923290699561646}
-  - component: {fileID: 8539150873013728554}
+  - component: {fileID: 543851182024510833}
+  - component: {fileID: 2520750028769324087}
   m_Layer: 0
   m_Name: Sprite
   m_TagString: Untagged
@@ -105,29 +105,29 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &8674923290699561646
+--- !u!4 &543851182024510833
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8695530602030498322}
+  m_GameObject: {fileID: 5036317603123396859}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 2.5, y: 2.5, z: 2.5}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 5918631766500988216}
+  m_Father: {fileID: 2356094099721022797}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!212 &8539150873013728554
+--- !u!212 &2520750028769324087
 SpriteRenderer:
   serializedVersion: 2
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8695530602030498322}
+  m_GameObject: {fileID: 5036317603123396859}
   m_Enabled: 1
   m_CastShadows: 0
   m_ReceiveShadows: 0
