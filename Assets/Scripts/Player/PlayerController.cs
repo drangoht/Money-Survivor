@@ -36,9 +36,11 @@ public class PlayerController : MonoBehaviour
             Input.GetAxisRaw("Vertical")
         ).normalized;
 
-        // Flip sprite based on horizontal direction
+        // Sprite faces LEFT by default (flipX=false).
+        // Moving right → flipX=true  → mirrors sprite → faces right.
+        // Moving left  → flipX=false → natural pose  → faces left.
         if (_sr != null && _moveInput.x != 0f)
-            _sr.flipX = _moveInput.x < 0f;
+            _sr.flipX = (_moveInput.x > 0f);
     }
 
     private void FixedUpdate()

@@ -113,12 +113,174 @@ public static class GameSetup
     // ══════════════════════════════════════════════════════════════════════════
 
     private static Sprite _circle, _square;
+    private static Sprite _playerSprite, _enemySprite, _coinSprite, _bgSprite;
 
     private static void GenerateSprites()
     {
         _circle = GetOrCreateSprite(SpritesPath + "/Circle.png", CreateCircleTex(128));
         _square = GetOrCreateSprite(SpritesPath + "/Square.png",  CreateSolidTex(32, Color.white));
+        
+        // Single-frame sprites — no sheet slicing needed
+        _playerSprite = LoadSingleSprite(SpritesPath + "/player_sprite.png", "player");
+        _enemySprite  = LoadSingleSprite(SpritesPath + "/enemy_sprite.png",  "enemy");
+        _coinSprite   = LoadSingleSprite(SpritesPath + "/coin_sprite.png",   "coin");
+        _bgSprite     = LoadSingleSprite(SpritesPath + "/scrolling_background.png", "bg");
+
         Log($"  Sprites ready");
+    }
+
+    // Load single PNG as one Sprite (strips background)
+    private static Sprite LoadSingleSprite(string path, string baseName)
+    {
+        if (!File.Exists(path)) return _square;
+        string assetPath = SpritesPath + "/" + baseName + "_Sprite.asset";
+        var existing = AssetDatabase.LoadAssetAtPath<Sprite>(assetPath);
+        if (existing != null) return existing;
+
+        Texture2D tex = LoadTexFromDisk(path);
+        StripBackground(tex);
+
+        string texPath = SpritesPath + "/" + baseName + "_Tex.asset";
+        AssetDatabase.CreateAsset(tex, texPath);
+        Sprite sp = Sprite.Create(tex, new Rect(0,0,tex.width,tex.height), new Vector2(0.5f,0.5f), 250f);
+        sp.name = baseName;
+        AssetDatabase.CreateAsset(sp, assetPath);
+        AssetDatabase.SaveAssets();
+        return sp;
+    }
+
+    // Load PNG and slice into cols×rows grid of frames, reading from top-left in image order
+    private static Sprite[] LoadSpriteSheetFrames(string path, int cols, int rows, string baseName)
+    {
+        if (!File.Exists(path)) return new[] { _square };
+
+        Texture2D full = LoadTexFromDisk(path);
+        int fw = full.width  / cols;
+        int fh = full.height / rows;
+        int totalFrames = cols * rows;
+        Log($"  Slicing {baseName}: {full.width}x{full.height} → {cols}x{rows} grid, frame={fw}x{fh}, total={totalFrames} frames");
+        StripBackground(full);
+
+        var frames = new Sprite[totalFrames];
+        int frameIdx = 0;
+
+        // Read top-row first (in image coords = highest Y in Unity coords)
+        for (int row = rows - 1; row >= 0; row--)
+        {
+            for (int col = 0; col < cols; col++)
+            {
+                string assetPath = SpritesPath + "/" + baseName + "_f" + frameIdx + "_Sprite.asset";
+                var existing = AssetDatabase.LoadAssetAtPath<Sprite>(assetPath);
+                if (existing != null) { frames[frameIdx++] = existing; continue; }
+
+                int x = col * fw;
+                int y = row * fh; // Unity y=0 is bottom, so row 0 = bottom of image
+
+                Texture2D frameTex = new Texture2D(fw, fh, TextureFormat.RGBA32, false);
+                frameTex.SetPixels(full.GetPixels(x, y, fw, fh));
+                frameTex.filterMode = FilterMode.Point;
+                frameTex.wrapMode = TextureWrapMode.Clamp;
+                frameTex.Apply();
+
+                string texPath = SpritesPath + "/" + baseName + "_f" + frameIdx + "_Tex.asset";
+                AssetDatabase.CreateAsset(frameTex, texPath);
+
+                // PPU=128: 320px frame → 2.5 Unity units. Good readable size.
+                Sprite sp = Sprite.Create(frameTex, new Rect(0, 0, fw, fh), new Vector2(0.5f, 0.5f), 128f);
+                sp.name = baseName + "_" + frameIdx;
+                AssetDatabase.CreateAsset(sp, assetPath);
+                frames[frameIdx++] = sp;
+            }
+        }
+
+        AssetDatabase.SaveAssets();
+        return frames;
+    }
+
+    private static Texture2D LoadTexFromDisk(string path)
+    {
+        byte[] bytes = File.ReadAllBytes(path);
+        Texture2D tex = new Texture2D(2, 2, TextureFormat.RGBA32, false);
+        tex.LoadImage(bytes);
+        tex.filterMode = FilterMode.Point;
+        tex.wrapMode = TextureWrapMode.Clamp;
+        return tex;
+    }
+
+    // Color-key background removal: iterative BFS flood fill from all 4 corners
+    private static void StripBackground(Texture2D tex)
+    {
+        int w = tex.width, h = tex.height;
+        Color[] pixels = tex.GetPixels();
+        bool[] visited = new bool[w * h];
+
+        // Use top-left corner pixel as background key color
+        Color key = pixels[(h - 1) * w]; // top-left in Unity's bottom-up coords
+
+        float threshold = 0.18f; // catches white/light backgrounds without eating into character art
+
+        var queue = new System.Collections.Generic.Queue<int>();
+
+        System.Action<int> enqueue = (idx) => {
+            if (idx < 0 || idx >= pixels.Length || visited[idx]) return;
+            Color c = pixels[idx];
+            float dist = Mathf.Abs(c.r - key.r)
+                       + Mathf.Abs(c.g - key.g)
+                       + Mathf.Abs(c.b - key.b);
+            if (dist > threshold) return;
+            visited[idx] = true;
+            queue.Enqueue(idx);
+        };
+
+        // Seed from ALL border pixels (more robust than just 4 corners)
+        for (int bx = 0; bx < w; bx++) { enqueue(bx); enqueue((h-1)*w + bx); }   // top & bottom rows
+        for (int by = 0; by < h; by++) { enqueue(by * w); enqueue(by * w + w-1); } // left & right cols
+
+        while (queue.Count > 0)
+        {
+            int idx = queue.Dequeue();
+            pixels[idx] = Color.clear;
+            int x = idx % w, y = idx / w;
+            if (x > 0)   enqueue(idx - 1);
+            if (x < w-1) enqueue(idx + 1);
+            if (y > 0)   enqueue(idx - w);
+            if (y < h-1) enqueue(idx + w);
+        }
+
+        // --- Hard edge cleanup pass (pixel art: no semi-transparency) ---
+        // Clear any background-adjacent pixels that are close to the background color.
+        float edgeThreshold = 0.45f;
+        for (int i = 0; i < pixels.Length; i++)
+        {
+            if (visited[i]) continue;
+            int ex = i % w, ey = i / w;
+            bool nearCleared =
+                (ex > 0   && visited[i - 1]) ||
+                (ex < w-1 && visited[i + 1]) ||
+                (ey > 0   && visited[i - w]) ||
+                (ey < h-1 && visited[i + w]);
+            if (!nearCleared) continue;
+
+            float dist = Mathf.Abs(pixels[i].r - key.r)
+                       + Mathf.Abs(pixels[i].g - key.g)
+                       + Mathf.Abs(pixels[i].b - key.b);
+            if (dist < edgeThreshold)
+                pixels[i] = Color.clear; // hard cut — no blending for pixel art
+        }
+
+        // --- Global magenta removal pass (catches any remaining #FF00FF background pixels) ---
+        Color magenta = new Color(1f, 0f, 1f);
+        for (int i = 0; i < pixels.Length; i++)
+        {
+            float magentaDist = Mathf.Abs(pixels[i].r - magenta.r)
+                              + Mathf.Abs(pixels[i].g - magenta.g)
+                              + Mathf.Abs(pixels[i].b - magenta.b);
+            if (magentaDist < 0.4f)
+                pixels[i] = Color.clear;
+        }
+
+        tex.SetPixels(pixels);
+        tex.Apply();
     }
 
     private static Sprite GetOrCreateSprite(string path, Texture2D generated)
@@ -326,9 +488,9 @@ public static class GameSetup
 
     private static void CreatePrefabs()
     {
-        _coinPrefab     = MakeProjectile("Coin.prefab", _circle, new Color(1f,.84f,0f), typeof(ProjectileBase));
+        _coinPrefab     = MakeProjectile("Coin.prefab", _coinSprite, Color.white, typeof(ProjectileBase));
         _cardPrefab     = MakeProjectile("Card.prefab", _square, new Color(.2f,.8f,.9f), typeof(BoomerangProjectile));
-        _dividendPrefab = MakeProjectile("Dividend.prefab", _circle, new Color(1f,.6f,0f), typeof(ProjectileBase));
+        _dividendPrefab = MakeProjectile("Dividend.prefab", _coinSprite, Color.white, typeof(ProjectileBase));
         _orbPrefab      = MakeOrb();
         _chestPrefab    = MakeChest();
         _playerPrefab   = MakePlayer();
@@ -351,7 +513,11 @@ public static class GameSetup
 
         var root = new GameObject("Player");
         root.tag = "Player";
-        Sprite2D(root, _circle, new Color(.1f,.9f,.3f), 2, .8f);
+        var spriteChild = Sprite2D(root, _playerSprite, Color.white, 2, 1f);
+        // Bobbing animation + directional flip (uses Input.GetAxisRaw internally)
+        var bobber = spriteChild.gameObject.AddComponent<SpriteBobber>();
+        bobber.bobAmount = 0.04f;
+        bobber.bobSpeed  = 6f;
 
         var rb = root.AddComponent<Rigidbody2D>();
         rb.gravityScale = 0f; rb.freezeRotation = true;
@@ -424,7 +590,12 @@ public static class GameSetup
 
         var root = new GameObject(name);
         root.tag = "Enemy";
-        Sprite2D(root, _circle, data.bodyColor, 1, scale);
+        // All enemies same base scale as player; data.bodyColor gives 20% tint to distinguish types
+        var spriteChild = Sprite2D(root, _enemySprite, Color.white, 1, 1f);
+        spriteChild.color = Color.Lerp(Color.white, data.bodyColor, 0.2f);
+        var bobber = spriteChild.gameObject.AddComponent<SpriteBobber>();
+        bobber.bobAmount = 0.03f;
+        bobber.bobSpeed  = 5f;
         var rb = root.AddComponent<Rigidbody2D>();
         rb.gravityScale = 0f; rb.freezeRotation = true;
         var col = root.AddComponent<CircleCollider2D>();
@@ -485,7 +656,22 @@ public static class GameSetup
         camGO.AddComponent<CameraFollow>();
         camGO.AddComponent<ScreenShake>();
 
-        // (Background explicitly removed — using camera solid color instead)
+        // Background
+        var bg = GameObject.CreatePrimitive(PrimitiveType.Quad);
+        bg.name = "ScrollingBackground";
+        bg.transform.position = new Vector3(0, 0, 50f); // Pushed way back behind other sprites (Z=0)
+        bg.transform.localScale = new Vector3(200f, 200f, 1f);
+        GameObject.DestroyImmediate(bg.GetComponent<MeshCollider>());
+        
+        var bgMat = new Material(Shader.Find("Unlit/Texture")) { name = "BackgroundMaterial" };
+        if (_bgSprite != null)
+        {
+            bgMat.mainTexture = _bgSprite.texture;
+            bgMat.mainTexture.wrapMode = TextureWrapMode.Repeat;
+            bgMat.mainTextureScale = new Vector2(50f, 50f);
+        }
+        bg.GetComponent<Renderer>().sharedMaterial = bgMat;
+        bg.AddComponent<ScrollingBackground>();
 
         // Player
         if (_playerPrefab == null)
