@@ -44,7 +44,7 @@ public class LevelUpManager : MonoBehaviour
         // New weapons the player doesn't have yet
         var player = GameObject.FindWithTag("Player");
         if (player != null) _equippedWeapons.Clear();
-        _equippedWeapons.AddRange(player != null ? player.GetComponents<WeaponBase>() : System.Array.Empty<WeaponBase>());
+        _equippedWeapons.AddRange(player != null ? player.GetComponentsInChildren<WeaponBase>() : System.Array.Empty<WeaponBase>());
 
         foreach (var prefab in weaponPrefabs)
         {
@@ -99,7 +99,9 @@ public class LevelUpManager : MonoBehaviour
         switch (option.type)
         {
             case UpgradeType.NewWeapon when player != null:
-                var wb = player.AddComponent(option.weaponPrefab.GetComponent<WeaponBase>().GetType()) as WeaponBase;
+                // Instantiate the prefab as a child to keep all serialized fields (like projectile references)
+                var spawnedW = Instantiate(option.weaponPrefab, player.transform);
+                var wb       = spawnedW.GetComponent<WeaponBase>();
                 if (wb != null) wb.data = option.data;
                 break;
 

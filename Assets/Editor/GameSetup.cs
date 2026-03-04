@@ -114,17 +114,20 @@ public static class GameSetup
 
     private static Sprite _circle, _square;
     private static Sprite _playerSprite, _enemySprite, _coinSprite, _bgSprite;
+    private static Sprite _xpOrbSprite, _boomerangSprite, _shieldSprite;
 
     private static void GenerateSprites()
     {
         _circle = GetOrCreateSprite(SpritesPath + "/Circle.png", CreateCircleTex(128));
         _square = GetOrCreateSprite(SpritesPath + "/Square.png",  CreateSolidTex(32, Color.white));
         
-        // Single-frame sprites — no sheet slicing needed
-        _playerSprite = LoadSingleSprite(SpritesPath + "/player_sprite.png", "player");
-        _enemySprite  = LoadSingleSprite(SpritesPath + "/enemy_sprite.png",  "enemy");
-        _coinSprite   = LoadSingleSprite(SpritesPath + "/coin_sprite.png",   "coin");
-        _bgSprite     = LoadSingleSprite(SpritesPath + "/scrolling_background.png", "bg");
+        _playerSprite    = LoadSingleSprite(SpritesPath + "/player_sprite.png",         "player");
+        _enemySprite     = LoadSingleSprite(SpritesPath + "/enemy_sprite.png",          "enemy");
+        _coinSprite      = LoadSingleSprite(SpritesPath + "/coin_sprite.png",           "coin");
+        _bgSprite        = LoadSingleSprite(SpritesPath + "/scrolling_background.png",  "bg");
+        _xpOrbSprite     = LoadSingleSprite(SpritesPath + "/xp_orb_sprite.png",        "xporb");
+        _boomerangSprite = LoadSingleSprite(SpritesPath + "/boomerang_sprite.png",      "boomerang");
+        _shieldSprite    = LoadSingleSprite(SpritesPath + "/shield_sprite.png",         "shield");
 
         Log($"  Sprites ready");
     }
@@ -483,17 +486,18 @@ public static class GameSetup
     // ══════════════════════════════════════════════════════════════════════════
 
     private static GameObject _playerPrefab, _coinPrefab, _orbPrefab, _chestPrefab;
-    private static GameObject _cardPrefab, _dividendPrefab;
+    private static GameObject _cardPrefab, _dividendPrefab, _hitParticlesPrefab;
     private static GameObject _p1, _p2, _p3, _p4, _p5, _p6; // enemy prefabs
 
     private static void CreatePrefabs()
     {
-        _coinPrefab     = MakeProjectile("Coin.prefab", _coinSprite, Color.white, typeof(ProjectileBase));
-        _cardPrefab     = MakeProjectile("Card.prefab", _square, new Color(.2f,.8f,.9f), typeof(BoomerangProjectile));
-        _dividendPrefab = MakeProjectile("Dividend.prefab", _coinSprite, Color.white, typeof(ProjectileBase));
-        _orbPrefab      = MakeOrb();
-        _chestPrefab    = MakeChest();
-        _playerPrefab   = MakePlayer();
+        _coinPrefab         = MakeProjectile("Coin.prefab", _coinSprite, Color.white, typeof(ProjectileBase));
+        _cardPrefab         = MakeProjectile("Card.prefab", _square, new Color(.2f,.8f,.9f), typeof(BoomerangProjectile), 0.6f); // Larger card
+        _dividendPrefab     = MakeProjectile("Dividend.prefab", _shieldSprite, Color.white, typeof(ProjectileBase), 0.6f); // New Shield sprite
+        _orbPrefab          = MakeOrb();
+        _chestPrefab        = MakeChest();
+        _hitParticlesPrefab = MakeHitParticles();
+        _playerPrefab       = MakePlayer();
         
         _p1 = MakeEnemy("Bankman",      _bankman,      0.7f);
         _p2 = MakeEnemy("LoanShark",    _loanShark,    0.55f);
@@ -535,7 +539,7 @@ public static class GameSetup
         return Save(root, path);
     }
 
-    private static GameObject MakeProjectile(string fileName, Sprite sprite, Color color, Type componentType)
+    private static GameObject MakeProjectile(string fileName, Sprite sprite, Color color, Type componentType, float scale = 0.32f)
     {
         string path = PrefabsPath + "/" + fileName;
         var ex = AssetDatabase.LoadAssetAtPath<GameObject>(path);
@@ -543,7 +547,9 @@ public static class GameSetup
 
         var root = new GameObject(fileName.Replace(".prefab",""));
         root.tag = "Projectile";
-        Sprite2D(root, sprite, color, 1, .32f);
+        var spriteChild = Sprite2D(root, sprite, color, 1, scale);
+        spriteChild.gameObject.AddComponent<SpinProjectile>(); // Spin all projectiles
+        
         var rb = root.AddComponent<Rigidbody2D>();
         rb.gravityScale = 0f; rb.freezeRotation = true;
         var col = root.AddComponent<CircleCollider2D>();
@@ -560,7 +566,8 @@ public static class GameSetup
 
         var root = new GameObject("XPOrb");
         root.tag = "XPOrb";
-        Sprite2D(root, _circle, new Color(1f,.95f,.1f), 1, .28f);
+        var spriteChild = Sprite2D(root, _xpOrbSprite, Color.white, 1, 1f); // Use standard scale, sprite controls size
+        spriteChild.gameObject.AddComponent<ScalePulse>(); // Add pulsing animation
         var col = root.AddComponent<CircleCollider2D>();
         col.isTrigger = true; col.radius = 0.25f;
         root.AddComponent<XPOrb>();
@@ -571,12 +578,16 @@ public static class GameSetup
     {
         string path = PrefabsPath + "/Chest.prefab";
         var ex = AssetDatabase.LoadAssetAtPath<GameObject>(path);
-        if (ex != null) return ex;
+        if (ex != null) 
+        {
+            AssetDatabase.DeleteAsset(path); // Force overwrite
+            AssetDatabase.Refresh();
+        }
 
         var root = new GameObject("Chest");
-        var sr = Sprite2D(root, _square, new Color(.65f,.4f,.1f), 1, .75f);
+        var sr = Sprite2D(root, _square, new Color(.65f,.4f,.1f), 1, 2.5f); // 2.5 is exactly half the player's 128px size based on the 32px square sprite
         var col = root.AddComponent<CircleCollider2D>();
-        col.isTrigger = true; col.radius = 0.7f;
+        col.isTrigger = true; col.radius = 2.0f;
         var c = root.AddComponent<Chest>();
         c.possibleRewards = new[] { _healPU, _speedPU, _damagePU, _magnetPU, _radiusPU };
         return Save(root, path);
@@ -596,6 +607,8 @@ public static class GameSetup
         var bobber = spriteChild.gameObject.AddComponent<SpriteBobber>();
         bobber.bobAmount = 0.03f;
         bobber.bobSpeed  = 5f;
+        spriteChild.gameObject.AddComponent<HitFlash>(); // Add white hit flash component
+        
         var rb = root.AddComponent<Rigidbody2D>();
         rb.gravityScale = 0f; rb.freezeRotation = true;
         var col = root.AddComponent<CircleCollider2D>();
@@ -603,6 +616,52 @@ public static class GameSetup
         var eb = root.AddComponent<EnemyBase>();
         eb.data = data; eb.poolTag = name;
         eb.xpOrbPrefab = _orbPrefab;
+        eb.hitParticlePrefab = _hitParticlesPrefab; // Assign the particle prefab
+        return Save(root, path);
+    }
+
+    private static GameObject MakeHitParticles()
+    {
+        string path = PrefabsPath + "/HitParticles.prefab";
+        var ex = AssetDatabase.LoadAssetAtPath<GameObject>(path);
+        if (ex != null) return ex;
+
+        var root = new GameObject("HitParticles");
+        var ps = root.AddComponent<ParticleSystem>();
+        var psr = root.GetComponent<ParticleSystemRenderer>();
+        psr.material = new Material(Shader.Find("Sprites/Default"));
+        
+        var main = ps.main;
+        main.duration = 0.2f;
+        main.loop = false;
+        main.startLifetime = new ParticleSystem.MinMaxCurve(0.2f, 0.4f);
+        main.startSpeed = new ParticleSystem.MinMaxCurve(4f, 8f);
+        main.startSize = new ParticleSystem.MinMaxCurve(0.15f, 0.25f);
+        main.simulationSpace = ParticleSystemSimulationSpace.World;
+        main.playOnAwake = true;
+        main.stopAction = ParticleSystemStopAction.Destroy; // auto-destroy when done
+
+        var em = ps.emission;
+        em.rateOverTime = 0;
+        em.SetBursts(new[] { new ParticleSystem.Burst(0f, 4, 7) }); // 4 to 7 particles burst
+
+        var shape = ps.shape;
+        shape.shapeType = ParticleSystemShapeType.Sphere;
+        shape.radius = 0.2f;
+
+        var col = ps.colorOverLifetime;
+        col.enabled = true;
+        Gradient grad = new Gradient();
+        grad.SetKeys(
+            new GradientColorKey[] { new GradientColorKey(Color.white, 0f), new GradientColorKey(Color.white, 1f) },
+            new GradientAlphaKey[] { new GradientAlphaKey(1f, 0f), new GradientAlphaKey(0f, 1f) }
+        );
+        col.color = new ParticleSystem.MinMaxGradient(grad);
+
+        var size = ps.sizeOverLifetime;
+        size.enabled = true;
+        size.size = new ParticleSystem.MinMaxCurve(1f, 0f); // Shrink to nothing
+
         return Save(root, path);
     }
 
@@ -704,7 +763,7 @@ public static class GameSetup
         {
             CreateWeaponPrefabWrapper("SingleShot", typeof(SingleShot), _singleShotData, _coinPrefab),
             CreateWeaponPrefabWrapper("CoinToss", typeof(CoinToss), _coinData, _coinPrefab),
-            CreateWeaponPrefabWrapper("BillWhip", typeof(BillWhip), _whipData, null),
+            CreateWeaponPrefabWrapper("BillWhip", typeof(BillWhip), _whipData, _cardPrefab), // Assigned boomerang prefab to whip
             CreateWeaponPrefabWrapper("CompoundInterest", typeof(CompoundInterest), _auraData, null),
             CreateWeaponPrefabWrapper("BoomerangCard", typeof(BoomerangWeapon), _cardData, _cardPrefab),
             CreateWeaponPrefabWrapper("DividendShield", typeof(OrbitalWeapon), _dividendData, _dividendPrefab)
@@ -745,12 +804,12 @@ public static class GameSetup
         var root = new GameObject(name + "_Wrapper");
         var w = root.AddComponent(weaponType) as WeaponBase;
         w.data = data;
-        
         // Wire up specific fields
         if (w is CoinToss ct) ct.coinPrefab = projectile;
         if (w is SingleShot ss) { ss.projectilePrefab = projectile; ss.color = new Color(0.8f, 0.8f, 1f); }
         if (w is BoomerangWeapon bw) bw.boomerangPrefab = projectile;
         if (w is OrbitalWeapon ow) ow.orbitalPrefab = projectile;
+        if (w is BillWhip whip) whip.whipPrefab = projectile;
 
         return Save(root, path);
     }

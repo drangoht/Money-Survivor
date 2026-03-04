@@ -95,7 +95,7 @@ public class HUDController : MonoBehaviour
         // ── Kills & Score ─────────────────────────────────────────────────────
         var kStyle = new GUIStyle(_labelStyle) { fontSize = 16, alignment = TextAnchor.UpperRight };
         int kills  = GameManager.Instance.EnemiesKilled;
-        int score  = (kills * 50) + (int)(t * 10f);
+        int score  = kills * 50; // Points only from kills
 
         GUI.Label(new Rect(sw - 200f, 16f, 180f, 30f), $"Kills: {kills}", kStyle);
         

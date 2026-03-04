@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &5410685077855359897
+--- !u!1 &2939432291247813872
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,8 +8,8 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 8662255746770191911}
-  - component: {fileID: 8993951106791695737}
+  - component: {fileID: 3641184198612158215}
+  - component: {fileID: 6849516711327577293}
   m_Layer: 0
   m_Name: DividendShield_Wrapper
   m_TagString: Untagged
@@ -17,13 +17,13 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &8662255746770191911
+--- !u!4 &3641184198612158215
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5410685077855359897}
+  m_GameObject: {fileID: 2939432291247813872}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
@@ -32,17 +32,17 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &8993951106791695737
+--- !u!114 &6849516711327577293
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5410685077855359897}
+  m_GameObject: {fileID: 2939432291247813872}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 819f4eb481a6c8943b4f587a82301fec, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::OrbitalWeapon
   data: {fileID: 11400000, guid: 1c5355970b4df3b4dbcd1b2f0ab493c7, type: 2}
-  orbitalPrefab: {fileID: 2465497058165753428, guid: f331bd018f9abaf4bab48d98f0e562f7, type: 3}
+  orbitalPrefab: {fileID: 1697167887090242008, guid: f331bd018f9abaf4bab48d98f0e562f7, type: 3}

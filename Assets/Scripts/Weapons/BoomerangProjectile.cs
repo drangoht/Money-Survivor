@@ -29,9 +29,11 @@ public class BoomerangProjectile : ProjectileBase
         GetComponent<Rigidbody2D>().linearVelocity = Vector2.zero;
     }
 
-    private void Update()
+    protected override void Update()
     {
-        // Custom movement instead of base Rigidbody velocity
+        // Do NOT call base.Update() here, because we handle our own lifetime 
+        // based on the return trip, rather than a strict timer.
+        
         _timer += Time.deltaTime;
 
         // Spin the sprite

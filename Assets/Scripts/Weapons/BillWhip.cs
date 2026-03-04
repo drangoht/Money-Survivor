@@ -10,6 +10,7 @@ public class BillWhip : WeaponBase
 {
     [Header("Bill Whip Settings")]
     public float arcAngle = 120f;  // overridden by level stats via aoeRadius trick
+    public GameObject whipPrefab;  // assigned by GameSetup (boomerang/bill sprite)
 
     private int   _activationCount;
     private float _showWhipTime;
@@ -32,13 +33,15 @@ public class BillWhip : WeaponBase
         _whipRange = range;
         _showWhipTime = 0.15f; 
 
-        // Hit all enemies in arc
+        // Hit all enemies in arc and spawn visuals
         var hits = Physics2D.OverlapCircleAll(transform.position, range);
+        Vector2 facingDir = Quaternion.Euler(0, 0, _whipFacing) * Vector2.right;
+        float halfAngle = angle * 0.5f * Mathf.Deg2Rad;
+
         foreach (var hit in hits)
         {
             Vector2 toEnemy = (hit.transform.position - transform.position).normalized;
-            float dot = Vector2.Dot(toEnemy, Quaternion.Euler(0, 0, _whipFacing) * Vector2.right);
-            float halfAngle = angle * 0.5f * Mathf.Deg2Rad;
+            float dot = Vector2.Dot(toEnemy, facingDir);
 
             if (Mathf.Acos(Mathf.Clamp(dot, -1f, 1f)) <= halfAngle)
             {
@@ -48,35 +51,49 @@ public class BillWhip : WeaponBase
                 }
             }
         }
+
+        // Spawn visual arc of spinning bills (sweeping motion)
+        if (whipPrefab != null)
+        {
+            int visualCount = 7 + CurrentLevel * 2; // spawn a few more for density
+            float visualAngleStep = angle / (visualCount - 1);
+            float startVisualAngle = _whipFacing - (angle / 2f);
+            
+            float sweepDuration = 0.2f; // total animation time
+            float delayStep = sweepDuration / visualCount;
+
+            for (int i = 0; i < visualCount; i++)
+            {
+                float a = (startVisualAngle + (i * visualAngleStep)) * Mathf.Deg2Rad;
+                Vector2 arcPos = (Vector2)transform.position + new Vector2(Mathf.Cos(a), Mathf.Sin(a)) * (range * 0.8f);
+                var go = Instantiate(whipPrefab, arcPos, Quaternion.identity);
+                
+                // Increase scale to make it much more visible
+                go.transform.localScale = Vector3.one * 1.5f;
+                
+                // Disable projectile logic since these are just visuals
+                var pb = go.GetComponent<ProjectileBase>();
+                if (pb != null) pb.enabled = false;
+                var rb = go.GetComponent<Rigidbody2D>();
+                if (rb != null) rb.simulated = false;
+                var col = go.GetComponent<Collider2D>();
+                if (col != null) col.enabled = false;
+
+                // Add a simple script to fade and destroy
+                var fader = go.AddComponent<WhipVisualFader>();
+                
+                // Determine direction of sweep based on facing
+                int orderIndex = _whipFacing > 0f ? i : (visualCount - 1 - i);
+                
+                fader.delay = orderIndex * delayStep;
+                fader.duration = 0.35f; // stay alive slightly longer
+            }
+        }
     }
 
     protected override void Update()
     {
         base.Update();
-        if (_showWhipTime > 0f) _showWhipTime -= Time.deltaTime;
-    }
-
-    private void OnGUI()
-    {
-        if (_showWhipTime <= 0f || Camera.main == null) return;
-
-        // Draw a flash of color to represent the whip swipe
-        Vector3 playerScreenPos = Camera.main.WorldToScreenPoint(transform.position);
-        float   screenRange     = _whipRange * (Screen.height / (Camera.main.orthographicSize * 2f)); // approximate screen pixels
-        
-        // Offset box to left or right depending on facing
-        float xOffset = _whipFacing > 0f ? 0 : -screenRange;
-
-        Rect rect = new Rect(
-            playerScreenPos.x + xOffset,
-            Screen.height - playerScreenPos.y - (screenRange * 0.5f), // Invert Y
-            screenRange,
-            screenRange
-        );
-
-        GUI.color = new Color(0.1f, 0.8f, 0.2f, 0.5f); // transparent green
-        GUI.DrawTexture(rect, Texture2D.whiteTexture);
-        GUI.color = Color.white;
     }
 
     private void OnDrawGizmosSelected()

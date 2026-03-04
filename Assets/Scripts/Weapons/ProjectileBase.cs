@@ -51,7 +51,7 @@ public class ProjectileBase : MonoBehaviour, IPoolable
             _rb.linearVelocity = direction.normalized * speed;
     }
 
-    private void Update()
+    protected virtual void Update()
     {
         _lifeTimer -= Time.deltaTime;
         if (_lifeTimer <= 0f) Despawn();

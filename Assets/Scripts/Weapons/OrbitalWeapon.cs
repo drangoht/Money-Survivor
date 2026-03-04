@@ -57,10 +57,15 @@ public class OrbitalWeapon : WeaponBase
         while (_orbitals.Count < targetCount)
         {
             var go = Instantiate(orbitalPrefab, transform.position, Quaternion.identity);
+            // Disable Rigidbody physics so it doesn't fight our manual transform orbiting
+            var rb = go.GetComponent<Rigidbody2D>();
+            if (rb != null) rb.simulated = false;
+
             var proj = go.GetComponent<ProjectileBase>();
             if (proj != null)
             {
-                // Note: duration isn't used here since they never die naturally
+                // Give orbitals infinite lifetime so they don't despawn
+                stats.duration = 9999f; 
                 proj.Initialize(stats, Vector2.zero);
             }
             _orbitals.Add(go);

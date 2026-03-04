@@ -11,6 +11,7 @@ public class EnemyBase : MonoBehaviour, IPoolable
     [Header("Data")]
     public EnemyData data;
     public GameObject xpOrbPrefab; // assign in Inspector or via GameSetup
+    public GameObject hitParticlePrefab; // assign via GameSetup
 
     // Runtime
     private float        _currentHP;
@@ -93,11 +94,18 @@ public class EnemyBase : MonoBehaviour, IPoolable
     public void TakeDamage(float amount)
     {
         if (_isDead) return;
-
         _currentHP -= amount;
 
-        // Quick damage flash
+        // White hit flash
         if (_sr != null) StartCoroutine(DamageFlash());
+        
+        // Spawn colored hit particles instead of screen shake
+        if (hitParticlePrefab != null)
+        {
+            var parts = Instantiate(hitParticlePrefab, transform.position, Quaternion.identity);
+            var main = parts.GetComponent<ParticleSystem>().main;
+            main.startColor = _sr != null ? _sr.color : Color.white;
+        }
 
         if (_currentHP <= 0f) Die();
     }
@@ -107,24 +115,22 @@ public class EnemyBase : MonoBehaviour, IPoolable
         _isDead = true;
         EventBus.RaiseEnemyKilled(transform.position, data.xpValue);
 
-        // Spawn XP orb — direct instantiate, no pool needed
         if (xpOrbPrefab != null)
             Instantiate(xpOrbPrefab, transform.position, Quaternion.identity);
 
-        // Return self to pool or destroy
         if (ObjectPool.Instance != null && !string.IsNullOrEmpty(poolTag))
             ObjectPool.Instance.Return(poolTag, gameObject);
         else
             Destroy(gameObject);
     }
 
-    // Simple red flash coroutine
+    // White flash on hit (more readable on coloured sprites)
     private System.Collections.IEnumerator DamageFlash()
     {
         if (_sr == null) yield break;
         var original = _sr.color;
-        _sr.color = Color.red;
-        yield return new WaitForSeconds(0.08f);
+        _sr.color = Color.white;
+        yield return new WaitForSeconds(0.07f);
         _sr.color = original;
     }
 }
