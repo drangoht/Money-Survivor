@@ -35,3 +35,5 @@ This document serves as a backup of the prompt history and user requests used to
 * **Prompt:** "for readme use asset with transparent background inside of purple"
 * **Prompt:** "copy the assert for readme with transparent backgrouund, it does not work now"
 * **Prompt:** "write in markdown files all prompt history, walkthroughs and implementation plans"
+* **Prompt:** "updtae readme.MD wtih link to prompt_history.md, implementation_plan.ms and walkthrough.md"
+* **Prompt:** "so for now each time i prompt update the prompt_history.md file too"
