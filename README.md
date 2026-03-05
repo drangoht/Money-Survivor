@@ -5,6 +5,12 @@
 ## 🤖 Built with Google Antigravity
 This entire game—including core gameplay loops, enemy AI, a complete weapon upgrade system, dynamic UI, and the pixel art assets themselves—was built through pair programming and prompt-driven development using **Google Antigravity**. 
 
+### 📚 Development History & Documentation
+For full transparency and to document the AI pair-programming process, the complete history and architecture have been preserved:
+- [Prompt History](prompt_history.md) - A full log of the exact user prompts used to build the game.
+- [Implementation Plan](implementation_plan.md) - The core software architecture and engine decisions.
+- [Development Walkthrough](walkthrough.md) - A step-by-step narrative of the problems encountered and solved during development.
+
 The project structure is fundamentally unique: It avoids messy, unmergable Unity scenes and prefab metadata by using a custom **Editor Setup Script** (`GameSetup.cs`). 
 By simply running a single menu command (`MoneySurvivor → Setup Entire Project`), the AI's code dynamically generates all GameObjects, assigns all script logic, builds the necessary prefabs, bakes the scenes, and creates the ScriptableObjects that run the game database.
 
