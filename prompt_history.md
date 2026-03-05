@@ -37,3 +37,7 @@ This document serves as a backup of the prompt history and user requests used to
 * **Prompt:** "write in markdown files all prompt history, walkthroughs and implementation plans"
 * **Prompt:** "updtae readme.MD wtih link to prompt_history.md, implementation_plan.ms and walkthrough.md"
 * **Prompt:** "so for now each time i prompt update the prompt_history.md file too"
+
+### 5. Advanced Enemy Roster (Planned)
+* **Prompt:** "Add different type of enemies with different sprites: Ex-wife, children, inspecteur des impots, fisc... Each type has is particular life point and animations and specific particule when hitted and die"
+* **Prompt:** "save the implementation plan, so we will continue tomorrow"
