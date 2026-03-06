@@ -1,9 +1,9 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 /// <summary>
-/// HUD drawn entirely with OnGUI — no packages needed.
-/// Displays HP bar, XP bar, level, and elapsed timer.
-/// Attach to any persistent GameObject in the Game scene.
+/// Renders the in-game HUD (HP, XP, timer, kills) using OnGUI.
+/// Also handles the Pause Menu overlay using the new Unity Input System.
 /// </summary>
 public class HUDController : MonoBehaviour
 {
@@ -12,8 +12,14 @@ public class HUDController : MonoBehaviour
     private float _currentHP  = 100f;
     private float _maxHP      = 100f;
     private float _currentXP  = 0f;
-    private float _requiredXP = 50f;
+    private float _requiredXP = 10f;
     private int   _level      = 1;
+
+    private bool _isPaused;
+    
+    // Pause menu navigation
+    private int  _selectedIndex = 0; // 0: Resume, 1: Main Menu
+    private bool _navigateDownHandled, _navigateUpHandled;
 
     // Cached styles
     private GUIStyle _barBG, _hpFill, _xpFill, _labelStyle;
@@ -55,6 +61,66 @@ public class HUDController : MonoBehaviour
         _labelStyle.fontSize  = 18;
         _labelStyle.fontStyle = FontStyle.Bold;
         _labelStyle.normal.textColor = Color.white;
+    }
+
+    private void Update()
+    {
+        if (GameManager.Instance == null) return;
+        if (GameManager.Instance.State == GameState.GameOver) return;
+
+        bool togglePause = false;
+        if (Gamepad.current != null && Gamepad.current.startButton.wasPressedThisFrame) togglePause = true;
+        if (Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame) togglePause = true;
+
+        if (togglePause)
+        {
+            if (GameManager.Instance.State == GameState.Playing)
+            {
+                _selectedIndex = 0;
+                GameManager.Instance.PauseGame();
+            }
+            else if (GameManager.Instance.State == GameState.Paused)
+                GameManager.Instance.ResumeGame();
+        }
+
+        // Handle pause menu navigation
+        if (GameManager.Instance.State == GameState.Paused)
+        {
+            float y = 0f;
+            if (Gamepad.current != null)
+                y = Gamepad.current.leftStick.y.ReadValue() + Gamepad.current.dpad.y.ReadValue();
+            
+            if (Keyboard.current != null)
+            {
+                if (Keyboard.current.wKey.isPressed || Keyboard.current.upArrowKey.isPressed) y += 1f;
+                if (Keyboard.current.sKey.isPressed || Keyboard.current.downArrowKey.isPressed) y -= 1f;
+            }
+
+            if (y > 0.5f)
+            {
+                if (!_navigateUpHandled) { _selectedIndex--; _navigateUpHandled = true; }
+            }
+            else _navigateUpHandled = false;
+
+            if (y < -0.5f)
+            {
+                if (!_navigateDownHandled) { _selectedIndex++; _navigateDownHandled = true; }
+            }
+            else _navigateDownHandled = false;
+
+            if (_selectedIndex < 0) _selectedIndex = 1;
+            if (_selectedIndex > 1) _selectedIndex = 0;
+
+            bool confirm = false;
+            if (Gamepad.current != null && Gamepad.current.buttonSouth.wasPressedThisFrame) confirm = true;
+            if (Keyboard.current != null && (Keyboard.current.enterKey.wasPressedThisFrame || Keyboard.current.spaceKey.wasPressedThisFrame)) confirm = true;
+
+            if (confirm)
+            {
+                if (_selectedIndex == 0) GameManager.Instance.ResumeGame();
+                else GameManager.Instance.ReturnToMainMenu();
+            }
+        }
     }
 
     private void OnGUI()
@@ -239,15 +305,18 @@ public class HUDController : MonoBehaviour
 
         var btnStyle = new GUIStyle(GUI.skin.button) { fontSize = 20, fontStyle = FontStyle.Bold };
 
+        GUI.backgroundColor = _selectedIndex == 0 ? new Color(0.2f, 0.9f, 0.2f) : Color.white;
         if (GUI.Button(new Rect(startX + 60f, btnY, btnW, btnH), "RESUME", btnStyle))
         {
             GameManager.Instance.ResumeGame();
         }
 
+        GUI.backgroundColor = _selectedIndex == 1 ? new Color(0.9f, 0.2f, 0.2f) : Color.white;
         if (GUI.Button(new Rect(startX + panelW - btnW - 60f, btnY, btnW, btnH), "MAIN MENU", btnStyle))
         {
             GameManager.Instance.ReturnToMainMenu();
         }
+        GUI.backgroundColor = Color.white;
     }
 
     private static Texture2D MakeTex(int w, int h, Color col)

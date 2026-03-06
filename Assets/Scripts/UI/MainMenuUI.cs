@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 /// <summary>
 /// Main Menu UI using OnGUI — no packages needed.
@@ -9,6 +10,9 @@ public class MainMenuUI : MonoBehaviour
     public Texture2D splashScreen;
     private GUIStyle _titleStyle, _subStyle, _btnStyle, _bgStyle;
     private bool     _stylesReady;
+
+    private int  _selectedIndex = 0;       // 0: Play, 1: Quit
+    private bool _navigateDownHandled, _navigateUpHandled;
 
     private void InitStyles()
     {
@@ -28,6 +32,56 @@ public class MainMenuUI : MonoBehaviour
 
         _btnStyle = new GUIStyle(GUI.skin.button)
             { fontSize = 22, fontStyle = FontStyle.Bold };
+    }
+
+    private void Update()
+    {
+        HandleInput();
+    }
+
+    private void HandleInput()
+    {
+        float y = 0f;
+        if (Gamepad.current != null)
+            y = Gamepad.current.leftStick.y.ReadValue() + Gamepad.current.dpad.y.ReadValue();
+        
+        if (Keyboard.current != null)
+        {
+            if (Keyboard.current.wKey.isPressed || Keyboard.current.upArrowKey.isPressed) y += 1f;
+            if (Keyboard.current.sKey.isPressed || Keyboard.current.downArrowKey.isPressed) y -= 1f;
+        }
+
+        if (y > 0.5f)
+        {
+            if (!_navigateUpHandled) { _selectedIndex--; _navigateUpHandled = true; }
+        }
+        else _navigateUpHandled = false;
+
+        if (y < -0.5f)
+        {
+            if (!_navigateDownHandled) { _selectedIndex++; _navigateDownHandled = true; }
+        }
+        else _navigateDownHandled = false;
+
+        if (_selectedIndex < 0) _selectedIndex = 1;
+        if (_selectedIndex > 1) _selectedIndex = 0;
+
+        bool confirm = false;
+        if (Gamepad.current != null && Gamepad.current.buttonSouth.wasPressedThisFrame) confirm = true;
+        if (Keyboard.current != null && (Keyboard.current.enterKey.wasPressedThisFrame || Keyboard.current.spaceKey.wasPressedThisFrame)) confirm = true;
+
+        if (confirm)
+        {
+            if (_selectedIndex == 0) GameManager.Instance?.StartGame();
+            else
+            {
+#if UNITY_EDITOR
+                UnityEditor.EditorApplication.isPlaying = false;
+#else
+                Application.Quit();
+#endif
+            }
+        }
     }
 
     private void OnGUI()
@@ -64,14 +118,14 @@ public class MainMenuUI : MonoBehaviour
                   "Survive the financial apocalypse", _subStyle);
 
         // Play button
-        GUI.backgroundColor = new Color(0.1f, 0.65f, 0.15f);
+        GUI.backgroundColor = _selectedIndex == 0 ? new Color(0.2f, 0.9f, 0.2f) : new Color(0.1f, 0.65f, 0.15f);
         if (GUI.Button(new Rect(sw / 2f - 130f, sh / 2f - 20f, 260f, 60f), "PLAY", _btnStyle))
         {
             GameManager.Instance?.StartGame();
         }
 
         // Quit button
-        GUI.backgroundColor = new Color(0.5f, 0.1f, 0.1f);
+        GUI.backgroundColor = _selectedIndex == 1 ? new Color(0.9f, 0.2f, 0.2f) : new Color(0.5f, 0.1f, 0.1f);
         if (GUI.Button(new Rect(sw / 2f - 130f, sh / 2f + 55f, 260f, 50f), "QUIT", _btnStyle))
         {
 #if UNITY_EDITOR

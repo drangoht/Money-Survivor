@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 /// <summary>
 /// Level-up card selection UI drawn with OnGUI — no packages needed.
@@ -11,6 +12,9 @@ public class LevelUpUI : MonoBehaviour
     private bool   _visible;
     private Action<UpgradeOption> _callback;
     private List<UpgradeOption>   _options = new();
+
+    private int  _selectedIndex = 0;
+    private bool _navigateLeftHandled, _navigateRightHandled;
 
     // Cached styles
     private GUIStyle _panelStyle, _titleStyle, _cardStyle, _descStyle, _btnStyle;
@@ -43,7 +47,48 @@ public class LevelUpUI : MonoBehaviour
     {
         _options  = options;
         _callback = callback;
+        _selectedIndex = 0;
         _visible  = true;
+    }
+
+    private void Update()
+    {
+        if (!_visible) return;
+
+        float x = 0f;
+        if (Gamepad.current != null)
+            x = Gamepad.current.leftStick.x.ReadValue() + Gamepad.current.dpad.x.ReadValue();
+        
+        if (Keyboard.current != null)
+        {
+            if (Keyboard.current.dKey.isPressed || Keyboard.current.rightArrowKey.isPressed) x += 1f;
+            if (Keyboard.current.aKey.isPressed || Keyboard.current.leftArrowKey.isPressed) x -= 1f;
+        }
+
+        if (x > 0.5f)
+        {
+            if (!_navigateRightHandled) { _selectedIndex++; _navigateRightHandled = true; }
+        }
+        else _navigateRightHandled = false;
+
+        if (x < -0.5f)
+        {
+            if (!_navigateLeftHandled) { _selectedIndex--; _navigateLeftHandled = true; }
+        }
+        else _navigateLeftHandled = false;
+
+        if (_selectedIndex < 0) _selectedIndex = _options.Count - 1;
+        if (_selectedIndex >= _options.Count) _selectedIndex = 0;
+
+        bool confirm = false;
+        if (Gamepad.current != null && Gamepad.current.buttonSouth.wasPressedThisFrame) confirm = true;
+        if (Keyboard.current != null && (Keyboard.current.enterKey.wasPressedThisFrame || Keyboard.current.spaceKey.wasPressedThisFrame)) confirm = true;
+
+        if (confirm && _options.Count > 0)
+        {
+            _visible = false;
+            _callback?.Invoke(_options[_selectedIndex]);
+        }
     }
 
     private void OnGUI()
@@ -78,8 +123,10 @@ public class LevelUpUI : MonoBehaviour
             float cx = startX + i * (cardW + 20f);
             var   opt = _options[i];
 
-            // Card background
+            // Card background (highlight if selected)
+            GUI.color = i == _selectedIndex ? new Color(1f, 1f, 0.5f) : Color.white;
             GUI.Box(new Rect(cx, cardY, cardW, cardH), GUIContent.none, _cardStyle);
+            GUI.color = Color.white;
 
             // Type badge
             string badge = opt.type == UpgradeType.PowerUp ? "★ POWER-UP" : "⚔ WEAPON";
@@ -99,9 +146,9 @@ public class LevelUpUI : MonoBehaviour
             // Description
             GUI.Label(new Rect(cx + 12, cardY + 105, cardW - 24, 160f), opt.description, _descStyle);
 
-            // Choose button
-            GUI.backgroundColor = new Color(0.1f, 0.55f, 0.15f);
-            if (GUI.Button(new Rect(cx + 20, cardY + cardH - 60, cardW - 40, 44f), "CHOOSE", _btnStyle))
+            // Select Button
+            GUI.backgroundColor = i == _selectedIndex ? new Color(0.2f, 0.9f, 0.2f) : new Color(0.2f, 0.6f, 0.2f);
+            if (GUI.Button(new Rect(cx + 20, cardY + 260, cardW - 40, 40f), "SELECT", _btnStyle))
             {
                 _visible = false;
                 _callback?.Invoke(opt);

@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 /// <summary>
 /// Game Over screen using OnGUI — no packages needed.
@@ -10,13 +11,67 @@ public class GameOverUI : MonoBehaviour
     private GUIStyle _titleStyle, _statStyle, _btnStyle, _panelStyle;
     private bool   _stylesReady;
 
+    private int  _selectedIndex = 0; // 0: Retry, 1: Menu
+    private bool _navigateLeftHandled, _navigateRightHandled;
+
     private void Awake() => EventBus.OnPlayerDeath += Show;
     private void OnDestroy() => EventBus.OnPlayerDeath -= Show;
 
     private void Show()
     {
+        _selectedIndex = 0;
         _visible       = true;
         Time.timeScale = 0f;
+    }
+
+    private void Update()
+    {
+        if (!_visible || GameManager.Instance == null) return;
+
+        float x = 0f;
+        if (Gamepad.current != null)
+            x = Gamepad.current.leftStick.x.ReadValue() + Gamepad.current.dpad.x.ReadValue();
+        
+        if (Keyboard.current != null)
+        {
+            if (Keyboard.current.dKey.isPressed || Keyboard.current.rightArrowKey.isPressed) x += 1f;
+            if (Keyboard.current.aKey.isPressed || Keyboard.current.leftArrowKey.isPressed) x -= 1f;
+        }
+
+        if (x > 0.5f)
+        {
+            if (!_navigateRightHandled) { _selectedIndex++; _navigateRightHandled = true; }
+        }
+        else _navigateRightHandled = false;
+
+        if (x < -0.5f)
+        {
+            if (!_navigateLeftHandled) { _selectedIndex--; _navigateLeftHandled = true; }
+        }
+        else _navigateLeftHandled = false;
+
+        if (_selectedIndex < 0) _selectedIndex = 1;
+        if (_selectedIndex > 1) _selectedIndex = 0;
+
+        bool confirm = false;
+        if (Gamepad.current != null && Gamepad.current.buttonSouth.wasPressedThisFrame) confirm = true;
+        if (Keyboard.current != null && (Keyboard.current.enterKey.wasPressedThisFrame || Keyboard.current.spaceKey.wasPressedThisFrame)) confirm = true;
+
+        if (confirm)
+        {
+            if (_selectedIndex == 0)
+            {
+                _visible = false;
+                Time.timeScale = 1f;
+                GameManager.Instance.StartGame();
+            }
+            else
+            {
+                _visible = false;
+                Time.timeScale = 1f;
+                GameManager.Instance.ReturnToMainMenu();
+            }
+        }
     }
 
     private void InitStyles()
@@ -74,7 +129,7 @@ public class GameOverUI : MonoBehaviour
         GUI.Label(new Rect(px, py + 200, pw, 36f), $"Level Reached:  {GameManager.Instance.CurrentLevel}", _statStyle);
 
         // Buttons
-        GUI.backgroundColor = new Color(0.1f, 0.6f, 0.15f);
+        GUI.backgroundColor = _selectedIndex == 0 ? new Color(0.2f, 0.9f, 0.2f) : new Color(0.1f, 0.6f, 0.15f);
         if (GUI.Button(new Rect(px + 40, py + 270, 170f, 52f), "RETRY", _btnStyle))
         {
             _visible = false;
@@ -82,7 +137,7 @@ public class GameOverUI : MonoBehaviour
             GameManager.Instance.StartGame();
         }
 
-        GUI.backgroundColor = new Color(0.35f, 0.35f, 0.35f);
+        GUI.backgroundColor = _selectedIndex == 1 ? new Color(0.6f, 0.6f, 0.6f) : new Color(0.35f, 0.35f, 0.35f);
         if (GUI.Button(new Rect(px + 270, py + 270, 170f, 52f), "MENU", _btnStyle))
         {
             _visible = false;

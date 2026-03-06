@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 /// <summary>
 /// Chest reward popup using OnGUI — no packages needed.
@@ -27,7 +28,13 @@ public class ChestRewardUI : MonoBehaviour
 
     private void Update()
     {
-        if (_visible && Time.unscaledTime >= _hideTime)
+        if (!_visible) return;
+
+        bool dismiss = false;
+        if (Gamepad.current != null && Gamepad.current.buttonSouth.wasPressedThisFrame) dismiss = true;
+        if (Keyboard.current != null && (Keyboard.current.enterKey.wasPressedThisFrame || Keyboard.current.spaceKey.wasPressedThisFrame)) dismiss = true;
+
+        if (Time.unscaledTime >= _hideTime || dismiss)
             _visible = false;
     }
 
