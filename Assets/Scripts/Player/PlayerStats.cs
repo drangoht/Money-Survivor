@@ -13,6 +13,7 @@ public class PlayerStats : MonoBehaviour
     public float pickupRadius   = 2.5f;
     public float xpMultiplier   = 1f;
     public float invincibilityDuration = 0.8f;
+    public float repelForce     = 0f;
 
     [Header("Runtime")]
     public float CurrentHP { get; private set; }

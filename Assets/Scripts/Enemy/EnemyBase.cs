@@ -21,6 +21,9 @@ public class EnemyBase : MonoBehaviour, IPoolable
     private SpriteRenderer _sr;
     private bool         _isDead;
 
+    private float        _knockbackTimer;
+    private Vector2      _knockbackVelocity;
+
     // Pool tag (set by spawner so we can return to the correct pool)
     [HideInInspector] public string poolTag;
 
@@ -66,6 +69,14 @@ public class EnemyBase : MonoBehaviour, IPoolable
     {
         if (_isDead) return;
 
+        if (_knockbackTimer > 0f)
+        {
+            // Apply knockback velocity instead of normal AI movement
+            _rb.linearVelocity = _knockbackVelocity;
+            _knockbackTimer -= Time.deltaTime;
+            return;
+        }
+
         // Lazy player lookup
         if (_playerTransform == null)
         {
@@ -90,6 +101,13 @@ public class EnemyBase : MonoBehaviour, IPoolable
     // ── Public API ───────────────────────────────────────────────────────────
 
     public void SetDifficultyTier(int tier) => _difficultyTier = tier;
+
+    public void ApplyKnockback(Vector2 direction, float force, float duration = 0.25f)
+    {
+        if (_isDead) return;
+        _knockbackTimer = duration;
+        _knockbackVelocity = direction.normalized * force;
+    }
 
     public void TakeDamage(float amount)
     {

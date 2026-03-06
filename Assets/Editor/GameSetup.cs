@@ -356,7 +356,7 @@ public static class GameSetup
 
     private static EnemyData  _bankman, _exWife, _children, _irs, _bouncer, _ceo;
     private static WeaponData _coinData, _whipData,  _auraData, _cardData, _dividendData, _singleShotData;
-    private static PowerUpData _healPU, _speedPU, _damagePU, _magnetPU, _radiusPU;
+    private static PowerUpData _healPU, _speedPU, _damagePU, _magnetPU, _radiusPU, _repelPU;
 
     private static void CreateScriptableObjects()
     {
@@ -443,6 +443,8 @@ public static class GameSetup
                         PowerUpEffectType.MagnetAllOrbs,0f,new Color(.15f,.15f,.15f));
         _radiusPU = MakePU("Diversified","Diversified Portfolio","Bigger XP pickup radius.",
                         PowerUpEffectType.IncreasePickupRadius,1f,new Color(.3f,.5f,1f));
+        _repelPU  = MakePU("RestrainingOrder", "Restraining Order", "Weapons push enemies further away.",
+                        PowerUpEffectType.RepelEnemies, 2f, new Color(0.9f, 0.4f, 0.8f));
 
         Log($"  All ScriptableObjects created");
     }
@@ -595,7 +597,7 @@ public static class GameSetup
         var col = root.AddComponent<CircleCollider2D>();
         col.isTrigger = true; col.radius = 2.0f;
         var c = root.AddComponent<Chest>();
-        c.possibleRewards = new[] { _healPU, _speedPU, _damagePU, _magnetPU, _radiusPU };
+        c.possibleRewards = new[] { _healPU, _speedPU, _damagePU, _magnetPU, _radiusPU, _repelPU };
         return Save(root, path);
     }
 

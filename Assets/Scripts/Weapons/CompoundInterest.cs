@@ -44,12 +44,20 @@ public class CompoundInterest : WeaponBase
         float radius = CurrentStats.aoeRadius > 0f ? CurrentStats.aoeRadius : 2f;
         radius += CurrentLevel * 0.5f;
 
+        // We lookup stats to get the global repel force
+        var playerStats = GetComponentInParent<PlayerStats>();
+        float extraRepel = playerStats != null ? playerStats.repelForce : 0f;
+
         var hits = Physics2D.OverlapCircleAll(transform.position, radius);
         foreach (var col in hits)
         {
             if (col.TryGetComponent<EnemyBase>(out var enemy))
             {
                 enemy.TakeDamage(GetDamage());
+                
+                // Repel mechanics: push outward from aura center
+                Vector2 repelDir = (enemy.transform.position - transform.position).normalized;
+                enemy.ApplyKnockback(repelDir, 3f + extraRepel);
             }
         }
     }

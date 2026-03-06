@@ -8,7 +8,8 @@ public enum PowerUpEffectType
     IncreaseDamage,
     IncreasePickupRadius,
     MagnetAllOrbs,
-    ExtraLevelUpChoice
+    ExtraLevelUpChoice,
+    RepelEnemies
 }
 
 /// <summary>
