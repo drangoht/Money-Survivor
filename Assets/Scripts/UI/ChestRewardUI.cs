@@ -90,6 +90,8 @@ public class ChestRewardUI : MonoBehaviour
             case PowerUpEffectType.IncreaseDamage:        stats.damageMultiplier += pu.value / 100f; break;
             case PowerUpEffectType.IncreasePickupRadius:  stats.pickupRadius   += pu.value;  break;
             case PowerUpEffectType.RepelEnemies:          stats.repelForce     += pu.value;  break;
+            case PowerUpEffectType.IncreaseXPGain:        stats.xpMultiplier   += pu.value / 100f; break;
+            case PowerUpEffectType.IncreaseIFrames:       stats.invincibilityDuration += pu.value; break;
             case PowerUpEffectType.MagnetAllOrbs:
                 foreach (var orb in FindObjectsByType<XPOrb>(FindObjectsSortMode.None))
                     orb.ForceAttract();

@@ -10,44 +10,44 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 145f69880f6b2f949b44667bf30b9360, type: 3}
-  m_Name: DividendShieldData
+  m_Name: CryptominerData
   m_EditorClassIdentifier: Assembly-CSharp::WeaponData
-  weaponName: Dividend Shield
-  description: Coins rapidly orbit and damage enemies near you.
+  weaponName: Cryptominer
+  description: Drops a stationary mining rig that burns nearby enemies.
   icon: {fileID: 0}
   levels:
-  - damage: 8
-    fireRate: 90
+  - damage: 15
+    fireRate: 0.25
     projectileSpeed: 8
     projectileCount: 1
     pierceCount: 1
-    aoeRadius: 1.5
-    duration: 0
-  - damage: 12
-    fireRate: 120
+    aoeRadius: 2.5
+    duration: 3
+  - damage: 25
+    fireRate: 0.28
+    projectileSpeed: 8
+    projectileCount: 1
+    pierceCount: 1
+    aoeRadius: 2.8
+    duration: 3.5
+  - damage: 40
+    fireRate: 0.33
     projectileSpeed: 8
     projectileCount: 2
     pierceCount: 1
-    aoeRadius: 1.8
-    duration: 0
-  - damage: 18
-    fireRate: 150
+    aoeRadius: 3.2
+    duration: 4
+  - damage: 65
+    fireRate: 0.4
+    projectileSpeed: 8
+    projectileCount: 2
+    pierceCount: 1
+    aoeRadius: 3.6
+    duration: 4.5
+  - damage: 100
+    fireRate: 0.5
     projectileSpeed: 8
     projectileCount: 3
     pierceCount: 1
-    aoeRadius: 2
-    duration: 0
-  - damage: 25
-    fireRate: 180
-    projectileSpeed: 8
-    projectileCount: 4
-    pierceCount: 1
-    aoeRadius: 2.2
-    duration: 0
-  - damage: 40
-    fireRate: 210
-    projectileSpeed: 8
-    projectileCount: 6
-    pierceCount: 1
-    aoeRadius: 2.5
-    duration: 0
+    aoeRadius: 4
+    duration: 5

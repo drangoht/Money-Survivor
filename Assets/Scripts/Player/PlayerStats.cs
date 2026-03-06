@@ -21,9 +21,12 @@ public class PlayerStats : MonoBehaviour
     public bool  IsInvincible { get; private set; }
 
     private float _invincibilityTimer;
+    private SpriteRenderer _sr;
 
     private void Awake()
     {
+        _sr = GetComponentInChildren<SpriteRenderer>();
+
         CurrentHP = maxHP;
         EventBus.RaisePlayerHPChanged(CurrentHP, maxHP);
     }
@@ -33,7 +36,17 @@ public class PlayerStats : MonoBehaviour
         if (IsInvincible)
         {
             _invincibilityTimer -= Time.deltaTime;
-            if (_invincibilityTimer <= 0f) IsInvincible = false;
+
+            if (_sr != null)
+            {
+                _sr.enabled = Mathf.PingPong(Time.time * 15f, 1f) > 0.5f;
+            }
+
+            if (_invincibilityTimer <= 0f) 
+            {
+                IsInvincible = false;
+                if (_sr != null) _sr.enabled = true;
+            }
         }
     }
 

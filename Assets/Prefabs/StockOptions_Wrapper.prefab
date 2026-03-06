@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &7705505955819579976
+--- !u!1 &2521539868262264127
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,22 +8,22 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 7145759049595588922}
-  - component: {fileID: 8679853840015767160}
+  - component: {fileID: 3526408478076418400}
+  - component: {fileID: 7853247150818190873}
   m_Layer: 0
-  m_Name: DividendShield_Wrapper
+  m_Name: StockOptions_Wrapper
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &7145759049595588922
+--- !u!4 &3526408478076418400
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7705505955819579976}
+  m_GameObject: {fileID: 2521539868262264127}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
@@ -32,17 +32,17 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &8679853840015767160
+--- !u!114 &7853247150818190873
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7705505955819579976}
+  m_GameObject: {fileID: 2521539868262264127}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 819f4eb481a6c8943b4f587a82301fec, type: 3}
+  m_Script: {fileID: 11500000, guid: bf7b4cfb0d5badb4d808eb0764a5c390, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::OrbitalWeapon
-  data: {fileID: 11400000, guid: 1c5355970b4df3b4dbcd1b2f0ab493c7, type: 2}
-  orbitalPrefab: {fileID: 1087451376251131599, guid: f331bd018f9abaf4bab48d98f0e562f7, type: 3}
+  m_EditorClassIdentifier: Assembly-CSharp::StockOptionsWeapon
+  data: {fileID: 11400000, guid: 39b16f6459009d7459cfd96a9c8a7d3c, type: 2}
+  arrowPrefab: {fileID: 5446482205725386967, guid: 83d5e6b9e68faa64a9f7e71c42502aa8, type: 3}

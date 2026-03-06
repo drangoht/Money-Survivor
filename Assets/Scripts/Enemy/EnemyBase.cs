@@ -103,6 +103,8 @@ public class EnemyBase : MonoBehaviour, IPoolable
 
     public void SetDifficultyTier(int tier) => _difficultyTier = tier;
 
+    public bool IsDead() => _isDead;
+
     public void ApplyKnockback(Vector2 direction, float force, float duration = 0.25f)
     {
         if (_isDead) return;

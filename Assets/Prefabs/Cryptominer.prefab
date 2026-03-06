@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &7908184189567102801
+--- !u!1 &2374394846582300080
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,8 +8,8 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 5922416086518185373}
-  - component: {fileID: 8776214328916501344}
+  - component: {fileID: 3788943611982531025}
+  - component: {fileID: 5667555645308343405}
   m_Layer: 0
   m_Name: Sprite
   m_TagString: Untagged
@@ -17,29 +17,29 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &5922416086518185373
+--- !u!4 &3788943611982531025
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7908184189567102801}
+  m_GameObject: {fileID: 2374394846582300080}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 3.5, y: 3.5, z: 3.5}
+  m_LocalScale: {x: 0.4, y: 0.4, z: 0.4}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 1188362440936198618}
+  m_Father: {fileID: 5857985199612114231}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!212 &8776214328916501344
+--- !u!212 &5667555645308343405
 SpriteRenderer:
   serializedVersion: 2
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7908184189567102801}
+  m_GameObject: {fileID: 2374394846582300080}
   m_Enabled: 1
   m_CastShadows: 0
   m_ReceiveShadows: 0
@@ -79,19 +79,19 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 1
+  m_SortingOrder: -1
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 21300000, guid: 5b0e89677d3d75f4a9a6dc96fd56e087, type: 2}
+  m_Sprite: {fileID: 21300000, guid: b59ad513f9bb31c42a62c119c50bad16, type: 2}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 0.32, y: 0.32}
+  m_Size: {x: 2.56, y: 2.56}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
---- !u!1 &9100781085879243488
+--- !u!1 &8932257370047441272
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -99,39 +99,39 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 1188362440936198618}
-  - component: {fileID: 1836215660163856311}
-  - component: {fileID: 8384410185550152244}
+  - component: {fileID: 5857985199612114231}
+  - component: {fileID: 6901229297249314002}
+  - component: {fileID: 4909887789553758416}
   m_Layer: 0
-  m_Name: Chest
+  m_Name: Cryptominer
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &1188362440936198618
+--- !u!4 &5857985199612114231
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9100781085879243488}
+  m_GameObject: {fileID: 8932257370047441272}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 5922416086518185373}
+  - {fileID: 3788943611982531025}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!58 &1836215660163856311
+--- !u!58 &6901229297249314002
 CircleCollider2D:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9100781085879243488}
+  m_GameObject: {fileID: 8932257370047441272}
   m_Enabled: 1
   serializedVersion: 3
   m_Density: 1
@@ -161,25 +161,15 @@ CircleCollider2D:
   m_CompositeOrder: 0
   m_Offset: {x: 0, y: 0}
   m_Radius: 2
---- !u!114 &8384410185550152244
+--- !u!114 &4909887789553758416
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9100781085879243488}
+  m_GameObject: {fileID: 8932257370047441272}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 12013d7c61bf9f24cbfd6106337df3c6, type: 3}
+  m_Script: {fileID: 11500000, guid: 364c0dabe930bc54783d4dfeec6eb7f5, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Chest
-  possibleRewards:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 11400000, guid: 3e2db40d5d9568a408f6327ffe80bc2c, type: 2}
-  - {fileID: 11400000, guid: d4fa0f3750ec81d43b1f7674b8ab085f, type: 2}
-  - {fileID: 11400000, guid: f201c722328ed314990ea3d8cb272797, type: 2}
-  openParticlePrefab: {fileID: 8630335061285168146, guid: 614b215bccefca34db379ee58bec44e9, type: 3}
+  m_EditorClassIdentifier: Assembly-CSharp::LingeringAOE

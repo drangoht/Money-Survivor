@@ -48,6 +48,7 @@ public class LevelUpManager : MonoBehaviour
 
         foreach (var prefab in weaponPrefabs)
         {
+            if (prefab == null) continue;
             var wb = prefab.GetComponent<WeaponBase>();
             if (wb == null || wb.data == null) continue;
 
@@ -83,7 +84,10 @@ public class LevelUpManager : MonoBehaviour
 
         // Power-ups
         foreach (var pu in powerUps)
+        {
+            if (pu == null) continue;
             candidates.Add(new UpgradeOption { type = UpgradeType.PowerUp, powerUp = pu, label = pu.powerUpName, description = pu.description });
+        }
 
         // Shuffle and take N
         candidates = candidates.OrderBy(_ => Random.value).ToList();

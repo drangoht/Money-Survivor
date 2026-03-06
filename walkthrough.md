@@ -30,3 +30,12 @@ This document records the step-by-step process used to build and refine the game
 1.  **Documentation:** Wrote a dynamic `README.md` natively in the directory.
 2.  **Transparency Pass:** The game relies on stripping `#FF00FF` magenta natively. This broke the README images. The AI wrote a PowerShell script to inject into `Assets/Sprites/*` to cleanly calculate the pixel alpha transparency for the GitHub markdown views.
 3.  **Git Isolation:** Transparency broke the `GameSetup.cs` file parser! Fixed by reverting the original files, duplicating them into a `ReadmeImages/` folder purely for GitHub display, stripping the clones, and committing standard magenta sprites back into the game structure.
+
+## Phase 5: Chest System Overhaul & Expanded Item Pool
+1.  **Chest Rebalance:** Deprecated the random-spawning `ChestSpawner.cs`. Boss enemies (IRS Inspector, CEO) were flagged specifically to drop a highly customized Chest payload on death instead. Open the Chests to trigger a massive, erupting golden particle fountain.
+2.  **Item Roster Shakeup:** 
+    *   Removed `Dividend Shield`.
+    *   Added **Cryptominer** (Weapon): Drops stationary Area-of-Effect mining rigs that apply burning tick damage to enemies.
+    *   Added **Stock Options** (Weapon): Spits out volatile neon arrows (Up/Down curves). Damage payloads heavily randomize +/- 50% of the base value on each hit, visually scaling dynamically based on the random multiplier!
+    *   Added **Insider Trading** (Powerup): Magnifies XP gain from orbs directly.
+    *   Added **Tax Evasion** (Powerup): Passively buffs your post-damage Invincibility Frames.

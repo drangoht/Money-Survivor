@@ -115,7 +115,7 @@ public static class GameSetup
     private static Sprite _circle, _square;
     private static Sprite _playerSprite, _enemySprite, _coinSprite, _bgSprite;
     private static Sprite _xpOrbSprite, _boomerangSprite, _shieldSprite, _splashSprite, _chestSprite;
-    private static Sprite _exWifeSprite, _childrenSprite, _irsSprite;
+    private static Sprite _exWifeSprite, _childrenSprite, _irsSprite, _cryptoSprite, _stockSprite;
 
     private static void GenerateSprites()
     {
@@ -134,6 +134,8 @@ public static class GameSetup
         _shieldSprite    = LoadSingleSprite(SpritesPath + "/shield_sprite.png",         "shield");
         _splashSprite    = LoadSingleSprite(SpritesPath + "/splash_screen.png",         "splash");
         _chestSprite     = LoadSingleSprite(SpritesPath + "/chest_sprite_1772809376512.png", "chest");
+        _cryptoSprite    = LoadSingleSprite(SpritesPath + "/cryptominer_sprite_1772827344346.png", "cryptominer_V2");
+        _stockSprite     = LoadSingleSprite(SpritesPath + "/stock_options_sprite_1772827497492.png", "stock_options_V2");
 
         Log($"  Sprites ready");
     }
@@ -223,10 +225,11 @@ public static class GameSetup
         Color[] pixels = tex.GetPixels();
         bool[] visited = new bool[w * h];
 
-        // Use top-left corner pixel as background key color
-        Color key = pixels[(h - 1) * w]; // top-left in Unity's bottom-up coords
+        // Use a pixel slightly inset from the top-left as the background key
+        // (AI generated images sometimes have a 1-pixel colored border)
+        Color key = pixels[(h - 5) * w + 5]; 
 
-        float threshold = 0.18f; // catches white/light backgrounds without eating into character art
+        float threshold = 0.22f; // carefully tuned to avoid eating dark neon sprites
 
         var queue = new System.Collections.Generic.Queue<int>();
 
@@ -356,8 +359,8 @@ public static class GameSetup
     // ══════════════════════════════════════════════════════════════════════════
 
     private static EnemyData  _bankman, _exWife, _children, _irs, _bouncer, _ceo;
-    private static WeaponData _coinData, _whipData,  _auraData, _cardData, _dividendData, _singleShotData;
-    private static PowerUpData _healPU, _speedPU, _damagePU, _magnetPU, _radiusPU, _repelPU;
+    private static WeaponData _coinData, _whipData,  _auraData, _cardData, _singleShotData, _cryptoData, _stockData;
+    private static PowerUpData _healPU, _speedPU, _damagePU, _magnetPU, _radiusPU, _repelPU, _insiderPU, _taxPU;
 
     private static void CreateScriptableObjects()
     {
@@ -423,29 +426,38 @@ public static class GameSetup
                 new() { damage=50, fireRate=1.0f, projectileSpeed=18, projectileCount=4, pierceCount=99, duration=2.5f },
             });
 
-        _dividendData = MakeWeapon("DividendShieldData", "Dividend Shield",
-            "Coins rapidly orbit and damage enemies near you.",
+        string cryptoPath = WeaponSOPath + "/CryptominerData.asset";
+        if (AssetDatabase.LoadAssetAtPath<WeaponData>(cryptoPath) != null) AssetDatabase.DeleteAsset(cryptoPath);
+        _cryptoData = MakeWeapon("CryptominerData", "Cryptominer",
+            "Drops a stationary mining rig that burns nearby enemies.",
             new WeaponLevelStats[]
             {
-                new() { damage=8,  fireRate=90f,  aoeRadius=1.5f, projectileCount=1 },
-                new() { damage=12, fireRate=120f, aoeRadius=1.8f, projectileCount=2 },
-                new() { damage=18, fireRate=150f, aoeRadius=2.0f, projectileCount=3 },
-                new() { damage=25, fireRate=180f, aoeRadius=2.2f, projectileCount=4 },
-                new() { damage=40, fireRate=210f, aoeRadius=2.5f, projectileCount=6 },
+                new() { damage=15, fireRate=0.25f, aoeRadius=2.5f, projectileCount=1, duration=3f }, // 1 every 4.0 sec
+                new() { damage=25, fireRate=0.28f, aoeRadius=2.8f, projectileCount=1, duration=3.5f },// 1 every 3.5 sec
+                new() { damage=40, fireRate=0.33f, aoeRadius=3.2f, projectileCount=2, duration=4f }, // 1 every 3.0 sec
+                new() { damage=65, fireRate=0.40f, aoeRadius=3.6f, projectileCount=2, duration=4.5f },// 1 every 2.5 sec
+                new() { damage=100, fireRate=0.50f, aoeRadius=4.0f, projectileCount=3, duration=5f },// 1 every 2.0 sec
             });
 
-        _healPU   = MakePU("HealthInsurance","Health Insurance","Restores 30 HP.",
-                        PowerUpEffectType.HealHP,30f,new Color(.9f,.2f,.2f));
-        _speedPU  = MakePU("GoldRush","Gold Rush","Increase move speed.",
-                        PowerUpEffectType.IncreaseSpeed,0.5f,new Color(1f,.84f,0f));
-        _damagePU = MakePU("HedgeFund","Hedge Fund","+15% damage.",
-                        PowerUpEffectType.IncreaseDamage,15f,new Color(.2f,.8f,.3f));
-        _magnetPU = MakePU("BlackMarket","Black Market","Attract all XP orbs instantly.",
-                        PowerUpEffectType.MagnetAllOrbs,0f,new Color(.15f,.15f,.15f));
-        _radiusPU = MakePU("Diversified","Diversified Portfolio","Bigger XP pickup radius.",
-                        PowerUpEffectType.IncreasePickupRadius,1f,new Color(.3f,.5f,1f));
+        string stockPath = WeaponSOPath + "/StockOptionsData.asset";
+        if (AssetDatabase.LoadAssetAtPath<WeaponData>(stockPath) != null) AssetDatabase.DeleteAsset(stockPath);
+        _stockData = MakeWeapon("StockOptionsData", "Stock Options",
+            "Shoots volatile market arrows. Damage randomizes significantly per hit.",
+            new WeaponLevelStats[]
+            {
+                new() { damage=18, fireRate=1.2f, projectileSpeed=15, projectileCount=2, pierceCount=2, duration=2f },
+                new() { damage=24, fireRate=1.1f, projectileSpeed=16, projectileCount=3, pierceCount=2, duration=2f },
+                new() { damage=32, fireRate=1.0f, projectileSpeed=17, projectileCount=3, pierceCount=3, duration=2f },
+                new() { damage=45, fireRate=0.9f, projectileSpeed=18, projectileCount=4, pierceCount=3, duration=2.5f },
+                new() { damage=60, fireRate=0.8f, projectileSpeed=20, projectileCount=5, pierceCount=4, duration=2.5f },
+            });
+
         _repelPU  = MakePU("RestrainingOrder", "Restraining Order", "Weapons push enemies further away.",
                         PowerUpEffectType.RepelEnemies, 2f, new Color(0.9f, 0.4f, 0.8f));
+        _insiderPU = MakePU("InsiderTrading", "Insider Trading", "Gain 50% more XP from all orbs collected.",
+                        PowerUpEffectType.IncreaseXPGain, 50f, new Color(0.1f, 0.9f, 0.3f));
+        _taxPU = MakePU("TaxEvasion", "Tax Evasion", "Increases your invincibility time after taking damage.",
+                        PowerUpEffectType.IncreaseIFrames, 0.5f, new Color(0.5f, 0.5f, 0.9f));
 
         Log($"  All ScriptableObjects created");
     }
@@ -495,14 +507,21 @@ public static class GameSetup
     // ══════════════════════════════════════════════════════════════════════════
 
     private static GameObject _playerPrefab, _coinPrefab, _orbPrefab, _chestPrefab;
-    private static GameObject _cardPrefab, _dividendPrefab, _hitParticlesPrefab;
+    private static GameObject _cardPrefab, _cryptoPrefab, _stockPrefab, _hitParticlesPrefab;
     private static GameObject _p1, _p2, _p3, _p4, _p5, _p6; // enemy prefabs
 
     private static void CreatePrefabs()
     {
+        if (AssetDatabase.LoadAssetAtPath<GameObject>(PrefabsPath + "/Cryptominer.prefab") != null) AssetDatabase.DeleteAsset(PrefabsPath + "/Cryptominer.prefab");
+        if (AssetDatabase.LoadAssetAtPath<GameObject>(PrefabsPath + "/StockOptionsProjectile.prefab") != null) AssetDatabase.DeleteAsset(PrefabsPath + "/StockOptionsProjectile.prefab");
+
+        if (AssetDatabase.LoadAssetAtPath<GameObject>(PrefabsPath + "/Cryptominer.prefab") != null) AssetDatabase.DeleteAsset(PrefabsPath + "/Cryptominer.prefab");
+        if (AssetDatabase.LoadAssetAtPath<GameObject>(PrefabsPath + "/StockOptionsProjectile.prefab") != null) AssetDatabase.DeleteAsset(PrefabsPath + "/StockOptionsProjectile.prefab");
+
         _coinPrefab         = MakeProjectile("Coin.prefab", _coinSprite, Color.white, typeof(ProjectileBase));
         _cardPrefab         = MakeProjectile("Card.prefab", _square, new Color(.2f,.8f,.9f), typeof(BoomerangProjectile), 0.6f); // Larger card
-        _dividendPrefab     = MakeProjectile("Dividend.prefab", _shieldSprite, Color.white, typeof(ProjectileBase), 0.6f); // New Shield sprite
+        _cryptoPrefab       = MakeLingeringAOEPrefab("Cryptominer.prefab", _cryptoSprite, 0.40f);
+        _stockPrefab        = MakeProjectile("StockOptionsProjectile.prefab", _stockSprite, Color.white, typeof(VolatileProjectile), 0.25f);
         _orbPrefab          = MakeOrb();
         _chestPrefab        = MakeChest();
         _hitParticlesPrefab = MakeHitParticles();
@@ -573,6 +592,22 @@ public static class GameSetup
         return Save(root, path);
     }
 
+    private static GameObject MakeLingeringAOEPrefab(string fileName, Sprite sprite, float scale = 1.5f)
+    {
+        string path = PrefabsPath + "/" + fileName;
+        var ex = AssetDatabase.LoadAssetAtPath<GameObject>(path);
+        if (ex != null) return ex;
+
+        var root = new GameObject(fileName.Replace(".prefab", ""));
+        root.tag = "Projectile";
+        var spriteChild = Sprite2D(root, sprite, Color.white, -1, scale); // draw slightly behind
+        
+        var col = root.AddComponent<CircleCollider2D>();
+        col.isTrigger = true; col.radius = 2.0f;
+        root.AddComponent<LingeringAOE>();
+        return Save(root, path);
+    }
+
     private static GameObject MakeOrb()
     {
         string path = PrefabsPath + "/XPOrb.prefab";
@@ -604,7 +639,7 @@ public static class GameSetup
         var col = root.AddComponent<CircleCollider2D>();
         col.isTrigger = true; col.radius = 2.0f;
         var c = root.AddComponent<Chest>();
-        c.possibleRewards = new[] { _healPU, _speedPU, _damagePU, _magnetPU, _radiusPU, _repelPU };
+        c.possibleRewards = new[] { _healPU, _speedPU, _damagePU, _magnetPU, _radiusPU, _repelPU, _insiderPU, _taxPU };
         c.openParticlePrefab = MakeChestOpenParticles(); // Assign particle effect
         return Save(root, path);
     }
@@ -746,8 +781,6 @@ public static class GameSetup
     private static void CreateMainMenuScene()
     {
         string path = ScenesPath + "/MainMenu.unity";
-        if (File.Exists(path)) { Log("  MainMenu scene exists"); return; }
-
         var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
 
         // Camera
@@ -774,8 +807,6 @@ public static class GameSetup
     private static void CreateGameScene()
     {
         string path = ScenesPath + "/Game.unity";
-        if (File.Exists(path)) { Log("  Game scene exists"); return; }
-
         var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
 
         // Camera
@@ -833,7 +864,7 @@ public static class GameSetup
         sys.AddComponent<XPManager>();
 
         var lm = sys.AddComponent<LevelUpManager>();
-        lm.powerUps      = new List<PowerUpData> { _healPU, _speedPU, _damagePU, _magnetPU, _radiusPU };
+        lm.powerUps      = new List<PowerUpData> { _healPU, _speedPU, _damagePU, _magnetPU, _radiusPU, _insiderPU, _taxPU };
         lm.weaponPrefabs = new List<GameObject>
         {
             CreateWeaponPrefabWrapper("SingleShot", typeof(SingleShot), _singleShotData, _coinPrefab),
@@ -841,7 +872,8 @@ public static class GameSetup
             CreateWeaponPrefabWrapper("BillWhip", typeof(BillWhip), _whipData, _cardPrefab), // Assigned boomerang prefab to whip
             CreateWeaponPrefabWrapper("CompoundInterest", typeof(CompoundInterest), _auraData, null),
             CreateWeaponPrefabWrapper("BoomerangCard", typeof(BoomerangWeapon), _cardData, _cardPrefab),
-            CreateWeaponPrefabWrapper("DividendShield", typeof(OrbitalWeapon), _dividendData, _dividendPrefab)
+            CreateWeaponPrefabWrapper("Cryptominer", typeof(CryptominerWeapon), _cryptoData, _cryptoPrefab),
+            CreateWeaponPrefabWrapper("StockOptions", typeof(StockOptionsWeapon), _stockData, _stockPrefab)
         };
 
         // UI (all OnGUI-based)
@@ -878,8 +910,7 @@ public static class GameSetup
     private static GameObject CreateWeaponPrefabWrapper(string name, Type weaponType, WeaponData data, GameObject projectile)
     {
         string path = PrefabsPath + "/" + name + "_Wrapper.prefab";
-        var ex = AssetDatabase.LoadAssetAtPath<GameObject>(path);
-        if (ex != null) return ex;
+        if (AssetDatabase.LoadAssetAtPath<GameObject>(path) != null) AssetDatabase.DeleteAsset(path);
 
         var root = new GameObject(name + "_Wrapper");
         var w = root.AddComponent(weaponType) as WeaponBase;
@@ -888,7 +919,8 @@ public static class GameSetup
         if (w is CoinToss ct) ct.coinPrefab = projectile;
         if (w is SingleShot ss) { ss.projectilePrefab = projectile; ss.color = new Color(0.8f, 0.8f, 1f); }
         if (w is BoomerangWeapon bw) bw.boomerangPrefab = projectile;
-        if (w is OrbitalWeapon ow) ow.orbitalPrefab = projectile;
+        if (w is CryptominerWeapon cw) cw.minerPrefab = projectile;
+        if (w is StockOptionsWeapon sw) sw.arrowPrefab = projectile;
         if (w is BillWhip whip) whip.whipPrefab = projectile;
 
         return Save(root, path);

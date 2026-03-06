@@ -47,8 +47,8 @@ Expand your portfolio by leveling up to get new items.
   <br><img src="Assets/ReadmeImages/boomerang_sprite.png" width="64" />
 * **Bill Whip:** Sweep a massive arc of dollar bills in the direction you are moving to clear space.
 * **Compound Interest:** A persistent aura of damaging energy surrounding the player.
-* **Dividend Shield:** Equip floating geometric neon shields that orbit around you, damaging any enemies that try to crash the market.
-  <br><img src="Assets/ReadmeImages/shield_sprite.png" width="64" />
+* **Cryptominer:** Deploys stationary mining rigs that act as area-of-effect damage zones, burning enemies that step over them.
+* **Stock Options:** Shoots a volatile barrage of market arrows with highly randomized damage scaling per hit.
 
 ## 📈 Mechanics & Systems
 
