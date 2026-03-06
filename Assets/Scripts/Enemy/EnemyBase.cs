@@ -134,7 +134,13 @@ public class EnemyBase : MonoBehaviour, IPoolable
         EventBus.RaiseEnemyKilled(transform.position, data.xpValue);
 
         if (xpOrbPrefab != null)
-            Instantiate(xpOrbPrefab, transform.position, Quaternion.identity);
+        {
+            var orbGO = Instantiate(xpOrbPrefab, transform.position, Quaternion.identity);
+            if (orbGO.TryGetComponent<XPOrb>(out var orbComponent))
+            {
+                orbComponent.SetXP(data.xpValue);
+            }
+        }
 
         if (ObjectPool.Instance != null && !string.IsNullOrEmpty(poolTag))
             ObjectPool.Instance.Return(poolTag, gameObject);

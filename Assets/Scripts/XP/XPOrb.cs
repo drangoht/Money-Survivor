@@ -23,7 +23,7 @@ public class XPOrb : MonoBehaviour, IPoolable
     public void OnSpawn()
     {
         _isBeingAttracted = false;
-        if (_sr != null) _sr.color = orbColor;
+        SetXP(xpValue); // Refresh visual state just in case
     }
 
     public void OnDespawn() { }
@@ -32,14 +32,47 @@ public class XPOrb : MonoBehaviour, IPoolable
     private void Awake()
     {
         _sr = GetComponentInChildren<SpriteRenderer>();
-        if (_sr != null) _sr.color = orbColor;
 
         var col = GetComponent<CircleCollider2D>();
         col.isTrigger = true;
         col.radius    = 0.3f;
     }
 
-    private void Start() => FindReferences();
+    private void Start()
+    {
+        FindReferences();
+        SetXP(xpValue); // Apply initial visual state
+    }
+
+    public void SetXP(int amount)
+    {
+        xpValue = amount;
+        
+        // Define dynamic sizes and colors based on XP payload
+        float scaleMultiplier;
+        
+        if (xpValue <= 5)
+        {
+            // Small (e.g., standard enemies)
+            scaleMultiplier = 0.4f;
+            orbColor = new Color(0.2f, 0.9f, 0.2f); // Neon Green
+        }
+        else if (xpValue <= 15)
+        {
+            // Medium
+            scaleMultiplier = 0.6f;
+            orbColor = new Color(0.2f, 0.8f, 1f);   // Electric Cyan
+        }
+        else
+        {
+            // Large (e.g., Bosses like IRS)
+            scaleMultiplier = 0.8f;
+            orbColor = new Color(0.9f, 0.3f, 0.9f); // Neon Purple
+        }
+
+        transform.localScale = Vector3.one * scaleMultiplier;
+        if (_sr != null) _sr.color = orbColor;
+    }
 
     private void FindReferences()
     {
