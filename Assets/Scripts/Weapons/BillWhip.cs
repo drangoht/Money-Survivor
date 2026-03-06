@@ -13,7 +13,6 @@ public class BillWhip : WeaponBase
     public GameObject whipPrefab;  // assigned by GameSetup (boomerang/bill sprite)
 
     private int   _activationCount;
-    private float _showWhipTime;
     private float _whipFacing;
     private float _whipRange;
 
@@ -31,7 +30,6 @@ public class BillWhip : WeaponBase
 
         // Set up visual timer
         _whipRange = range;
-        _showWhipTime = 0.15f; 
 
         // Hit all enemies in arc and spawn visuals
         var hits = Physics2D.OverlapCircleAll(transform.position, range);

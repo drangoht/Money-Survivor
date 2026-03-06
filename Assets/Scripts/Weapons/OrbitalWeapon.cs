@@ -18,8 +18,9 @@ public class OrbitalWeapon : WeaponBase
         // We handle logic in Update.
     }
 
-    private void Update()
+    protected override void Update()
     {
+        base.Update();
         if (GameManager.Instance != null && GameManager.Instance.State != GameState.Playing) return;
 
         UpdateOrbitals();
