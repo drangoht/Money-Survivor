@@ -65,7 +65,7 @@ public class LevelUpUI : MonoBehaviour
         GUI.color = Color.white;
 
         // Title
-        GUI.Label(new Rect(sw / 2f - 250f, sh * 0.1f, 500f, 60f), "LEVEL UP!", _titleStyle);
+        GUI.Label(new Rect(sw / 2f - 400f, sh * 0.1f, 800f, 60f), "YOU'VE BEEN PROMOTED!", _titleStyle);
 
         // Cards
         float cardW = 240f, cardH = 320f;

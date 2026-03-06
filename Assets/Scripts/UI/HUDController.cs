@@ -127,8 +127,13 @@ public class HUDController : MonoBehaviour
         // ── Top Right Score & Kills ───────────────────────────────────────────
         int kills  = GameManager.Instance.EnemiesKilled;
         int score  = kills * 50;
+        
+        var kStyle = new GUIStyle(_labelStyle) { fontSize = 22, alignment = TextAnchor.MiddleRight };
+        string netWorthText = $"NET WORTH: ${score}";
+        Vector2 textSize = kStyle.CalcSize(new GUIContent(netWorthText));
 
-        float scoreW = 240f, scoreH = 65f;
+        float scoreW = Mathf.Max(240f, textSize.x + 30f);
+        float scoreH = 65f;
         float scoreX = sw - scoreW - 30f;
         
         // Score Box
@@ -137,12 +142,13 @@ public class HUDController : MonoBehaviour
         GUI.color = Color.white;
         GUI.Box(new Rect(scoreX, 30f, scoreW, scoreH), GUIContent.none, _barBG);
 
-        var kStyle = new GUIStyle(_labelStyle) { fontSize = 18, alignment = TextAnchor.MiddleRight };
+        kStyle.fontSize = 18;
+        kStyle.normal.textColor = Color.white;
         GUI.Label(new Rect(scoreX, 35f, scoreW - 15f, 25f), $"ACQUISITIONS: <color=yellow>{kills}</color>", kStyle);
         
         kStyle.fontSize = 22;
         kStyle.normal.textColor = new Color(0.2f, 1f, 0.4f); // Neon green score
-        GUI.Label(new Rect(scoreX, 60f, scoreW - 15f, 30f), $"NET WORTH: ${score}", kStyle);
+        GUI.Label(new Rect(scoreX, 60f, scoreW - 15f, 30f), netWorthText, kStyle);
     }
 
     private void DrawPauseMenu()
