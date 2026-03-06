@@ -10,6 +10,7 @@ public class EnemyData : ScriptableObject
     [Header("Identity")]
     public string enemyName = "Bankman";
     public Color  bodyColor = Color.blue;
+    public Color  hitParticleColor = Color.white;
 
     [Header("Stats")]
     public float hp            = 30f;

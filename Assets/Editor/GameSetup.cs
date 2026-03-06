@@ -115,6 +115,7 @@ public static class GameSetup
     private static Sprite _circle, _square;
     private static Sprite _playerSprite, _enemySprite, _coinSprite, _bgSprite;
     private static Sprite _xpOrbSprite, _boomerangSprite, _shieldSprite, _splashSprite;
+    private static Sprite _exWifeSprite, _childrenSprite, _irsSprite;
 
     private static void GenerateSprites()
     {
@@ -123,6 +124,9 @@ public static class GameSetup
         
         _playerSprite    = LoadSingleSprite(SpritesPath + "/player_sprite.png",         "player");
         _enemySprite     = LoadSingleSprite(SpritesPath + "/enemy_sprite.png",          "enemy");
+        _exWifeSprite    = LoadSingleSprite(SpritesPath + "/ex_wife_sprite.png",        "ex_wife");
+        _childrenSprite  = LoadSingleSprite(SpritesPath + "/children_sprite.png",       "children");
+        _irsSprite       = LoadSingleSprite(SpritesPath + "/irs_sprite.png",            "irs");
         _coinSprite      = LoadSingleSprite(SpritesPath + "/coin_sprite.png",           "coin");
         _bgSprite        = LoadSingleSprite(SpritesPath + "/scrolling_background.png",  "bg");
         _xpOrbSprite     = LoadSingleSprite(SpritesPath + "/xp_orb_sprite.png",        "xporb");
@@ -350,18 +354,18 @@ public static class GameSetup
     // SCRIPTABLE OBJECTS
     // ══════════════════════════════════════════════════════════════════════════
 
-    private static EnemyData  _bankman, _loanShark, _taxCollector, _auditor, _bouncer, _ceo;
+    private static EnemyData  _bankman, _exWife, _children, _irs, _bouncer, _ceo;
     private static WeaponData _coinData, _whipData,  _auraData, _cardData, _dividendData, _singleShotData;
     private static PowerUpData _healPU, _speedPU, _damagePU, _magnetPU, _radiusPU;
 
     private static void CreateScriptableObjects()
     {
-        _bankman      = MakeEnemy("Bankman",      new Color(.2f,.4f,.9f),  30f, 1.5f,  5f, 10);
-        _loanShark    = MakeEnemy("LoanShark",    new Color(.7f,.1f,.1f),  15f, 3.0f,  8f, 15);
-        _taxCollector = MakeEnemy("TaxCollector", new Color(.5f, 0f,.5f), 100f, 0.8f, 12f, 25);
-        _auditor      = MakeEnemy("Auditor",      new Color(.8f,.1f, 0f), 500f, 1.2f, 20f, 100, 1.05f, 1.02f);
-        _bouncer      = MakeEnemy("Bouncer",      new Color(.3f,.3f,.3f), 150f, 0.6f, 15f, 40);
-        _ceo          = MakeEnemy("CEO",          new Color(1f,.9f,.1f), 2500f, 2.5f, 30f, 500, 1.02f, 1.01f);
+        _bankman  = MakeEnemy("Bankman",  new Color(.2f,.4f,.9f),  30f, 1.5f,  5f, 10,  1.1f, 1.05f, new Color(.2f,.4f,.9f));
+        _exWife   = MakeEnemy("ExWife",   new Color(.8f,.2f,.8f),  60f, 1.2f, 15f, 25,  1.15f,1.02f, new Color(.8f,.2f,.8f));
+        _children = MakeEnemy("Children", new Color(1f, 1f, 0f),   15f, 2.5f,  3f, 5,   1.05f,1.08f, new Color(1f, 1f, 0f));
+        _irs      = MakeEnemy("IRS",      new Color(.1f,.8f,.2f), 250f, 0.9f, 25f, 50,  1.2f, 1.01f, new Color(.1f,.8f,.2f));
+        _bouncer  = MakeEnemy("Bouncer",  new Color(.3f,.3f,.3f), 150f, 0.6f, 15f, 40,  1.1f, 1.02f, new Color(.3f,.3f,.3f));
+        _ceo      = MakeEnemy("CEO",      new Color(1f,.9f,.1f), 2500f, 2.5f, 30f, 500, 1.02f,1.01f, new Color(1f,.9f,.1f));
 
         _singleShotData = MakeWeapon("SingleShotData", "Aimed Bullet",
             "Fires a projectile directly at the nearest enemy.",
@@ -444,7 +448,7 @@ public static class GameSetup
     }
 
     private static EnemyData MakeEnemy(string id, Color col, float hp, float spd,
-        float dmg, int xp, float hpS = 1.1f, float sS = 1.05f)
+        float dmg, int xp, float hpS, float sS, Color hitColor)
     {
         string path = EnemySOPath + "/" + id + ".asset";
         var ex = AssetDatabase.LoadAssetAtPath<EnemyData>(path);
@@ -452,6 +456,7 @@ public static class GameSetup
         var d = ScriptableObject.CreateInstance<EnemyData>();
         d.enemyName = id; d.bodyColor = col; d.hp = hp; d.moveSpeed = spd;
         d.contactDamage = dmg; d.xpValue = xp; d.hpScaleFactor = hpS; d.speedScaleFactor = sS;
+        d.hitParticleColor = hitColor;
         AssetDatabase.CreateAsset(d, path);
         Log($"  Enemy created: {id}");
         return d;
@@ -500,12 +505,12 @@ public static class GameSetup
         _hitParticlesPrefab = MakeHitParticles();
         _playerPrefab       = MakePlayer();
         
-        _p1 = MakeEnemy("Bankman",      _bankman,      0.7f);
-        _p2 = MakeEnemy("LoanShark",    _loanShark,    0.55f);
-        _p3 = MakeEnemy("TaxCollector", _taxCollector, 0.9f);
-        _p4 = MakeEnemy("Auditor",      _auditor,      1.5f);
-        _p5 = MakeEnemy("Bouncer",      _bouncer,      1.2f);
-        _p6 = MakeEnemy("CEO",          _ceo,          2.0f);
+        _p1 = MakeEnemyPrefab("Bankman",  _bankman,  _enemySprite,   0.7f, 0.03f, 5f);
+        _p2 = MakeEnemyPrefab("ExWife",   _exWife,   _exWifeSprite,  0.8f, 0.04f, 4f);
+        _p3 = MakeEnemyPrefab("Children", _children, _childrenSprite,0.5f, 0.06f, 8f);
+        _p4 = MakeEnemyPrefab("IRS",      _irs,      _irsSprite,     0.9f, 0.02f, 3f);
+        _p5 = MakeEnemyPrefab("Bouncer",  _bouncer,  _enemySprite,   1.2f, 0.03f, 4f);
+        _p6 = MakeEnemyPrefab("CEO",      _ceo,      _enemySprite,   2.0f, 0.03f, 4f);
         
         Log("  All prefabs created");
     }
@@ -594,7 +599,7 @@ public static class GameSetup
         return Save(root, path);
     }
 
-    private static GameObject MakeEnemy(string name, EnemyData data, float scale)
+    private static GameObject MakeEnemyPrefab(string name, EnemyData data, Sprite sprite, float scale, float bobAmt, float bobSpd)
     {
         string path = EnemyPath + "/" + name + ".prefab";
         var ex = AssetDatabase.LoadAssetAtPath<GameObject>(path);
@@ -602,12 +607,14 @@ public static class GameSetup
 
         var root = new GameObject(name);
         root.tag = "Enemy";
-        // All enemies same base scale as player; data.bodyColor gives 20% tint to distinguish types
-        var spriteChild = Sprite2D(root, _enemySprite, Color.white, 1, 1f);
-        spriteChild.color = Color.Lerp(Color.white, data.bodyColor, 0.2f);
+        var spriteChild = Sprite2D(root, sprite, Color.white, 1, 1f);
+        
+        // Only use bodyColor tint if we're using the generic recycled enemy sprite
+        if (sprite == _enemySprite) spriteChild.color = Color.Lerp(Color.white, data.bodyColor, 0.2f);
+        
         var bobber = spriteChild.gameObject.AddComponent<SpriteBobber>();
-        bobber.bobAmount = 0.03f;
-        bobber.bobSpeed  = 5f;
+        bobber.bobAmount = bobAmt;
+        bobber.bobSpeed  = bobSpd;
         spriteChild.gameObject.AddComponent<HitFlash>(); // Add white hit flash component
         
         var rb = root.AddComponent<Rigidbody2D>();
@@ -748,9 +755,9 @@ public static class GameSetup
 
         var sp = sys.AddComponent<EnemySpawner>();
         sp.bankmanPrefab      = _p1;
-        sp.loanSharkPrefab    = _p2;
-        sp.taxCollectorPrefab = _p3;
-        sp.auditorPrefab      = _p4;
+        sp.exWifePrefab       = _p2;
+        sp.childrenPrefab     = _p3;
+        sp.irsPrefab          = _p4;
         sp.bouncerPrefab      = _p5;
         sp.ceoPrefab          = _p6;
 

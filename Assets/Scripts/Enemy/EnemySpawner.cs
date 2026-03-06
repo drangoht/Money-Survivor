@@ -10,9 +10,9 @@ public class EnemySpawner : MonoBehaviour
 {
     [Header("Enemy Prefabs")]
     public GameObject bankmanPrefab;
-    public GameObject loanSharkPrefab;
-    public GameObject taxCollectorPrefab;
-    public GameObject auditorPrefab;   // boss 1
+    public GameObject exWifePrefab;
+    public GameObject childrenPrefab;
+    public GameObject irsPrefab;       // boss 1
     public GameObject bouncerPrefab;   // tank
     public GameObject ceoPrefab;       // endgame boss
 
@@ -82,12 +82,12 @@ public class EnemySpawner : MonoBehaviour
             baseSpawnInterval = Mathf.Max(0.3f, baseSpawnInterval * 0.9f);
         }
 
-        // Boss 1 timer (Auditor)
+        // Boss 1 timer (IRS)
         _bossTimer += Time.deltaTime;
         if (_bossTimer >= bossInterval)
         {
             _bossTimer = 0f;
-            SpawnEnemy(auditorPrefab);
+            SpawnEnemy(irsPrefab);
         }
 
         // Boss 2 timer (CEO)
@@ -115,8 +115,8 @@ public class EnemySpawner : MonoBehaviour
         float w2 = SpawnWeights[clampedTier, 2];
 
         if (r < w0)                SpawnEnemy(bankmanPrefab);
-        else if (r < w0 + w1)      SpawnEnemy(loanSharkPrefab);
-        else if (r < w0 + w1 + w2) SpawnEnemy(taxCollectorPrefab);
+        else if (r < w0 + w1)      SpawnEnemy(exWifePrefab);
+        else if (r < w0 + w1 + w2) SpawnEnemy(childrenPrefab);
         else                       SpawnEnemy(bouncerPrefab);
     }
 

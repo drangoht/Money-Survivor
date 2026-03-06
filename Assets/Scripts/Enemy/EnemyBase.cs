@@ -99,12 +99,12 @@ public class EnemyBase : MonoBehaviour, IPoolable
         // White hit flash
         if (_sr != null) StartCoroutine(DamageFlash());
         
-        // Spawn colored hit particles instead of screen shake
+        // Spawn colored hit particles based on EnemyData
         if (hitParticlePrefab != null)
         {
             var parts = Instantiate(hitParticlePrefab, transform.position, Quaternion.identity);
             var main = parts.GetComponent<ParticleSystem>().main;
-            main.startColor = _sr != null ? _sr.color : Color.white;
+            main.startColor = data != null ? data.hitParticleColor : Color.white;
         }
 
         if (_currentHP <= 0f) Die();

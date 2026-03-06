@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e36d053cf82140042974a422bd8ac0a5, type: 3}
+  m_Name: Children
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyData
+  enemyName: Children
+  bodyColor: {r: 1, g: 1, b: 0, a: 1}
+  hitParticleColor: {r: 1, g: 1, b: 0, a: 1}
+  hp: 15
+  moveSpeed: 2.5
+  contactDamage: 3
+  xpValue: 5
+  hpScaleFactor: 1.05
+  speedScaleFactor: 1.08
