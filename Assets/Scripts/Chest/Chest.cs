@@ -14,6 +14,9 @@ public class Chest : MonoBehaviour
     [Header("Spawn timing")]
     public static float SpawnInterval = 60f; // seconds between chest spawns
 
+    [Header("Visuals")]
+    public GameObject openParticlePrefab;
+
     private bool _opened;
     private SpriteRenderer _sr;
 
@@ -22,7 +25,6 @@ public class Chest : MonoBehaviour
     private void Awake()
     {
         _sr = GetComponentInChildren<SpriteRenderer>();
-        if (_sr != null) _sr.color = new Color(0.7f, 0.5f, 0.1f); // brown chest color
 
         var col = GetComponent<CircleCollider2D>();
         col.isTrigger = true;
@@ -54,13 +56,19 @@ public class Chest : MonoBehaviour
         if (_sr != null)
         {
             float t = 0f;
-            while (t < 0.3f)
+            while (t < 0.4f)
             {
                 t += Time.deltaTime;
-                float scale = 1f + 0.3f * Mathf.Sin(t / 0.3f * Mathf.PI);
+                float scale = 1f + 0.6f * Mathf.Sin(t / 0.4f * Mathf.PI); // Bigger bounce
                 transform.localScale = Vector3.one * scale;
                 yield return null;
             }
+        }
+
+        // Spawn explosion particles before destroying
+        if (openParticlePrefab != null)
+        {
+            Instantiate(openParticlePrefab, transform.position, Quaternion.identity);
         }
 
         // Show the reward UI

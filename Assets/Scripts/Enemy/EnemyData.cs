@@ -9,6 +9,7 @@ public class EnemyData : ScriptableObject
 {
     [Header("Identity")]
     public string enemyName = "Bankman";
+    public bool   isBoss    = false;
     public Color  bodyColor = Color.blue;
     public Color  hitParticleColor = Color.white;
 

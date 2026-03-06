@@ -12,6 +12,7 @@ public class EnemyBase : MonoBehaviour, IPoolable
     public EnemyData data;
     public GameObject xpOrbPrefab; // assign in Inspector or via GameSetup
     public GameObject hitParticlePrefab; // assign via GameSetup
+    public GameObject chestPrefab; // assigned globally via GameSetup
 
     // Runtime
     private float        _currentHP;
@@ -140,6 +141,11 @@ public class EnemyBase : MonoBehaviour, IPoolable
             {
                 orbComponent.SetXP(data.xpValue);
             }
+        }
+
+        if (data != null && data.isBoss && chestPrefab != null)
+        {
+            Instantiate(chestPrefab, transform.position, Quaternion.identity);
         }
 
         if (ObjectPool.Instance != null && !string.IsNullOrEmpty(poolTag))

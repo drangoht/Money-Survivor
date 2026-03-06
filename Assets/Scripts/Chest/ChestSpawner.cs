@@ -33,16 +33,7 @@ public class ChestSpawner : MonoBehaviour
 
     private void Update()
     {
-        if (_playerTransform == null) return;
-        if (GameManager.Instance != null &&
-            GameManager.Instance.State != GameState.Playing) return;
-
-        _timer -= Time.deltaTime;
-        if (_timer <= 0f)
-        {
-            _timer = spawnInterval;
-            SpawnChest();
-        }
+        // Deprecated: Chests now only drop from Boss enemy deaths (EnemyBase.cs)
     }
 
     private void SpawnChest()

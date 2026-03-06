@@ -114,7 +114,7 @@ public static class GameSetup
 
     private static Sprite _circle, _square;
     private static Sprite _playerSprite, _enemySprite, _coinSprite, _bgSprite;
-    private static Sprite _xpOrbSprite, _boomerangSprite, _shieldSprite, _splashSprite;
+    private static Sprite _xpOrbSprite, _boomerangSprite, _shieldSprite, _splashSprite, _chestSprite;
     private static Sprite _exWifeSprite, _childrenSprite, _irsSprite;
 
     private static void GenerateSprites()
@@ -133,6 +133,7 @@ public static class GameSetup
         _boomerangSprite = LoadSingleSprite(SpritesPath + "/boomerang_sprite.png",      "boomerang");
         _shieldSprite    = LoadSingleSprite(SpritesPath + "/shield_sprite.png",         "shield");
         _splashSprite    = LoadSingleSprite(SpritesPath + "/splash_screen.png",         "splash");
+        _chestSprite     = LoadSingleSprite(SpritesPath + "/chest_sprite_1772809376512.png", "chest");
 
         Log($"  Sprites ready");
     }
@@ -450,13 +451,13 @@ public static class GameSetup
     }
 
     private static EnemyData MakeEnemy(string id, Color col, float hp, float spd,
-        float dmg, int xp, float hpS, float sS, Color hitColor)
+        float dmg, int xp, float hpS, float sS, Color hitColor, bool isBoss = false)
     {
         string path = EnemySOPath + "/" + id + ".asset";
         var ex = AssetDatabase.LoadAssetAtPath<EnemyData>(path);
         if (ex != null) { Log($"  Enemy exists: {id}"); return ex; }
         var d = ScriptableObject.CreateInstance<EnemyData>();
-        d.enemyName = id; d.bodyColor = col; d.hp = hp; d.moveSpeed = spd;
+        d.enemyName = id; d.isBoss = isBoss; d.bodyColor = col; d.hp = hp; d.moveSpeed = spd;
         d.contactDamage = dmg; d.xpValue = xp; d.hpScaleFactor = hpS; d.speedScaleFactor = sS;
         d.hitParticleColor = hitColor;
         AssetDatabase.CreateAsset(d, path);
@@ -513,6 +514,12 @@ public static class GameSetup
         _p4 = MakeEnemyPrefab("IRS",      _irs,      _irsSprite,     0.9f, 0.02f, 3f);
         _p5 = MakeEnemyPrefab("Bouncer",  _bouncer,  _enemySprite,   1.2f, 0.03f, 4f);
         _p6 = MakeEnemyPrefab("CEO",      _ceo,      _enemySprite,   2.0f, 0.03f, 4f);
+
+        // Update the SOs with the boss flag
+        _irs.isBoss = true;
+        _ceo.isBoss = true;
+        UnityEditor.EditorUtility.SetDirty(_irs);
+        UnityEditor.EditorUtility.SetDirty(_ceo);
         
         Log("  All prefabs created");
     }
@@ -593,11 +600,12 @@ public static class GameSetup
         }
 
         var root = new GameObject("Chest");
-        var sr = Sprite2D(root, _square, new Color(.65f,.4f,.1f), 1, 2.5f); // 2.5 is exactly half the player's 128px size based on the 32px square sprite
+        var sr = Sprite2D(root, _chestSprite, Color.white, 1, 3.5f); // Use custom high-quality sprite and double the size
         var col = root.AddComponent<CircleCollider2D>();
         col.isTrigger = true; col.radius = 2.0f;
         var c = root.AddComponent<Chest>();
         c.possibleRewards = new[] { _healPU, _speedPU, _damagePU, _magnetPU, _radiusPU, _repelPU };
+        c.openParticlePrefab = MakeChestOpenParticles(); // Assign particle effect
         return Save(root, path);
     }
 
@@ -671,6 +679,62 @@ public static class GameSetup
         var size = ps.sizeOverLifetime;
         size.enabled = true;
         size.size = new ParticleSystem.MinMaxCurve(1f, 0f); // Shrink to nothing
+
+        return Save(root, path);
+    }
+
+    private static GameObject MakeChestOpenParticles()
+    {
+        string path = PrefabsPath + "/ChestOpenParticles.prefab";
+        var ex = AssetDatabase.LoadAssetAtPath<GameObject>(path);
+        if (ex != null) return ex;
+
+        var root = new GameObject("ChestOpenParticles");
+        var ps = root.AddComponent<ParticleSystem>();
+        var psr = root.GetComponent<ParticleSystemRenderer>();
+        psr.material = new Material(Shader.Find("Sprites/Default"));
+        
+        var main = ps.main;
+        main.duration = 1.0f;
+        main.loop = false;
+        main.startLifetime = new ParticleSystem.MinMaxCurve(0.6f, 1.2f);
+        main.startSpeed = new ParticleSystem.MinMaxCurve(8f, 12f);
+        main.startSize = new ParticleSystem.MinMaxCurve(0.2f, 0.4f);
+        main.startColor = new Color(1f, 0.9f, 0.2f); // Gold / Treasure color
+        main.simulationSpace = ParticleSystemSimulationSpace.World;
+        main.playOnAwake = true;
+        main.stopAction = ParticleSystemStopAction.Destroy;
+
+        var em = ps.emission;
+        em.rateOverTime = 0;
+        em.SetBursts(new[] { new ParticleSystem.Burst(0f, 30, 40) }); // Massive burst of golden particles!
+
+        var shape = ps.shape;
+        shape.shapeType = ParticleSystemShapeType.Hemisphere;
+        shape.radius = 0.5f;
+        // Shoot upwards
+        shape.rotation = new Vector3(-90f, 0f, 0f);
+
+        var vel = ps.velocityOverLifetime;
+        vel.enabled = true;
+        vel.y = new ParticleSystem.MinMaxCurve(4f, 8f);
+
+        var col = ps.colorOverLifetime;
+        col.enabled = true;
+        Gradient grad = new Gradient();
+        grad.SetKeys(
+            new GradientColorKey[] { new GradientColorKey(new Color(1f,0.9f,0.2f), 0f), new GradientColorKey(new Color(1f,0.6f,0f), 1f) },
+            new GradientAlphaKey[] { new GradientAlphaKey(1f, 0f), new GradientAlphaKey(0f, 1f) }
+        );
+        col.color = new ParticleSystem.MinMaxGradient(grad);
+
+        var size = ps.sizeOverLifetime;
+        size.enabled = true;
+        size.size = new ParticleSystem.MinMaxCurve(1f, 0f); // Shrink to nothing
+
+        var noise = ps.noise;
+        noise.enabled = true;
+        noise.strength = 1.5f;
 
         return Save(root, path);
     }
