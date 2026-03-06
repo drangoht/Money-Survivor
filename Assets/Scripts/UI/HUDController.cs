@@ -58,6 +58,7 @@ public class HUDController : MonoBehaviour
         _xpFill.normal.background = MakeTex(1, 1, new Color(0f, 0.8f, 1f, 1f));   // Electric cyan XP
 
         _labelStyle = new GUIStyle(GUI.skin.label);
+        _labelStyle.richText  = true;
         _labelStyle.fontSize  = 18;
         _labelStyle.fontStyle = FontStyle.Bold;
         _labelStyle.normal.textColor = Color.white;
@@ -175,7 +176,7 @@ public class HUDController : MonoBehaviour
         // ── Level Badge ───────────────────────────────────────────────────────
         var lvlStyle = new GUIStyle(_labelStyle) { fontSize = 24, fontStyle = FontStyle.Bold };
         lvlStyle.normal.textColor = new Color(0f, 0.8f, 1f); // match XP bar
-        GUI.Label(new Rect(barX, barY + xpBarH + 8f, 200f, 40f), $"AUTHORITY LVL <color=white>{_level}</color>", lvlStyle);
+        GUI.Label(new Rect(barX, barY + xpBarH + 8f, 400f, 40f), $"AUTHORITY LVL <color=white>{_level}</color>", lvlStyle);
 
         // ── Top Center Timer Box ─────────────────────────────────────────────
         float t     = GameManager.Instance.TimeSurvived;
