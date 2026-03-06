@@ -19,7 +19,7 @@ public class HUDController : MonoBehaviour
     
     // Pause menu navigation
     private int  _selectedIndex = 0; // 0: Resume, 1: Main Menu
-    private bool _navigateDownHandled, _navigateUpHandled;
+    private bool _navigateLeftHandled, _navigateRightHandled;
 
     // Cached styles
     private GUIStyle _barBG, _hpFill, _xpFill, _labelStyle;
@@ -86,27 +86,27 @@ public class HUDController : MonoBehaviour
         // Handle pause menu navigation
         if (GameManager.Instance.State == GameState.Paused)
         {
-            float y = 0f;
+            float x = 0f;
             if (Gamepad.current != null)
-                y = Gamepad.current.leftStick.y.ReadValue() + Gamepad.current.dpad.y.ReadValue();
+                x = Gamepad.current.leftStick.x.ReadValue() + Gamepad.current.dpad.x.ReadValue();
             
             if (Keyboard.current != null)
             {
-                if (Keyboard.current.wKey.isPressed || Keyboard.current.upArrowKey.isPressed) y += 1f;
-                if (Keyboard.current.sKey.isPressed || Keyboard.current.downArrowKey.isPressed) y -= 1f;
+                if (Keyboard.current.dKey.isPressed || Keyboard.current.rightArrowKey.isPressed) x += 1f;
+                if (Keyboard.current.aKey.isPressed || Keyboard.current.leftArrowKey.isPressed) x -= 1f;
             }
 
-            if (y > 0.5f)
+            if (x > 0.5f)
             {
-                if (!_navigateUpHandled) { _selectedIndex--; _navigateUpHandled = true; }
+                if (!_navigateRightHandled) { _selectedIndex++; _navigateRightHandled = true; }
             }
-            else _navigateUpHandled = false;
+            else _navigateRightHandled = false;
 
-            if (y < -0.5f)
+            if (x < -0.5f)
             {
-                if (!_navigateDownHandled) { _selectedIndex++; _navigateDownHandled = true; }
+                if (!_navigateLeftHandled) { _selectedIndex--; _navigateLeftHandled = true; }
             }
-            else _navigateDownHandled = false;
+            else _navigateLeftHandled = false;
 
             if (_selectedIndex < 0) _selectedIndex = 1;
             if (_selectedIndex > 1) _selectedIndex = 0;
