@@ -113,7 +113,7 @@ public static class GameSetup
     // ══════════════════════════════════════════════════════════════════════════
 
     private static Sprite _circle, _square;
-    private static Sprite _playerSprite, _enemySprite, _coinSprite, _bgSprite;
+    private static Sprite _playerSprite, _enemySprite, _coinSprite, _bgSpriteFront, _bgSpriteBack;
     private static Sprite _xpOrbSprite, _boomerangSprite, _shieldSprite, _splashSprite, _chestSprite;
     private static Sprite _exWifeSprite, _childrenSprite, _irsSprite, _cryptoSprite, _stockSprite;
 
@@ -121,6 +121,16 @@ public static class GameSetup
     {
         _circle = GetOrCreateSprite(SpritesPath + "/Circle.png", CreateCircleTex(128));
         _square = GetOrCreateSprite(SpritesPath + "/Square.png",  CreateSolidTex(32, Color.white));
+
+        // Parallax backgrounds: front (tiled with holes) and far (soft gradient).
+        _bgSpriteFront = GetOrCreateSprite(
+            SpritesPath + "/scrolling_background.png",
+            CreateTiledForegroundBackgroundTex(1024, 1024),
+            forceRegenerate: true);
+        _bgSpriteBack = GetOrCreateSprite(
+            SpritesPath + "/scrolling_background_far.png",
+            CreateFarParallaxBackgroundTex(1024, 1024),
+            forceRegenerate: true);
         
         _playerSprite    = LoadSingleSprite(SpritesPath + "/player_sprite.png",         "player");
         _enemySprite     = LoadSingleSprite(SpritesPath + "/enemy_sprite.png",          "enemy");
@@ -128,7 +138,6 @@ public static class GameSetup
         _childrenSprite  = LoadSingleSprite(SpritesPath + "/children_sprite.png",       "children");
         _irsSprite       = LoadSingleSprite(SpritesPath + "/irs_sprite.png",            "irs");
         _coinSprite      = LoadSingleSprite(SpritesPath + "/coin_sprite.png",           "coin");
-        _bgSprite        = LoadSingleSprite(SpritesPath + "/scrolling_background.png",  "bg");
         _xpOrbSprite     = LoadSingleSprite(SpritesPath + "/xp_orb_sprite.png",        "xporb");
         _boomerangSprite = LoadSingleSprite(SpritesPath + "/boomerang_sprite.png",      "boomerang");
         _shieldSprite    = LoadSingleSprite(SpritesPath + "/shield_sprite.png",         "shield");
@@ -295,13 +304,13 @@ public static class GameSetup
         tex.Apply();
     }
 
-    private static Sprite GetOrCreateSprite(string path, Texture2D generated)
+    private static Sprite GetOrCreateSprite(string path, Texture2D generated, bool forceRegenerate = false)
     {
         string texPath = path;
         string spritePath = path.Replace(".png", "_Sprite.asset");
 
         // 1. Ensure Texture exists
-        if (!File.Exists(texPath))
+        if (!File.Exists(texPath) || forceRegenerate)
         {
             File.WriteAllBytes(texPath, generated.EncodeToPNG());
             AssetDatabase.ImportAsset(texPath, ImportAssetOptions.ForceUpdate);
@@ -312,6 +321,7 @@ public static class GameSetup
                 importer.textureType = TextureImporterType.Sprite; // Still good for UI rendering
                 importer.spritePixelsPerUnit = 100f;
                 importer.filterMode = FilterMode.Bilinear;
+                importer.wrapMode = TextureWrapMode.Repeat;
                 importer.SaveAndReimport();
             }
         }
@@ -342,6 +352,126 @@ public static class GameSetup
         for (int x = 0; x < size; x++)
             tex.SetPixel(x, y, Vector2.Distance(new Vector2(x, y), center) <= radius
                 ? Color.white : Color.clear);
+        tex.Apply();
+        return tex;
+    }
+
+    private static Texture2D CreateTiledForegroundBackgroundTex(int width, int height)
+    {
+        var tex = new Texture2D(width, height, TextureFormat.RGBA32, false);
+
+        // Lighter base tiles.
+        Color baseCol    = new Color(0.22f, 0.30f, 0.45f);       // ~#384C73
+        Color borderCol  = new Color(0.26f, 0.36f, 0.52f);       // ~#435C85
+        // Glass window fill and stripe colors with alpha so the far background is clearly visible.
+        Color glassCol        = new Color(0.78f, 0.88f, 1.0f, 0.32f); // light blue, softer opacity
+        Color glassStripeCol  = new Color(0.82f, 0.92f, 1.0f, 0.55f); // brighter stripes
+        Color glassFrameCol   = new Color(0.70f, 0.82f, 1.0f, 0.75f); // solid frame around window
+
+        const int tileSize        = 128;
+        const int borderThickness = 2;
+        const int windowMargin    = 12;  // inset from tile borders (smaller margin → larger window)
+        const int windowStride    = 3;   // every Nth tile gets a window
+        const int windowFrameThickness = 3;
+        const int stripeWidth     = 3;
+        const int stripeSpacing   = 10;  // distance between stripes inside window
+
+        for (int y = 0; y < height; y++)
+        {
+            for (int x = 0; x < width; x++)
+            {
+                int tileX = x / tileSize;
+                int tileY = y / tileSize;
+                int lx    = x % tileSize;
+                int ly    = y % tileSize;
+
+                bool onVerticalBorder   = lx < borderThickness;
+                bool onHorizontalBorder = ly < borderThickness;
+                bool isBorder           = onVerticalBorder || onHorizontalBorder;
+
+                // Decide whether this tile should have a glass "window".
+                bool hasWindow = (tileX % windowStride == 1) && (tileY % windowStride == 1);
+                bool insideWindow = lx >= windowMargin && lx < tileSize - windowMargin
+                                  && ly >= windowMargin && ly < tileSize - windowMargin;
+
+                if (hasWindow && insideWindow)
+                {
+                    int innerWidth  = tileSize - 2 * windowMargin;
+                    int innerHeight = tileSize - 2 * windowMargin;
+                    int wx = lx - windowMargin;
+                    int wy = ly - windowMargin;
+
+                    bool isFrame =
+                        wx < windowFrameThickness ||
+                        wy < windowFrameThickness ||
+                        wx >= innerWidth  - windowFrameThickness ||
+                        wy >= innerHeight - windowFrameThickness;
+
+                    if (isFrame)
+                    {
+                        // Solid glass frame to outline the window.
+                        tex.SetPixel(x, y, glassFrameCol);
+                    }
+                    else
+                    {
+                        // Interior: vertical stripes to suggest a glass panel.
+                        bool isStripe = (wx % stripeSpacing) < stripeWidth;
+                        tex.SetPixel(x, y, isStripe ? glassStripeCol : glassCol);
+                    }
+                }
+                else
+                {
+                    tex.SetPixel(x, y, isBorder ? borderCol : baseCol);
+                }
+            }
+        }
+
+        tex.filterMode = FilterMode.Bilinear;
+        tex.wrapMode   = TextureWrapMode.Repeat;
+        tex.Apply();
+        return tex;
+    }
+
+    private static Texture2D CreateFarParallaxBackgroundTex(int width, int height)
+    {
+        var tex = new Texture2D(width, height, TextureFormat.RGBA32, false);
+
+        // Blue sky with bright clouds for the far parallax layer.
+        Color skyTopCol    = new Color(0.28f, 0.55f, 0.95f); // ~#4890F2, deep blue
+        Color skyBottomCol = new Color(0.70f, 0.85f, 1.00f); // ~#B3D9FF, light near-horizon blue
+        Color cloudCol     = new Color(0.97f, 0.98f, 1.00f); // almost white clouds
+
+        // Perlin noise parameters to generate soft cloud patches across the sky.
+        float noiseScale     = 0.010f;
+        float cloudThreshold = 0.48f;
+        float cloudIntensity = 0.80f;
+
+        for (int y = 0; y < height; y++)
+        {
+            for (int x = 0; x < width; x++)
+            {
+                // Vertical sky gradient that loops cleanly when tiled (top and bottom match).
+                float vNorm = (float)y / (height - 1);
+                float vLoop = Mathf.Abs(vNorm * 2f - 1f); // 0 at middle, 1 at top & bottom
+                Color baseColGrad = Color.Lerp(skyBottomCol, skyTopCol, vLoop);
+
+                // Cloud pattern overlay using Perlin noise.
+                float n = Mathf.PerlinNoise(x * noiseScale, y * noiseScale);
+                if (n > cloudThreshold)
+                {
+                    float cloudT = (n - cloudThreshold) / (1f - cloudThreshold);
+                    cloudT = Mathf.Clamp01(cloudT);
+                    // Blend towards cloud color to form soft, bright patches.
+                    baseColGrad = Color.Lerp(baseColGrad, cloudCol, cloudT * cloudIntensity);
+                }
+
+                Color c = baseColGrad;
+                tex.SetPixel(x, y, c);
+            }
+        }
+
+        tex.filterMode = FilterMode.Bilinear;
+        tex.wrapMode   = TextureWrapMode.Repeat;
         tex.Apply();
         return tex;
     }
@@ -547,7 +677,19 @@ public static class GameSetup
     {
         string path = PrefabsPath + "/Player.prefab";
         var ex = AssetDatabase.LoadAssetAtPath<GameObject>(path);
-        if (ex != null) { Log("  Player exists"); return ex; }
+        if (ex != null)
+        {
+            // Ensure movement bounds are configured even for an existing prefab.
+            var existingController = ex.GetComponent<PlayerController>();
+            if (existingController != null)
+            {
+                existingController.useMovementBounds = true;
+                existingController.minBounds = new Vector2(-95f, -95f);
+                existingController.maxBounds = new Vector2( 95f,  95f);
+            }
+            Log("  Player exists (movement bounds updated)");
+            return ex;
+        }
 
         var root = new GameObject("Player");
         root.tag = "Player";
@@ -563,7 +705,10 @@ public static class GameSetup
         col.radius = 0.4f;
 
         root.AddComponent<PlayerStats>();
-        root.AddComponent<PlayerController>();
+        var controller = root.AddComponent<PlayerController>();
+        controller.useMovementBounds = true;
+        controller.minBounds = new Vector2(-95f, -95f);
+        controller.maxBounds = new Vector2( 95f,  95f);
 
         var sw = root.AddComponent<SingleShot>();
         sw.data = _singleShotData;
@@ -821,22 +966,48 @@ public static class GameSetup
         camGO.AddComponent<CameraFollow>();
         camGO.AddComponent<ScreenShake>();
 
-        // Background
-        var bg = GameObject.CreatePrimitive(PrimitiveType.Quad);
-        bg.name = "ScrollingBackground";
-        bg.transform.position = new Vector3(0, 0, 50f); // Pushed way back behind other sprites (Z=0)
-        bg.transform.localScale = new Vector3(200f, 200f, 1f);
-        GameObject.DestroyImmediate(bg.GetComponent<MeshCollider>());
-        
-        var bgMat = new Material(Shader.Find("Unlit/Texture")) { name = "BackgroundMaterial" };
-        if (_bgSprite != null)
+        // Background – two-layer parallax:
+        // Far layer: soft dark gradient.
+        var bgFar = GameObject.CreatePrimitive(PrimitiveType.Quad);
+        bgFar.name = "BackgroundFar";
+        bgFar.transform.position = new Vector3(0, 0, 55f); // furthest back
+        bgFar.transform.localScale = new Vector3(220f, 220f, 1f);
+        GameObject.DestroyImmediate(bgFar.GetComponent<MeshCollider>());
+
+        var bgFarMat = new Material(Shader.Find("Unlit/Texture")) { name = "BackgroundFarMaterial" };
+        if (_bgSpriteBack != null)
         {
-            bgMat.mainTexture = _bgSprite.texture;
-            bgMat.mainTexture.wrapMode = TextureWrapMode.Repeat;
-            bgMat.mainTextureScale = new Vector2(50f, 50f);
+            bgFarMat.mainTexture = _bgSpriteBack.texture;
+            bgFarMat.mainTexture.wrapMode = TextureWrapMode.Repeat;
+            bgFarMat.mainTextureScale = new Vector2(40f, 40f);
         }
-        bg.GetComponent<Renderer>().sharedMaterial = bgMat;
-        bg.AddComponent<ScrollingBackground>();
+        var bgFarRenderer = bgFar.GetComponent<Renderer>();
+        bgFarRenderer.sharedMaterial = bgFarMat;
+        bgFarRenderer.sortingLayerName = "Default";
+        bgFarRenderer.sortingOrder = -2000; // always behind everything else
+        var farScroll = bgFar.AddComponent<ScrollingBackground>();
+        farScroll.scrollScale = 0.01f;
+
+        // Near layer: lighter tiled pattern with transparent holes to reveal the far layer.
+        var bgNear = GameObject.CreatePrimitive(PrimitiveType.Quad);
+        bgNear.name = "BackgroundNear";
+        bgNear.transform.position = new Vector3(0, 0, 50f);
+        bgNear.transform.localScale = new Vector3(200f, 200f, 1f);
+        GameObject.DestroyImmediate(bgNear.GetComponent<MeshCollider>());
+
+        var bgNearMat = new Material(Shader.Find("Unlit/Transparent")) { name = "BackgroundNearMaterial" };
+        if (_bgSpriteFront != null)
+        {
+            bgNearMat.mainTexture = _bgSpriteFront.texture;
+            bgNearMat.mainTexture.wrapMode = TextureWrapMode.Repeat;
+            bgNearMat.mainTextureScale = new Vector2(50f, 50f);
+        }
+        var bgNearRenderer = bgNear.GetComponent<Renderer>();
+        bgNearRenderer.sharedMaterial = bgNearMat;
+        bgNearRenderer.sortingLayerName = "Default";
+        bgNearRenderer.sortingOrder = -1500; // in front of far layer, still behind gameplay sprites
+        var nearScroll = bgNear.AddComponent<ScrollingBackground>();
+        nearScroll.scrollScale = 0.025f;
 
         // Player
         if (_playerPrefab == null)

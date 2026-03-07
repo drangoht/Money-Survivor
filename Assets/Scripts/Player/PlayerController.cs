@@ -13,6 +13,11 @@ public class PlayerController : MonoBehaviour
     private PlayerStats _stats;
     private Vector2     _moveInput;
 
+    [Header("Movement Bounds")]
+    public bool   useMovementBounds = false;
+    public Vector2 minBounds = new Vector2(-95f, -95f);
+    public Vector2 maxBounds = new Vector2( 95f,  95f);
+
     // Sprite flipping
     private SpriteRenderer _sr;
 
@@ -65,6 +70,25 @@ public class PlayerController : MonoBehaviour
     private void FixedUpdate()
     {
         if (!_stats.IsAlive) return;
-        _rb.linearVelocity = _moveInput * _stats.moveSpeed;
+
+        Vector2 desiredVelocity = _moveInput * _stats.moveSpeed;
+
+        if (!useMovementBounds)
+        {
+            _rb.linearVelocity = desiredVelocity;
+            return;
+        }
+
+        // Move while clamping the player inside the configured bounds so they cannot leave the background.
+        Vector2 currentPos = _rb.position;
+        Vector2 nextPos    = currentPos + desiredVelocity * Time.fixedDeltaTime;
+
+        nextPos.x = Mathf.Clamp(nextPos.x, minBounds.x, maxBounds.x);
+        nextPos.y = Mathf.Clamp(nextPos.y, minBounds.y, maxBounds.y);
+
+        _rb.MovePosition(nextPos);
+        // Keep velocity consistent with the actual movement (useful for animations / other systems).
+        Vector2 actualVelocity = (nextPos - currentPos) / Time.fixedDeltaTime;
+        _rb.linearVelocity = actualVelocity;
     }
 }
