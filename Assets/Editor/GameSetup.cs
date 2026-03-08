@@ -1467,6 +1467,7 @@ public static class GameSetup
         cs.chestPrefab = _chestPrefab;
 
         sys.AddComponent<XPManager>();
+        sys.AddComponent<SoundManager>();
 
         var lm = sys.AddComponent<LevelUpManager>();
         lm.powerUps      = new List<PowerUpData> { _healPU, _speedPU, _damagePU, _magnetPU, _radiusPU, _insiderPU, _taxPU, _overclockPU };

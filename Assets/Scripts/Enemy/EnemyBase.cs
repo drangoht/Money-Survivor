@@ -123,6 +123,7 @@ public class EnemyBase : MonoBehaviour, IPoolable
     public void TakeDamage(float amount)
     {
         if (_isDead) return;
+        EventBus.RaiseEnemyHit(transform.position);
         _currentHP -= amount;
 
         // White hit flash

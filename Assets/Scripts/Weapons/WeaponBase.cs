@@ -38,6 +38,7 @@ public abstract class WeaponBase : MonoBehaviour
         if (_fireTimer <= 0f)
         {
             _fireTimer = 1f / CurrentStats.fireRate;
+            EventBus.RaiseWeaponFired(transform.position);
             Activate();
         }
     }

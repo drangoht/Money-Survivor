@@ -32,6 +32,7 @@ public class LevelUpManager : MonoBehaviour
         if (options.Count == 0) { GameManager.Instance?.ResumeGame(); return; }
 
         GameManager.Instance?.EnterLevelUp();
+        EventBus.RaiseLevelUpScreenShown();
         _ui?.Show(options, ApplyChoice, () => BuildOptions(3));
     }
 
@@ -101,7 +102,7 @@ public class LevelUpManager : MonoBehaviour
     }
 
     /// <summary>Returns one random possible reward for chests (weapon, weapon upgrade, or power-up). Null if none available.</summary>
-    public UpgradeOption? GetRandomChestReward()
+    public UpgradeOption GetRandomChestReward()
     {
         var candidates = BuildCandidates();
         if (candidates.Count == 0) return null;
@@ -136,6 +137,7 @@ public class LevelUpManager : MonoBehaviour
     private void ApplyChoice(UpgradeOption option)
     {
         ApplyReward(option);
+        EventBus.RaiseRewardApplied(option);
         GameManager.Instance?.ResumeGame();
     }
 

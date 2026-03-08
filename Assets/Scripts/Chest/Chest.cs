@@ -43,6 +43,7 @@ public class Chest : MonoBehaviour
         if (option == null) { Destroy(gameObject); return; }
         levelUp.ApplyReward(option);
         EventBus.RaiseChestOpened(option);
+        EventBus.RaiseRewardApplied(option);
         StartCoroutine(OpenAnimation(option));
     }
 

@@ -18,6 +18,12 @@ public static class EventBus
     // Chest events (reward is the chosen upgrade option: weapon, weapon upgrade, or power-up)
     public static event Action<UpgradeOption> OnChestOpened;
 
+    // Sound / gameplay events (for SFX)
+    public static event Action<Vector3> OnWeaponFired;       // position (e.g. player)
+    public static event Action<Vector3> OnEnemyHit;         // hit position
+    public static event Action OnLevelUpScreenShown;        // when level-up card UI is displayed
+    public static event Action<UpgradeOption> OnRewardApplied; // after applying a reward (weapon / upgrade / power-up)
+
     // Game state events
     public static event Action OnGameStart;
     public static event Action OnGameOver;
@@ -30,6 +36,10 @@ public static class EventBus
     public static void RaiseXPChanged(float cur, float req)       => OnXPChanged?.Invoke(cur, req);
     public static void RaiseEnemyKilled(Vector3 pos, int xp)      => OnEnemyKilled?.Invoke(pos, xp);
     public static void RaiseChestOpened(UpgradeOption data)     => OnChestOpened?.Invoke(data);
+    public static void RaiseWeaponFired(Vector3 pos)            => OnWeaponFired?.Invoke(pos);
+    public static void RaiseEnemyHit(Vector3 pos)              => OnEnemyHit?.Invoke(pos);
+    public static void RaiseLevelUpScreenShown()               => OnLevelUpScreenShown?.Invoke();
+    public static void RaiseRewardApplied(UpgradeOption data)   => OnRewardApplied?.Invoke(data);
     public static void RaiseGameStart()           => OnGameStart?.Invoke();
     public static void RaiseGameOver()            => OnGameOver?.Invoke();
     public static void RaiseGamePaused()          => OnGamePaused?.Invoke();
@@ -42,8 +52,12 @@ public static class EventBus
         OnPlayerLevelUp = null;
         OnPlayerHPChanged = null;
         OnXPChanged     = null;
-        OnEnemyKilled   = null;
-        OnChestOpened   = null;
+        OnEnemyKilled      = null;
+        OnChestOpened      = null;
+        OnWeaponFired      = null;
+        OnEnemyHit         = null;
+        OnLevelUpScreenShown = null;
+        OnRewardApplied    = null;
         OnGameStart     = null;
         OnGameOver      = null;
         OnGamePaused    = null;
