@@ -166,11 +166,15 @@ public class EnemySpawner : MonoBehaviour
         if (prefab == null) return;
 
         Vector2 spawnPos = GetSpawnPosition();
-        Instantiate(prefab, spawnPos, Quaternion.identity);
+        var instance = Instantiate(prefab, spawnPos, Quaternion.identity);
 
-        // Set difficulty tier on spawned enemy
-        var enemy = prefab.GetComponent<EnemyBase>();
-        if (enemy != null) enemy.SetDifficultyTier(_tier);
+        var enemy = instance.GetComponent<EnemyBase>();
+        if (enemy != null)
+        {
+            enemy.SetDifficultyTier(_tier);
+            float timeSurvived = GameManager.Instance != null ? GameManager.Instance.TimeSurvived : 0f;
+            enemy.SetTimeStrength(timeSurvived);
+        }
     }
 
     private Vector2 GetSpawnPosition()

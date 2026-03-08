@@ -654,7 +654,7 @@ public static class GameSetup
 
     private static EnemyData  _bankman, _exWife, _children, _irs, _bouncer, _ceo, _megaBoss;
     private static WeaponData _coinData, _whipData,  _auraData, _cardData, _singleShotData, _cryptoData, _stockData;
-    private static PowerUpData _healPU, _speedPU, _damagePU, _magnetPU, _radiusPU, _repelPU, _insiderPU, _taxPU, _overclockPU;
+    private static PowerUpData _healPU, _speedPU, _damagePU, _magnetPU, _radiusPU, _insiderPU, _taxPU, _overclockPU;
 
     private static void CreateScriptableObjects()
     {
@@ -703,11 +703,11 @@ public static class GameSetup
             "A growing aura that deals constant damage to nearby enemies.",
             new WeaponLevelStats[]
             {
-                new() { damage=3,  fireRate=1.8f, aoeRadius=1.2f },
-                new() { damage=4,  fireRate=1.8f, aoeRadius=1.35f },
-                new() { damage=5,  fireRate=1.9f, aoeRadius=1.5f },
-                new() { damage=6,  fireRate=1.9f, aoeRadius=1.65f },
-                new() { damage=8,  fireRate=2f,   aoeRadius=1.8f },
+                new() { damage=1.5f, fireRate=2f, aoeRadius=0.9f },
+                new() { damage=2f,   fireRate=2f, aoeRadius=1f },
+                new() { damage=2.5f, fireRate=2.1f, aoeRadius=1.1f },
+                new() { damage=3f,   fireRate=2.1f, aoeRadius=1.2f },
+                new() { damage=4f,   fireRate=2.2f, aoeRadius=1.3f },
             }, "CompoundInterest");
 
         _cardData = MakeWeapon("CreditCardData", "Credit Card",
@@ -747,8 +747,16 @@ public static class GameSetup
                 new() { damage=60, fireRate=0.8f, projectileSpeed=20, projectileCount=5, pierceCount=4, duration=2.5f },
             }, "StockOptions");
 
-        _repelPU  = MakePU("RestrainingOrder", "Restraining Order", "Weapons push enemies further away.",
-                        PowerUpEffectType.RepelEnemies, 2f, new Color(0.9f, 0.4f, 0.8f));
+        _healPU   = MakePU("HealthInsurance", "Health Insurance", "Restores 30 HP.",
+                        PowerUpEffectType.HealHP, 30f, new Color(0.9f, 0.2f, 0.2f));
+        _speedPU  = MakePU("GoldRush", "Gold Rush", "Increase move speed.",
+                        PowerUpEffectType.IncreaseSpeed, 0.5f, new Color(1f, 0.84f, 0f));
+        _damagePU = MakePU("HedgeFund", "Hedge Fund", "+15% damage.",
+                        PowerUpEffectType.IncreaseDamage, 15f, new Color(0.2f, 0.8f, 0.3f));
+        _magnetPU = MakePU("BlackMarket", "Black Market", "Attract all XP orbs on the map instantly.",
+                        PowerUpEffectType.MagnetAllOrbs, 0f, new Color(0.15f, 0.15f, 0.15f));
+        _radiusPU = MakePU("Diversified", "Diversified Portfolio", "Bigger XP pickup radius.",
+                        PowerUpEffectType.IncreasePickupRadius, 1f, new Color(0.3f, 0.5f, 1f));
         _insiderPU = MakePU("InsiderTrading", "Insider Trading", "Gain 50% more XP from all orbs collected.",
                         PowerUpEffectType.IncreaseXPGain, 50f, new Color(0.1f, 0.9f, 0.3f));
         _taxPU = MakePU("TaxEvasion", "Tax Evasion", "Increases your invincibility time after taking damage.",
@@ -1056,10 +1064,20 @@ public static class GameSetup
         return Save(root, path);
     }
 
+    // Sized so circle fully covers the sprite (100 PPU: 1 unit ≈ 0.5 radius; 0.6 gives full cover for typical sprites)
+    private const float EnemyColliderTriggerRadiusBase = 0.6f;
+    private const float EnemyColliderBlockRadiusBase   = 0.57f;
+
     private static void ApplyEnemyPrefabScale(GameObject contents, float scale)
     {
         var spriteT = contents.transform.Find("Sprite");
         if (spriteT != null) spriteT.localScale = Vector3.one * scale;
+        var cols = contents.GetComponents<CircleCollider2D>();
+        foreach (var c in cols)
+        {
+            if (c.isTrigger) c.radius = EnemyColliderTriggerRadiusBase * scale;
+            else             c.radius = EnemyColliderBlockRadiusBase * scale;
+        }
     }
 
     private static GameObject MakeEnemyPrefab(string name, EnemyData data, Sprite sprite, float scale, float bobAmt, float bobSpd, bool addAuraParticles = false)
@@ -1083,7 +1101,7 @@ public static class GameSetup
                     {
                         var add = contents.AddComponent<CircleCollider2D>();
                         add.isTrigger = false;
-                        add.radius = 0.38f;
+                        add.radius = EnemyColliderBlockRadiusBase * scale;
                         var enemyBase = contents.GetComponent<EnemyBase>();
                         if (enemyBase != null && enemyBase.chestPrefab == null) enemyBase.chestPrefab = _chestPrefab;
                         ApplyEnemyPrefabScale(contents, scale);
@@ -1138,10 +1156,10 @@ public static class GameSetup
         rb.gravityScale = 0f; rb.freezeRotation = true;
         var colTrigger = root.AddComponent<CircleCollider2D>();
         colTrigger.isTrigger = true;
-        colTrigger.radius = 0.4f;
+        colTrigger.radius = EnemyColliderTriggerRadiusBase * scale;
         var colBlock = root.AddComponent<CircleCollider2D>();
         colBlock.isTrigger = false;
-        colBlock.radius = 0.38f;
+        colBlock.radius = EnemyColliderBlockRadiusBase * scale;
         var eb = root.AddComponent<EnemyBase>();
         eb.data = data; eb.poolTag = name;
         eb.xpOrbPrefab = _orbPrefab;
@@ -1451,7 +1469,7 @@ public static class GameSetup
         sys.AddComponent<XPManager>();
 
         var lm = sys.AddComponent<LevelUpManager>();
-        lm.powerUps      = new List<PowerUpData> { _healPU, _speedPU, _damagePU, _magnetPU, _radiusPU, _repelPU, _insiderPU, _taxPU, _overclockPU };
+        lm.powerUps      = new List<PowerUpData> { _healPU, _speedPU, _damagePU, _magnetPU, _radiusPU, _insiderPU, _taxPU, _overclockPU };
         lm.weaponPrefabs = new List<GameObject>
         {
             CreateWeaponPrefabWrapper("SingleShot", typeof(SingleShot), _singleShotData, _coinPrefab),

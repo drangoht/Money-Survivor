@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &6171182490899817246
+--- !u!1 &2297194660854313428
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,8 +8,8 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 4442227051874329122}
-  - component: {fileID: 5207804388086097210}
+  - component: {fileID: 8057528431078623578}
+  - component: {fileID: 5425499969831636054}
   m_Layer: 0
   m_Name: Cryptominer_Wrapper
   m_TagString: Untagged
@@ -17,13 +17,13 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &4442227051874329122
+--- !u!4 &8057528431078623578
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6171182490899817246}
+  m_GameObject: {fileID: 2297194660854313428}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
@@ -32,17 +32,17 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &5207804388086097210
+--- !u!114 &5425499969831636054
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6171182490899817246}
+  m_GameObject: {fileID: 2297194660854313428}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8461c849224b3af45b824ab6a0577cb2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CryptominerWeapon
   data: {fileID: 11400000, guid: 06e08495362e7944298dcbbb361791e2, type: 2}
-  minerPrefab: {fileID: 3441058148929824268, guid: 37475b304509a3e41a73d0f7a77b3265, type: 3}
+  minerPrefab: {fileID: 3318900444861428827, guid: 37475b304509a3e41a73d0f7a77b3265, type: 3}

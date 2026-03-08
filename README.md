@@ -15,48 +15,96 @@ The project structure is fundamentally unique: It avoids messy, unmergable Unity
 
 ---
 
+## 🎮 Controls & Input
+
+| Input | Action |
+|-------|--------|
+| **WASD** / **Arrow keys** / **Left stick** | Move |
+| **Escape** | **Open / close pause menu** (when playing or paused) |
+| **Start (gamepad)** | Open / close pause menu |
+| **Enter** / **Space** / **South button** | Confirm (menus, level-up cards) |
+| **W / Up** / **S / Down** | Navigate main menu & level-up choices |
+| **A / Left** / **D / Right** | Navigate pause menu (Resume / Menu) |
+
+---
+
 ## ⚔️ Weapons (Wealth Acquisition)
-Expand your portfolio by leveling up to get new items. You can hold **at most 3 weapons**; each weapon can be upgraded up to **level 10**. Weapon icons appear in the HUD thumbnails and on level-up cards.
 
-| Icon | Weapon | Description |
-|------|--------|-------------|
-| ![Aimed Bullet](Assets/Art/WeaponIcons/AimedBullet.png) | **Aimed Bullet** | Fires a high-speed projectile directly at the nearest enemy. Reliable single-target DPS. |
-| ![Coin Toss](Assets/Art/WeaponIcons/CoinToss.png) | **Coin Toss** | Throws gold coins in all directions that deal damage and pierce. Overkill-style spread. |
-| ![Bill Whip](Assets/Art/WeaponIcons/BillWhip.png) | **Bill Whip** | Sweeps a massive arc of dollar bills to hit all nearby enemies in range. |
-| ![Compound Interest](Assets/Art/WeaponIcons/CompoundInterest.png) | **Compound Interest** | A persistent aura around the player that damages and lightly pushes nearby enemies. Grows with level. |
-| ![Credit Card](Assets/Art/WeaponIcons/CreditCard.png) | **Credit Card** | Throws a piercing credit card that boomerangs back. High pierce, multiple cards at higher levels. |
-| ![Cryptominer](Assets/Art/WeaponIcons/Cryptominer.png) | **Cryptominer** | Drops stationary mining rigs that burn enemies in an area over time. |
-| ![Stock Options](Assets/Art/WeaponIcons/StockOptions.png) | **Stock Options** | Shoots volatile market arrows; damage randomizes significantly per hit. |
+You can hold **at most 3 weapons**. Each weapon can be upgraded up to **level 10**. New weapons and upgrades are offered on level-up (and sometimes in boss chests). Weapon icons appear in the HUD and on level-up cards.
 
-All weapon icons use a **consistent square format** and **mauve (#E0B0FF) background** that is stripped to transparency at import (same approach as the XP orb). Icons are stored in `Assets/Art/WeaponIcons/` and are assigned when you run **MoneySurvivor → Setup Entire Project** or **Assign Weapon Icons**.
+| Weapon | Description |
+|--------|-------------|
+| **Aimed Bullet** | Fires a high-speed projectile at the nearest enemy. Reliable single-target DPS. |
+| **Coin Toss** | Throws gold coins in all directions; damage and pierce. Overkill-style spread. |
+| **Bill Whip** | Sweeps a massive arc of dollar bills, hitting all enemies in range. |
+| **Compound Interest** | A persistent aura around the player that damages and lightly pushes nearby enemies. Grows with level. |
+| **Credit Card** | Throws a piercing credit card that boomerangs back. High pierce, multiple cards at higher levels. |
+| **Cryptominer** | Drops stationary mining rigs that burn enemies in an area over time. |
+| **Stock Options** | Shoots volatile market arrows; damage randomizes significantly per hit. |
+
+Weapon icons use a **square format** and **mauve (#E0B0FF) background** (stripped to transparency at import). Icons are in `Assets/Art/WeaponIcons/` and are assigned when you run **MoneySurvivor → Setup Entire Project** or **Assign Weapon Icons**.
+
+---
 
 ## 👹 Enemies & Bosses
+
+### Regular Enemies
 | Type | Role | Notes |
 |------|------|--------|
 | **Bankman** | Basic | Low HP, moderate speed. |
 | **ExWife** | Mid | Higher HP and damage. |
 | **Children** | Swarm | Fast, low HP. |
 | **Bouncer** | Tank | Slow, high HP. |
-| **IRS** | Boss | Spawns every 3 min. Large (1.8× scale), 600 HP, 55 contact damage, 120 XP. Drops chest. |
-| **CEO** | Boss | Spawns at 10 min. Very large (4× scale), 6000 HP, 70 contact damage, 1200 XP. Drops chest. |
-| **MegaBoss** | Boss | Spawns every 2 min. Huge (5.6× scale), 1500 HP, 90 contact damage, 700 XP, red aura particles. Drops chest. |
 
-## 🎁 Power-Ups (Chests & Level-Up)
-- **Heal** / **Max HP** / **Speed** / **Damage** / **Pickup Radius** – Stat boosts.
-- **Restraining Order** – Weapons push enemies further away.
-- **Insider Trading** – +50% XP from orbs.
-- **Tax Evasion** – Longer invincibility after taking damage.
-- **Overclock** – Multiplier to projectile count (weapons fire more projectiles per shot).
+### Bosses
+Bosses are larger, tougher, and **drop a chest** when killed. Enemy strength (HP, contact damage, speed) also scales with **elapsed time** (stronger every 2 minutes).
+
+| Boss | Scale | HP | Contact damage | XP | Spawn rule |
+|------|-------|-----|----------------|-----|------------|
+| **IRS** | 1.8× | 600 | 55 | 120 | Every 3 min (then every 1.5 min after 15 min, every 10 s after 20 min). |
+| **CEO** | 4× | 6000 | 70 | 1200 | **Once** at 10 min. |
+| **MegaBoss** | 5.6× | 1500 | 90 | 700 | Every 2 min (then every 1 min after 15 min, every 10 s after 20 min). Red aura particles. |
 
 ---
 
-## 📐 Rules & Mechanics
+## 🎁 Power-Ups (Chests & Level-Up)
 
-- **Movement bounds:** Player cannot leave the play area; position is clamped to ±95 units so you stay on the background.
-- **Obstacles:** Office furniture (desks, chairs, walls) is placed randomly; player and enemies cannot walk through them (insurmountable, blocking colliders).
-- **Foreground sync:** The tiled foreground background scrolls with the camera; obstacles, XP orbs, and crypto miner rigs move with it so they don’t slide on the ground.
-- **Score:** Net Worth = number of enemies killed (no time-based score).
-- **Difficulty:** Spawn rate and enemy mix escalate every 30 s (tier). **Bosses:** IRS every 3 min, MegaBoss every 2 min, CEO once at 10 min. **After 15 min:** IRS every 1.5 min, MegaBoss every 1 min. **After 20 min:** IRS and MegaBoss every 10 s. **After 22 min:** spawn rate becomes **insane** (very fast regular spawns).
+Power-ups can appear as **level-up choices** (one of three cards) or as **chest rewards** when you open a boss chest. All use the same pool of effects below.
+
+| Power-up | Effect |
+|----------|--------|
+| **Health Insurance** | Restores 30 HP. |
+| **Gold Rush** | Increases move speed (+0.5). |
+| **Hedge Fund** | +15% damage (multiplicative). |
+| **Black Market** | Attract **all** XP orbs on the map to the player instantly (one-time). |
+| **Diversified Portfolio** | +1 to XP pickup radius. |
+| **Insider Trading** | +50% XP gained from orbs (multiplicative). |
+| **Tax Evasion** | +0.5 s invincibility duration after taking damage. |
+| **Overclock** | +25% projectile count for all weapons (multiplicative). |
+
+---
+
+## 📐 Gameplay & Rules
+
+- **Movement:** Player is clamped to the play area (±95 units); you cannot leave the background.
+- **Obstacles:** Office furniture (desks, chairs, walls) is placed randomly; player and enemies cannot walk through them.
+- **Foreground sync:** Obstacles, XP orbs, and crypto miner rigs move with the scrolling foreground so they don’t slide.
+- **Score (Net Worth):** Equals the number of enemies killed (no time-based score).
+- **Level-up:** Collect XP orbs to fill the bar; on level-up the game pauses and you pick one of three cards (new weapon, weapon upgrade, or power-up). A one-time **Refresh choices** option can appear as a fourth card.
+- **Chests:** Dropped by bosses. On open, a random reward (weapon / upgrade / power-up from the same pools) is applied, then a short notification is shown.
+- **Difficulty:** Spawn rate and enemy mix escalate every 30 s (tier). Enemies get **stronger every 2 minutes** (HP, contact damage, and speed scale up). After **22 min**, regular spawn rate becomes **insane** (very fast).
+
+---
+
+## 💾 Persisted Save (Best Run Only)
+
+- **What is saved:** Only your **best run** is stored: **time survived**, **kills**, and **score** (Net Worth = kills × 50).
+- **When it is saved:** When you leave the run (Retry or Menu from the Game Over screen). The run is **only** written to disk if its **score is higher** than the previous best; otherwise nothing is updated.
+- **Where it is shown:**  
+  - **Main menu:** A line like *Best run: MM:SS | X kills | $score* appears below the buttons if a best run exists.  
+  - **Game Over screen:** The same *Best run* line is shown above the Retry / Menu buttons when a best run exists.
+
+Data is stored in **PlayerPrefs** (keys: `MoneySurvivor_BestTime`, `MoneySurvivor_BestKills`, `MoneySurvivor_BestScore`).
 
 ---
 
@@ -81,11 +129,11 @@ Custom splash and menus themed to the game.
 
 ## 📈 Systems
 
-- **Dynamic scaling:** As time survived increases, spawn rate and difficulty tier increase.
+- **Dynamic scaling:** Spawn rate and difficulty tier increase over time; enemies scale every 2 minutes.
 - **Event bus:** Decoupled events for game state, level-up, and UI.
 - **Object pooling:** Enemies and particles use pooling for performance.
 - **Juicy combat:** Hit flashing, screen shake, XP orbs, particle emitters on hit/death.
-- **OnGUI UI:** HUD, pause menu, level-up cards, and game-over screen drawn with OnGUI.
+- **OnGUI UI:** HUD, **pause menu (Escape)**, level-up cards, game-over screen, and chest reward toast drawn with OnGUI.
 
 ---
 
@@ -96,3 +144,5 @@ Custom splash and menus themed to the game.
 3. In the menu bar, click **MoneySurvivor → Setup Entire Project**.
 4. The editor script will generate Prefabs, Sprites, ScriptableObjects, and Scenes.
 5. Open **Assets/Scenes/MainMenu.unity** (or **Game.unity**) and press **Play**.
+
+Use **Escape** in-game to open and close the pause menu.

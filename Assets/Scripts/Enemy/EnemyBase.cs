@@ -17,6 +17,7 @@ public class EnemyBase : MonoBehaviour, IPoolable
     // Runtime
     private float        _currentHP;
     private int          _difficultyTier; // set by spawner
+    private float        _timeStrengthMult = 1f; // scales with elapsed time (set by spawner)
     private Rigidbody2D  _rb;
     private Transform    _playerTransform;
     private SpriteRenderer _sr;
@@ -33,7 +34,7 @@ public class EnemyBase : MonoBehaviour, IPoolable
     public void OnSpawn()
     {
         _isDead = false;
-        float hpMult = Mathf.Pow(data.hpScaleFactor, _difficultyTier);
+        float hpMult = Mathf.Pow(data.hpScaleFactor, _difficultyTier) * _timeStrengthMult;
         _currentHP   = data.hp * hpMult;
 
         if (_sr != null) _sr.color = data.bodyColor;
@@ -60,7 +61,7 @@ public class EnemyBase : MonoBehaviour, IPoolable
         // Fallback initialization if OnSpawn wasn't called (e.g., initial spawns)
         if (_currentHP <= 0f && data != null)
         {
-            float hpMult = Mathf.Pow(data.hpScaleFactor, _difficultyTier);
+            float hpMult = Mathf.Pow(data.hpScaleFactor, _difficultyTier) * _timeStrengthMult;
             _currentHP   = data.hp * hpMult;
             if (_sr != null) _sr.color = data.bodyColor;
         }
@@ -88,7 +89,7 @@ public class EnemyBase : MonoBehaviour, IPoolable
 
         float speedMult = Mathf.Pow(data.speedScaleFactor, _difficultyTier);
         Vector2 dir = ((Vector2)_playerTransform.position - _rb.position).normalized;
-        _rb.linearVelocity = dir * (data.moveSpeed * speedMult);
+        _rb.linearVelocity = dir * (data.moveSpeed * speedMult * Mathf.Sqrt(_timeStrengthMult));
     }
 
     private void OnTriggerStay2D(Collider2D other)
@@ -96,12 +97,19 @@ public class EnemyBase : MonoBehaviour, IPoolable
         if (_isDead) return;
         var stats = other.GetComponent<PlayerStats>();
         if (stats == null) return;
-        stats.TakeDamage(data.contactDamage);
+        stats.TakeDamage(data.contactDamage * _timeStrengthMult);
     }
 
     // ── Public API ───────────────────────────────────────────────────────────
 
     public void SetDifficultyTier(int tier) => _difficultyTier = tier;
+
+    /// <summary>Scale HP and contact damage; steps up every 2 minutes. Call after SetDifficultyTier when spawning.</summary>
+    public void SetTimeStrength(float timeSurvived)
+    {
+        int twoMinuteSteps = Mathf.FloorToInt(timeSurvived / 120f); // 0–2 min: 0, 2–4 min: 1, etc.
+        _timeStrengthMult = 1f + twoMinuteSteps * 0.25f; // +25% per 2 minutes
+    }
 
     public bool IsDead() => _isDead;
 
