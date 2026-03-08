@@ -654,7 +654,7 @@ public static class GameSetup
 
     private static EnemyData  _bankman, _exWife, _children, _irs, _bouncer, _ceo, _megaBoss;
     private static WeaponData _coinData, _whipData,  _auraData, _cardData, _singleShotData, _cryptoData, _stockData;
-    private static PowerUpData _healPU, _speedPU, _damagePU, _magnetPU, _radiusPU, _insiderPU, _taxPU, _overclockPU;
+    private static PowerUpData _healPU, _speedPU, _damagePU, _magnetPU, _radiusPU, _insiderPU, _taxPU, _overclockPU, _duplicatePU;
 
     private static void CreateScriptableObjects()
     {
@@ -763,6 +763,8 @@ public static class GameSetup
                         PowerUpEffectType.IncreaseIFrames, 0.5f, new Color(0.5f, 0.5f, 0.9f));
         _overclockPU = MakePU("Overclock", "Overclock", "Weapons fire more projectiles per shot (+25% count).",
                         PowerUpEffectType.IncreaseProjectileCount, 25f, new Color(0.2f, 0.7f, 1f));
+        _duplicatePU = MakePU("DuplicateProjectile", "Duplicate Projectile", "Double the number of projectiles per shot (+100%).",
+                        PowerUpEffectType.IncreaseProjectileCount, 100f, new Color(0.6f, 0.3f, 1f));
 
         Log($"  All ScriptableObjects created");
     }
@@ -1470,7 +1472,7 @@ public static class GameSetup
         sys.AddComponent<SoundManager>();
 
         var lm = sys.AddComponent<LevelUpManager>();
-        lm.powerUps      = new List<PowerUpData> { _healPU, _speedPU, _damagePU, _magnetPU, _radiusPU, _insiderPU, _taxPU, _overclockPU };
+        lm.powerUps      = new List<PowerUpData> { _healPU, _speedPU, _damagePU, _magnetPU, _radiusPU, _insiderPU, _taxPU, _overclockPU, _duplicatePU };
         lm.weaponPrefabs = new List<GameObject>
         {
             CreateWeaponPrefabWrapper("SingleShot", typeof(SingleShot), _singleShotData, _coinPrefab),

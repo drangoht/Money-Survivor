@@ -1,9 +1,8 @@
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 /// <summary>
 /// Renders the in-game HUD (HP, XP, timer, kills) using OnGUI.
-/// Also handles the Pause Menu overlay using the new Unity Input System.
+/// Also handles the Pause Menu overlay. Uses legacy Input Manager.
 /// </summary>
 public class HUDController : MonoBehaviour
 {
@@ -72,10 +71,8 @@ public class HUDController : MonoBehaviour
         if (GameManager.Instance == null) return;
         if (GameManager.Instance.State == GameState.GameOver) return;
 
-        bool togglePause = false;
-        if (Gamepad.current != null && Gamepad.current.startButton.wasPressedThisFrame) togglePause = true;
-        if (Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame) togglePause = true;
-        if (Input.GetKeyDown(KeyCode.Escape)) togglePause = true; // fallback so Escape always works
+        bool togglePause = Input.GetKeyDown(KeyCode.Escape) || Input.GetButtonDown("Cancel")
+            || Input.GetKeyDown(KeyCode.JoystickButton7); // Controller Start button
 
         if (togglePause)
         {
@@ -91,15 +88,7 @@ public class HUDController : MonoBehaviour
         // Handle pause menu navigation
         if (GameManager.Instance.State == GameState.Paused)
         {
-            float x = 0f;
-            if (Gamepad.current != null)
-                x = Gamepad.current.leftStick.x.ReadValue() + Gamepad.current.dpad.x.ReadValue();
-            
-            if (Keyboard.current != null)
-            {
-                if (Keyboard.current.dKey.isPressed || Keyboard.current.rightArrowKey.isPressed) x += 1f;
-                if (Keyboard.current.aKey.isPressed || Keyboard.current.leftArrowKey.isPressed) x -= 1f;
-            }
+            float x = Input.GetAxisRaw("Horizontal");
 
             if (x > 0.5f)
             {
@@ -116,11 +105,7 @@ public class HUDController : MonoBehaviour
             if (_selectedIndex < 0) _selectedIndex = 1;
             if (_selectedIndex > 1) _selectedIndex = 0;
 
-            bool confirm = false;
-            if (Gamepad.current != null && Gamepad.current.buttonSouth.wasPressedThisFrame) confirm = true;
-            if (Keyboard.current != null && (Keyboard.current.enterKey.wasPressedThisFrame || Keyboard.current.spaceKey.wasPressedThisFrame)) confirm = true;
-
-            if (confirm)
+            if (Input.GetButtonDown("Submit"))
             {
                 if (_selectedIndex == 0) GameManager.Instance.ResumeGame();
                 else GameManager.Instance.ReturnToMainMenu();
@@ -306,15 +291,21 @@ public class HUDController : MonoBehaviour
 
         if (stats != null)
         {
-            GUI.Label(new Rect(colX, colY, 250f, 25f), $"HP: {Mathf.CeilToInt(stats.CurrentHP)} / {Mathf.CeilToInt(stats.maxHP)}", _labelStyle);
+            GUI.Label(new Rect(colX, colY, 280f, 25f), $"HP: {Mathf.CeilToInt(stats.CurrentHP)} / {Mathf.CeilToInt(stats.maxHP)}", _labelStyle);
             colY += 25f;
-            GUI.Label(new Rect(colX, colY, 250f, 25f), $"Speed: {stats.moveSpeed:F1}", _labelStyle);
+            GUI.Label(new Rect(colX, colY, 280f, 25f), $"Speed: {stats.moveSpeed:F1}", _labelStyle);
             colY += 25f;
-            GUI.Label(new Rect(colX, colY, 250f, 25f), $"Damage Mult: {stats.damageMultiplier:F1}x", _labelStyle);
+            GUI.Label(new Rect(colX, colY, 280f, 25f), $"Damage Mult: {stats.damageMultiplier:F1}x", _labelStyle);
             colY += 25f;
-            GUI.Label(new Rect(colX, colY, 250f, 25f), $"Pickup Radius: {stats.pickupRadius:F1}m", _labelStyle);
+            GUI.Label(new Rect(colX, colY, 280f, 25f), $"Pickup Radius: {stats.pickupRadius:F1}m", _labelStyle);
             colY += 25f;
-            GUI.Label(new Rect(colX, colY, 250f, 25f), $"XP Multiplier: {stats.xpMultiplier:F1}x", _labelStyle);
+            GUI.Label(new Rect(colX, colY, 280f, 25f), $"XP Multiplier: {stats.xpMultiplier:F1}x", _labelStyle);
+            colY += 25f;
+            GUI.Label(new Rect(colX, colY, 280f, 25f), $"Invincibility: {stats.invincibilityDuration:F1}s", _labelStyle);
+            colY += 25f;
+            GUI.Label(new Rect(colX, colY, 280f, 25f), $"Projectile Count: {stats.projectileCountMultiplier:F1}x", _labelStyle);
+            colY += 25f;
+            GUI.Label(new Rect(colX, colY, 280f, 25f), $"Repel Force: {stats.repelForce:F1}", _labelStyle);
         }
 
         // Weapons column

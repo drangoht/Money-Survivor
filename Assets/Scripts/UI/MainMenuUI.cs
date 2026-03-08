@@ -1,8 +1,7 @@
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 /// <summary>
-/// Main Menu UI using OnGUI — no packages needed.
+/// Main Menu UI using OnGUI. Uses legacy Input Manager.
 /// Loads in the MainMenu scene.
 /// </summary>
 public class MainMenuUI : MonoBehaviour
@@ -41,15 +40,7 @@ public class MainMenuUI : MonoBehaviour
 
     private void HandleInput()
     {
-        float y = 0f;
-        if (Gamepad.current != null)
-            y = Gamepad.current.leftStick.y.ReadValue() + Gamepad.current.dpad.y.ReadValue();
-        
-        if (Keyboard.current != null)
-        {
-            if (Keyboard.current.wKey.isPressed || Keyboard.current.upArrowKey.isPressed) y += 1f;
-            if (Keyboard.current.sKey.isPressed || Keyboard.current.downArrowKey.isPressed) y -= 1f;
-        }
+        float y = Input.GetAxisRaw("Vertical");
 
         if (y > 0.5f)
         {
@@ -66,11 +57,7 @@ public class MainMenuUI : MonoBehaviour
         if (_selectedIndex < 0) _selectedIndex = 1;
         if (_selectedIndex > 1) _selectedIndex = 0;
 
-        bool confirm = false;
-        if (Gamepad.current != null && Gamepad.current.buttonSouth.wasPressedThisFrame) confirm = true;
-        if (Keyboard.current != null && (Keyboard.current.enterKey.wasPressedThisFrame || Keyboard.current.spaceKey.wasPressedThisFrame)) confirm = true;
-
-        if (confirm)
+        if (Input.GetButtonDown("Submit"))
         {
             if (_selectedIndex == 0) GameManager.Instance?.StartGame();
             else

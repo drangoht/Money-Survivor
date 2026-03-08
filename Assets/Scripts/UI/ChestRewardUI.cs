@@ -1,9 +1,8 @@
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 /// <summary>
 /// Chest reward popup using OnGUI. Shows the label and description of the reward (weapon, weapon upgrade, or power-up).
-/// Reward is already applied by Chest via LevelUpManager.ApplyReward.
+/// Reward is already applied by Chest via LevelUpManager.ApplyReward. Uses legacy Input Manager.
 /// </summary>
 public class ChestRewardUI : MonoBehaviour
 {
@@ -29,11 +28,7 @@ public class ChestRewardUI : MonoBehaviour
     {
         if (!_visible) return;
 
-        bool dismiss = false;
-        if (Gamepad.current != null && Gamepad.current.buttonSouth.wasPressedThisFrame) dismiss = true;
-        if (Keyboard.current != null && (Keyboard.current.enterKey.wasPressedThisFrame || Keyboard.current.spaceKey.wasPressedThisFrame)) dismiss = true;
-
-        if (Time.unscaledTime >= _hideTime || dismiss)
+        if (Time.unscaledTime >= _hideTime || Input.GetButtonDown("Submit"))
             _visible = false;
     }
 

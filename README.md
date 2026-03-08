@@ -81,6 +81,7 @@ Power-ups can appear as **level-up choices** (one of three cards) or as **chest 
 | **Insider Trading** | +50% XP gained from orbs (multiplicative). |
 | **Tax Evasion** | +0.5 s invincibility duration after taking damage. |
 | **Overclock** | +25% projectile count for all weapons (multiplicative). |
+| **Duplicate Projectile** | +100% projectile count (double projectiles per shot, multiplicative). |
 
 ---
 
@@ -146,3 +147,5 @@ Custom splash and menus themed to the game.
 5. Open **Assets/Scenes/MainMenu.unity** (or **Game.unity**) and press **Play**.
 
 Use **Escape** in-game to open and close the pause menu.
+
+**Input:** The project uses the **legacy Input Manager** only (no new Input System package), so you won’t see the “native platform backends” prompt. Controls: WASD / arrows, Escape (pause), Enter/Space (confirm), gamepad via default axes (Horizontal, Vertical, Submit, Cancel).

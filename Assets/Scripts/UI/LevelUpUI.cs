@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 /// <summary>
 /// Level-up card selection UI drawn with OnGUI — no packages needed.
@@ -59,15 +58,7 @@ public class LevelUpUI : MonoBehaviour
     {
         if (!_visible) return;
 
-        float x = 0f;
-        if (Gamepad.current != null)
-            x = Gamepad.current.leftStick.x.ReadValue() + Gamepad.current.dpad.x.ReadValue();
-        
-        if (Keyboard.current != null)
-        {
-            if (Keyboard.current.dKey.isPressed || Keyboard.current.rightArrowKey.isPressed) x += 1f;
-            if (Keyboard.current.aKey.isPressed || Keyboard.current.leftArrowKey.isPressed) x -= 1f;
-        }
+        float x = Input.GetAxisRaw("Horizontal");
 
         if (x > 0.5f)
         {
@@ -85,11 +76,7 @@ public class LevelUpUI : MonoBehaviour
         if (_selectedIndex < 0) _selectedIndex = selectableCount - 1;
         if (_selectedIndex >= selectableCount) _selectedIndex = 0;
 
-        bool confirm = false;
-        if (Gamepad.current != null && Gamepad.current.buttonSouth.wasPressedThisFrame) confirm = true;
-        if (Keyboard.current != null && (Keyboard.current.enterKey.wasPressedThisFrame || Keyboard.current.spaceKey.wasPressedThisFrame)) confirm = true;
-
-        if (confirm)
+        if (Input.GetButtonDown("Submit"))
         {
             if (CanShowRefresh() && _selectedIndex == _options.Count)
             {

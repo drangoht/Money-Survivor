@@ -114,7 +114,7 @@ MonoBehaviour:
   data: {fileID: 11400000, guid: 367e1eaed67153f439bedd91e1500dbc, type: 2}
   xpOrbPrefab: {fileID: 6135278874558500445, guid: 68067151309cb0b4bb873ab80b39045e, type: 3}
   hitParticlePrefab: {fileID: 1615597018830496104, guid: 8887b13d945fad6428b3a64045c59b65, type: 3}
-  chestPrefab: {fileID: 304033318482061716, guid: 438bd0165d736f0439f89e620e1cf6c1, type: 3}
+  chestPrefab: {fileID: 3013784722325576207, guid: 438bd0165d736f0439f89e620e1cf6c1, type: 3}
   poolTag: IRS
 --- !u!58 &7625370636859363416
 CircleCollider2D:

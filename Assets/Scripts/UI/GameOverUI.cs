@@ -1,8 +1,7 @@
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 /// <summary>
-/// Game Over screen using OnGUI — no packages needed.
+/// Game Over screen using OnGUI. Uses legacy Input Manager.
 /// </summary>
 public class GameOverUI : MonoBehaviour
 {
@@ -28,15 +27,7 @@ public class GameOverUI : MonoBehaviour
     {
         if (!_visible || GameManager.Instance == null) return;
 
-        float x = 0f;
-        if (Gamepad.current != null)
-            x = Gamepad.current.leftStick.x.ReadValue() + Gamepad.current.dpad.x.ReadValue();
-        
-        if (Keyboard.current != null)
-        {
-            if (Keyboard.current.dKey.isPressed || Keyboard.current.rightArrowKey.isPressed) x += 1f;
-            if (Keyboard.current.aKey.isPressed || Keyboard.current.leftArrowKey.isPressed) x -= 1f;
-        }
+        float x = Input.GetAxisRaw("Horizontal");
 
         if (x > 0.5f)
         {
@@ -53,11 +44,7 @@ public class GameOverUI : MonoBehaviour
         if (_selectedIndex < 0) _selectedIndex = 1;
         if (_selectedIndex > 1) _selectedIndex = 0;
 
-        bool confirm = false;
-        if (Gamepad.current != null && Gamepad.current.buttonSouth.wasPressedThisFrame) confirm = true;
-        if (Keyboard.current != null && (Keyboard.current.enterKey.wasPressedThisFrame || Keyboard.current.spaceKey.wasPressedThisFrame)) confirm = true;
-
-        if (confirm)
+        if (Input.GetButtonDown("Submit"))
         {
             GameManager.Instance.SaveBestRunIfBetter();
             _visible = false;
