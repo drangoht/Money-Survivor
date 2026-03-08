@@ -145,6 +145,8 @@ public static class GameSetup
         _shieldSprite    = LoadSingleSprite(SpritesPath + "/shield_sprite.png",         "shield");
         _splashSprite    = LoadSingleSprite(SpritesPath + "/splash_screen.png",         "splash");
         _chestSprite     = LoadSingleSprite(SpritesPath + "/chest_sprite_1772809376512.png", "chest");
+        if (_chestSprite == _square)
+            _chestSprite = GetOrCreateSprite(SpritesPath + "/chest_fallback.png", CreateChestTex(64, 48));
         _cryptoSprite    = LoadSingleSprite(SpritesPath + "/cryptominer_sprite_1772827344346.png", "cryptominer_V2");
         _stockSprite     = LoadSingleSprite(SpritesPath + "/stock_options_sprite_1772827497492.png", "stock_options_V2");
 
@@ -537,6 +539,29 @@ public static class GameSetup
         return tex;
     }
 
+    private static Texture2D CreateChestTex(int width, int height)
+    {
+        var tex = new Texture2D(width, height, TextureFormat.RGBA32, false);
+        Color brownDark = new Color(0.35f, 0.22f, 0.12f);
+        Color brownMid  = new Color(0.55f, 0.35f, 0.18f);
+        Color gold      = new Color(0.85f, 0.65f, 0.15f);
+        int edge = 2;
+        int lidY = height * 3 / 5;
+        for (int y = 0; y < height; y++)
+        for (int x = 0; x < width; x++)
+        {
+            bool atEdge = x < edge || x >= width - edge || y < edge || y >= height - edge;
+            bool inLid = y >= lidY;
+            bool lockArea = x >= width/2 - 4 && x < width/2 + 4 && y >= lidY - 6 && y < lidY + 4;
+            if (lockArea) tex.SetPixel(x, y, gold);
+            else if (atEdge) tex.SetPixel(x, y, brownDark);
+            else tex.SetPixel(x, y, inLid ? brownMid : brownDark);
+        }
+        tex.filterMode = FilterMode.Bilinear;
+        tex.Apply();
+        return tex;
+    }
+
     private static Texture2D CreateOfficeWallTex(int width, int height)
     {
         var tex = new Texture2D(width, height, TextureFormat.RGBA32, false);
@@ -906,22 +931,43 @@ public static class GameSetup
             {
                 var cols = ex.GetComponents<CircleCollider2D>();
                 if (cols.Length < 2)
-            {
-                var contents = PrefabUtility.LoadPrefabContents(path);
-                if (contents != null)
                 {
-                    var add = contents.AddComponent<CircleCollider2D>();
-                    add.isTrigger = false;
-                    add.radius = 0.38f;
-                    PrefabUtility.SaveAsPrefabAsset(contents, path);
-                    PrefabUtility.UnloadPrefabContents(contents);
-                    Log($"  Enemy prefab updated with obstacle collider: {name}");
+                    var contents = PrefabUtility.LoadPrefabContents(path);
+                    if (contents != null)
+                    {
+                        var add = contents.AddComponent<CircleCollider2D>();
+                        add.isTrigger = false;
+                        add.radius = 0.38f;
+                        var enemyBase = contents.GetComponent<EnemyBase>();
+                        if (enemyBase != null && enemyBase.chestPrefab == null) enemyBase.chestPrefab = _chestPrefab;
+                        PrefabUtility.SaveAsPrefabAsset(contents, path);
+                        PrefabUtility.UnloadPrefabContents(contents);
+                        Log($"  Enemy prefab updated with obstacle collider: {name}");
+                    }
+                }
+                else
+                {
+                    var contents = PrefabUtility.LoadPrefabContents(path);
+                    if (contents != null)
+                    {
+                        var enemyBase = contents.GetComponent<EnemyBase>();
+                        if (enemyBase != null && enemyBase.chestPrefab == null) { enemyBase.chestPrefab = _chestPrefab; PrefabUtility.SaveAsPrefabAsset(contents, path); Log($"  Enemy prefab updated with chest: {name}"); }
+                        PrefabUtility.UnloadPrefabContents(contents);
+                    }
                 }
                 return ex;
             }
             else
-                return ex; // already has BossAura
-        }
+            {
+                var contents = PrefabUtility.LoadPrefabContents(path);
+                if (contents != null)
+                {
+                    var enemyBase = contents.GetComponent<EnemyBase>();
+                    if (enemyBase != null && enemyBase.chestPrefab == null) { enemyBase.chestPrefab = _chestPrefab; PrefabUtility.SaveAsPrefabAsset(contents, path); Log($"  Enemy prefab updated with chest: {name}"); }
+                    PrefabUtility.UnloadPrefabContents(contents);
+                }
+                return ex;
+            }
         }
 
         var root = new GameObject(name);
@@ -947,7 +993,8 @@ public static class GameSetup
         var eb = root.AddComponent<EnemyBase>();
         eb.data = data; eb.poolTag = name;
         eb.xpOrbPrefab = _orbPrefab;
-        eb.hitParticlePrefab = _hitParticlesPrefab; // Assign the particle prefab
+        eb.hitParticlePrefab = _hitParticlesPrefab;
+        eb.chestPrefab = _chestPrefab; // Bosses drop chest on death
 
         if (addAuraParticles)
             AddBossAuraParticles(root, data != null ? data.hitParticleColor : new Color(0.9f, 0.2f, 0.2f));
@@ -1047,7 +1094,11 @@ public static class GameSetup
     {
         string path = PrefabsPath + "/ChestOpenParticles.prefab";
         var ex = AssetDatabase.LoadAssetAtPath<GameObject>(path);
-        if (ex != null) return ex;
+        if (ex != null)
+        {
+            AssetDatabase.DeleteAsset(path);
+            AssetDatabase.Refresh();
+        }
 
         var root = new GameObject("ChestOpenParticles");
         var ps = root.AddComponent<ParticleSystem>();
@@ -1077,7 +1128,10 @@ public static class GameSetup
 
         var vel = ps.velocityOverLifetime;
         vel.enabled = true;
+        // All axes must use same curve mode (TwoConstants) to avoid "Velocity curves must all be in the same mode"
+        vel.x = new ParticleSystem.MinMaxCurve(0f, 0f);
         vel.y = new ParticleSystem.MinMaxCurve(4f, 8f);
+        vel.z = new ParticleSystem.MinMaxCurve(0f, 0f);
 
         var col = ps.colorOverLifetime;
         col.enabled = true;

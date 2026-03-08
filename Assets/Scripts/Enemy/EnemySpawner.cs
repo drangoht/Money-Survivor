@@ -36,6 +36,20 @@ public class EnemySpawner : MonoBehaviour
     [Tooltip("Mega boss spawns every N seconds (big, tough, lots of XP)")]
     public float megaBossInterval = 120f; // 2 mins
 
+    [Header("After 15 Minutes")]
+    [Tooltip("After this many seconds, bosses spawn more often")]
+    public float moreBossesAfterTime = 900f; // 15 mins
+    [Tooltip("IRS interval after 15 mins")]
+    public float bossIntervalLate = 90f; // 1.5 mins
+    [Tooltip("Mega boss interval after 15 mins")]
+    public float megaBossIntervalLate = 60f; // 1 min
+
+    [Header("After 20 Minutes")]
+    [Tooltip("After this many seconds, bosses spawn every 10s")]
+    public float moreBossesAfterTime2 = 1200f; // 20 mins
+    [Tooltip("IRS and Mega boss interval after 20 mins")]
+    public float bossIntervalVeryLate = 10f;
+
     private float _spawnTimer;
     private float _tierTimer;
     private float _bossTimer;
@@ -87,24 +101,30 @@ public class EnemySpawner : MonoBehaviour
             baseSpawnInterval = Mathf.Max(0.3f, baseSpawnInterval * 0.9f);
         }
 
+        float timeSurvived = GameManager.Instance != null ? GameManager.Instance.TimeSurvived : 0f;
+        float currentBossInterval = timeSurvived >= moreBossesAfterTime2 ? bossIntervalVeryLate
+            : (timeSurvived >= moreBossesAfterTime ? bossIntervalLate : bossInterval);
+        float currentMegaBossInterval = timeSurvived >= moreBossesAfterTime2 ? bossIntervalVeryLate
+            : (timeSurvived >= moreBossesAfterTime ? megaBossIntervalLate : megaBossInterval);
+
         // Boss 1 timer (IRS)
         _bossTimer += Time.deltaTime;
-        if (_bossTimer >= bossInterval)
+        if (_bossTimer >= currentBossInterval)
         {
             _bossTimer = 0f;
             SpawnEnemy(irsPrefab);
         }
 
-        // Boss 2 timer (CEO)
-        if (!_ceoSpawned && GameManager.Instance != null && GameManager.Instance.TimeSurvived >= ceoSpawnTime)
+        // Boss 2 timer (CEO) – once at ceoSpawnTime
+        if (!_ceoSpawned && timeSurvived >= ceoSpawnTime)
         {
             _ceoSpawned = true;
             SpawnEnemy(ceoPrefab);
         }
 
-        // Mega boss timer (every 2 minutes: big, tough, lots of XP)
+        // Mega boss timer
         _megaBossTimer += Time.deltaTime;
-        if (_megaBossTimer >= megaBossInterval && megaBossPrefab != null)
+        if (_megaBossTimer >= currentMegaBossInterval && megaBossPrefab != null)
         {
             _megaBossTimer = 0f;
             SpawnEnemy(megaBossPrefab);

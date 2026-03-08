@@ -61,3 +61,11 @@ This document records the step-by-step process used to build and refine the game
 1. **MegaBoss:** New boss spawning every 2 minutes: large (scale 2.8), 600 HP, 40 contact damage, 300 XP, drops chest. Uses same enemy pipeline (EnemyData, prefab, EnemySpawner timer).
 2. **Boss Aura:** MegaBoss prefab given a child ParticleSystem (“BossAura”): local-space, red-tinted, sphere-shaped aura for visual emphasis.
 3. **Bug Fix:** Resolved CS0106 (invalid `private` on “item”) by fixing a missing closing brace in `MakeEnemyPrefab` so `AddBossAuraParticles` is a class-level method, not a local function.
+
+---
+
+## Phase 8: Chest Fix & Boss Spawn Tiers
+
+1. **Chest Drop:** Enemy prefabs were not assigned `chestPrefab`; GameSetup now sets it when creating or updating enemy prefabs so bosses (IRS, CEO, MegaBoss) drop chests on death.
+2. **Chest Visual & Particles:** When the chest image file is missing, a procedural chest texture is used. ChestOpenParticles velocity curves were fixed (all axes use same MinMaxCurve mode) and the prefab is recreated on setup to avoid “Particle Velocity curves must all be in the same mode”.
+3. **Boss Spawn Tiers:** After 15 min, IRS and MegaBoss spawn more often (90 s and 60 s). After 20 min, both spawn every 10 s. CEO remains once at 10 min. `EnemySpawner` uses `moreBossesAfterTime`, `moreBossesAfterTime2`, and late-interval fields for this.

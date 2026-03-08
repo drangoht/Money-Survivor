@@ -97,3 +97,14 @@ This document serves as a backup of the prompt history and user requests used to
 ## 9. Documentation
 
 * **Prompt:** "update all md files with new weapons, enemies, rules, alle the prompts use and implementation plans"
+
+---
+
+## 10. Chest Fix, Boss Timing & Docs
+
+* **Prompt:** "chests seems to not working i don't see any chest appears and no drop from boss too"
+* **Prompt:** "the chest is white square instead of chest sprite and there is an error when player get it / Particle Velocity curves must all be in the same mode"
+* **Prompt:** "same bug when getting chest: Particle Velocity curves must all be in the same mode / so make boss apears at 10 seconds for testing purpose"
+* **Prompt:** "ok now chest works you can revrt the spawn time, but these will appears more often after 15 minutes, not under every 10 s"
+* **Prompt:** "and after 20 minutes boss spawn every 10 seconds"
+* **Prompt:** "pdate md files with these new rules"

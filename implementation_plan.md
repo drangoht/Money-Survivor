@@ -57,9 +57,10 @@ Damage is multiplied by **`PlayerStats.damageMultiplier`**. Level-up can add a n
 
 - **`EnemySpawner`**  
   - **Regular waves:** Weighted mix of Bankman, ExWife, Children, Bouncer by difficulty tier (tier every 30 s; spawn interval shortens over time).
-  - **IRS boss:** Every `bossInterval` (default 180 s).
-  - **CEO boss:** Once at `ceoSpawnTime` (default 600 s).
-  - **MegaBoss:** Every `megaBossInterval` (default 120 s). Large, high HP, 300 XP, aura particles, drops chest.
+  - **IRS boss:** Every `bossInterval` (180 s). After 15 min: `bossIntervalLate` (90 s). After 20 min: `bossIntervalVeryLate` (10 s).
+  - **CEO boss:** Once at `ceoSpawnTime` (600 s).
+  - **MegaBoss:** Every `megaBossInterval` (120 s). After 15 min: `megaBossIntervalLate` (60 s). After 20 min: `bossIntervalVeryLate` (10 s). Large, high HP, 300 XP, aura particles, drops chest.
+  - **Thresholds:** `moreBossesAfterTime` = 900 s (15 min), `moreBossesAfterTime2` = 1200 s (20 min).
 
 Spawn position is at `spawnRadius` from the player (off-screen). Difficulty tier is set on the spawned enemy for HP/speed scaling.
 

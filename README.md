@@ -53,7 +53,7 @@ Expand your portfolio by leveling up to get new items.
 - **Obstacles:** Office furniture (desks, chairs, walls) is placed randomly; player and enemies cannot walk through them (insurmountable, blocking colliders).
 - **Foreground sync:** The tiled foreground background scrolls with the camera; obstacles, XP orbs, and crypto miner rigs move with it so they don’t slide on the ground.
 - **Score:** Net Worth = number of enemies killed (no time-based score).
-- **Difficulty:** Spawn rate and enemy mix escalate every 30 s (tier). Bosses: IRS every 3 min, MegaBoss every 2 min, CEO at 10 min.
+- **Difficulty:** Spawn rate and enemy mix escalate every 30 s (tier). **Bosses:** IRS every 3 min, MegaBoss every 2 min, CEO once at 10 min. **After 15 min:** IRS every 1.5 min, MegaBoss every 1 min. **After 20 min:** IRS and MegaBoss every 10 s.
 
 ---
 
