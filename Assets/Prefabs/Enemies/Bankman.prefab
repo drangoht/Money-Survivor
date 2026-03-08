@@ -132,6 +132,7 @@ GameObject:
   - component: {fileID: 2082553460807961712}
   - component: {fileID: 1773500156552883938}
   - component: {fileID: 5844100833565255521}
+  - component: {fileID: 6335132878474415458}
   m_Layer: 0
   m_Name: Bankman
   m_TagString: Untagged
@@ -233,4 +234,41 @@ MonoBehaviour:
   data: {fileID: 11400000, guid: 578e6cb86daf6534f8eb69fddea9c7e2, type: 2}
   xpOrbPrefab: {fileID: 6135278874558500445, guid: 68067151309cb0b4bb873ab80b39045e, type: 3}
   hitParticlePrefab: {fileID: 1615597018830496104, guid: 8887b13d945fad6428b3a64045c59b65, type: 3}
+  chestPrefab: {fileID: 0}
   poolTag: Bankman
+--- !u!58 &6335132878474415458
+CircleCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6784598242117028729}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 0
+  m_UsedByEffector: 0
+  m_CompositeOperation: 0
+  m_CompositeOrder: 0
+  m_Offset: {x: 0, y: 0}
+  m_Radius: 0.38

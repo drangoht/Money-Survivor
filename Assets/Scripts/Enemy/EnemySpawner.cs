@@ -15,6 +15,7 @@ public class EnemySpawner : MonoBehaviour
     public GameObject irsPrefab;       // boss 1
     public GameObject bouncerPrefab;   // tank
     public GameObject ceoPrefab;       // endgame boss
+    public GameObject megaBossPrefab;  // big boss every 2 min, lots of XP
 
     [Header("Spawn Settings")]
     [Tooltip("How far off-screen enemies spawn (world units from player)")]
@@ -32,9 +33,13 @@ public class EnemySpawner : MonoBehaviour
     [Tooltip("CEO boss spawns at this absolute time")]
     public float ceoSpawnTime = 600f; // 10 mins
 
+    [Tooltip("Mega boss spawns every N seconds (big, tough, lots of XP)")]
+    public float megaBossInterval = 120f; // 2 mins
+
     private float _spawnTimer;
     private float _tierTimer;
     private float _bossTimer;
+    private float _megaBossTimer;
     private bool  _ceoSpawned;
     private int   _tier;
 
@@ -95,6 +100,14 @@ public class EnemySpawner : MonoBehaviour
         {
             _ceoSpawned = true;
             SpawnEnemy(ceoPrefab);
+        }
+
+        // Mega boss timer (every 2 minutes: big, tough, lots of XP)
+        _megaBossTimer += Time.deltaTime;
+        if (_megaBossTimer >= megaBossInterval && megaBossPrefab != null)
+        {
+            _megaBossTimer = 0f;
+            SpawnEnemy(megaBossPrefab);
         }
 
         // Regular spawns

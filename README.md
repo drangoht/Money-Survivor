@@ -2,66 +2,94 @@
 
 **Money Survivor** is a fast-paced, top-down action roguelike ("bullet heaven") built entirely in Unity, themed around surviving a cyberpunk financial apocalypse. Play as a slick corporate CEO, use financially-themed weapons to fight off hordes of corrupt bankers and auditors, and maximize your Net Worth!
 
-## 🤖 Built with Google Antigravity
-This entire game—including core gameplay loops, enemy AI, a complete weapon upgrade system, dynamic UI, and the pixel art assets themselves—was built through pair programming and prompt-driven development using **Google Antigravity**. 
+## 🤖 Built with AI Pair Programming
+This entire game—including core gameplay loops, enemy AI, a complete weapon upgrade system, dynamic UI, office environments, and the pixel art assets themselves—was built through pair programming and prompt-driven development.
 
 ### 📚 Development History & Documentation
 For full transparency and to document the AI pair-programming process, the complete history and architecture have been preserved:
-- [Prompt History](prompt_history.md) - A full log of the exact user prompts used to build the game.
-- [Implementation Plan](implementation_plan.md) - The core software architecture and engine decisions.
-- [Development Walkthrough](walkthrough.md) - A step-by-step narrative of the problems encountered and solved during development.
+- [Prompt History](prompt_history.md) – A full log of the exact user prompts used to build the game.
+- [Implementation Plan](implementation_plan.md) – The core software architecture and engine decisions.
+- [Development Walkthrough](walkthrough.md) – A step-by-step narrative of the problems encountered and solved during development.
 
-The project structure is fundamentally unique: It avoids messy, unmergable Unity scenes and prefab metadata by using a custom **Editor Setup Script** (`GameSetup.cs`). 
-By simply running a single menu command (`MoneySurvivor → Setup Entire Project`), the AI's code dynamically generates all GameObjects, assigns all script logic, builds the necessary prefabs, bakes the scenes, and creates the ScriptableObjects that run the game database.
+The project structure is fundamentally unique: It avoids messy, unmergable Unity scenes and prefab metadata by using a custom **Editor Setup Script** (`GameSetup.cs`). By simply running a single menu command (**MoneySurvivor → Setup Entire Project**), the script dynamically generates all GameObjects, assigns all script logic, builds the necessary prefabs, bakes the scenes, and creates the ScriptableObjects that run the game database.
+
+---
+
+## ⚔️ Weapons (Wealth Acquisition)
+Expand your portfolio by leveling up to get new items.
+
+| Weapon | Description |
+|--------|-------------|
+| **Single Shot** | Reliable initial investment. Fires a high-speed projectile at the nearest enemy. |
+| **Coin Toss** | Throws heavy coins in all directions that deal collateral damage. |
+| **Bill Whip** | Sweeps a massive arc of dollar bills to hit all nearby enemies. |
+| **Compound Interest** | A persistent aura of damaging energy surrounding the player. |
+| **Credit Card** | Throws a piercing credit card that boomerangs back to you. |
+| **Cryptominer** | Deploys stationary mining rigs that act as area-of-effect damage zones. |
+| **Stock Options** | Shoots volatile market arrows with highly randomized damage per hit. |
+
+## 👹 Enemies & Bosses
+| Type | Role | Notes |
+|------|------|--------|
+| **Bankman** | Basic | Low HP, moderate speed. |
+| **ExWife** | Mid | Higher HP and damage. |
+| **Children** | Swarm | Fast, low HP. |
+| **Bouncer** | Tank | Slow, high HP. |
+| **IRS** | Boss | Spawns every 3 min. Drops chest. |
+| **CEO** | Boss | Spawns at 10 min. Drops chest. |
+| **MegaBoss** | Boss | Spawns every 2 min. Large (2.8× scale), 600 HP, 300 XP, red aura particles. Drops chest. |
+
+## 🎁 Power-Ups (Chests & Level-Up)
+- **Heal** / **Max HP** / **Speed** / **Damage** / **Pickup Radius** – Stat boosts.
+- **Restraining Order** – Weapons push enemies further away.
+- **Insider Trading** – +50% XP from orbs.
+- **Tax Evasion** – Longer invincibility after taking damage.
+
+---
+
+## 📐 Rules & Mechanics
+
+- **Movement bounds:** Player cannot leave the play area; position is clamped to ±95 units so you stay on the background.
+- **Obstacles:** Office furniture (desks, chairs, walls) is placed randomly; player and enemies cannot walk through them (insurmountable, blocking colliders).
+- **Foreground sync:** The tiled foreground background scrolls with the camera; obstacles, XP orbs, and crypto miner rigs move with it so they don’t slide on the ground.
+- **Score:** Net Worth = number of enemies killed (no time-based score).
+- **Difficulty:** Spawn rate and enemy mix escalate every 30 s (tier). Bosses: IRS every 3 min, MegaBoss every 2 min, CEO at 10 min.
 
 ---
 
 ## 📸 Screenshots & Artwork
 
-A showcase of the AI-generated pixel art assets that give the game its juicy, synthwave-finance aesthetic.
+A showcase of the AI-generated pixel art and procedural assets.
 
 ### The CEO
 The player character. A stylized banker in a sharp suit and sunglasses.
-<img src="Assets/ReadmeImages/player_sprite.png" width="128" />
 
 ### The Opposition
-Hordes of enemies representing the corrupted factions of the financial world (Bankmen, Loan Sharks, Tax Collectors, Auditors).
-<img src="Assets/ReadmeImages/enemy_sprite.png" width="128" />
+Hordes of enemies representing the corrupted factions of the financial world (Bankmen, Ex-Wife, Children, Bouncers, IRS, CEO, MegaBoss).
 
 ### The Corporate Floor
-A seamlessly tileable cyberpunk neon financial company office floor, featuring glowing lines and data server tiles.
-<img src="Assets/Sprites/scrolling_background.png" width="400" />
+- **Foreground:** Lighter tiled pattern with rectangular “glass” windows (striped blue) revealing the layer below.
+- **Underneath:** Blue sky with clouds; both layers use parallax scrolling.
 
 ### Splash Screen & Main Menu
-<img src="Assets/Sprites/splash_screen.png" width="800" />
+Custom splash and menus themed to the game.
 
 ---
 
-## ⚔️ Wealth Acquisition (Weapons)
-Expand your portfolio by leveling up to get new items.
+## 📈 Systems
 
-* **Single Shot:** Reliable initial investment. Fires a high-speed projectile at the nearest enemy.
-* **Coin Toss:** Throw heavy, physics-enabled coins into the fray that deal collateral damage.
-  <br><img src="Assets/ReadmeImages/coin_sprite.png" width="64" />
-* **Boomerang Card:** Fling a heavy credit card that slices through enemies, stops, and returns to your hand.
-  <br><img src="Assets/ReadmeImages/boomerang_sprite.png" width="64" />
-* **Bill Whip:** Sweep a massive arc of dollar bills in the direction you are moving to clear space.
-* **Compound Interest:** A persistent aura of damaging energy surrounding the player.
-* **Cryptominer:** Deploys stationary mining rigs that act as area-of-effect damage zones, burning enemies that step over them.
-* **Stock Options:** Shoots a volatile barrage of market arrows with highly randomized damage scaling per hit.
+- **Dynamic scaling:** As time survived increases, spawn rate and difficulty tier increase.
+- **Event bus:** Decoupled events for game state, level-up, and UI.
+- **Object pooling:** Enemies and particles use pooling for performance.
+- **Juicy combat:** Hit flashing, screen shake, XP orbs, particle emitters on hit/death.
+- **OnGUI UI:** HUD, pause menu, level-up cards, and game-over screen drawn with OnGUI.
 
-## 📈 Mechanics & Systems
-
-* **Dynamic Scaling:** As time Surviving increases, enemy spawn rates dramatically increase.
-* **Event Bus Architecture:** An elegant, decoupled event-driven system handles game state changes, leveling up, and UI updates without hard dependencies.
-* **Object Pooling:** To maintain smooth 60fps+ gameplay during the most intense swarm moments, all enemies and particles use memory-efficient object pooling.
-* **Juicy Combat:** Advanced visual feedback including Hit Flashing, screen shakes, floating XP orbs, and rich particle emitters on enemy death.
-* **Event-Driven UI:** Custom, stylized HUD and floating menus drawn cleanly with `OnGUI`.
+---
 
 ## 🚀 How to Play (Developer Setup)
 
-1. Clone or download the repository to an empty Unity Project.
+1. Clone or download the repository into a Unity project.
 2. Open the Unity Editor.
-3. In the top Menu Bar, click **`MoneySurvivor → Setup Entire Project`**.
-4. The custom editor scripts will run, automatically generating every Prefab, Sprite, ScriptableObject, and Scene.
-5. Open `Assets/Scenes/MainMenu.unity` and press **Play**!
+3. In the menu bar, click **MoneySurvivor → Setup Entire Project**.
+4. The editor script will generate Prefabs, Sprites, ScriptableObjects, and Scenes.
+5. Open **Assets/Scenes/MainMenu.unity** (or **Game.unity**) and press **Play**.

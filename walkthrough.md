@@ -2,40 +2,62 @@
 
 This document records the step-by-step process used to build and refine the game alongside the AI up to its current state.
 
+---
+
 ## Phase 1: Foundational Layout
-1.  **Project Initialization:** Created the barebones Unity project and immediately instantiated `GameSetup.cs`.
-2.  **Asset Generation:** Set up `GameSetup.cs` to write completely code-generated primitive textures, and then transitioned to using AI-generated pixel-art sprites (Player CEO, Enemies, Coins).
-3.  **Basic Loop:** Implemented the player controller with a virtual camera follow script, floating enemies that track the player, and barebones OnGUI tracking.
+
+1. **Project Initialization:** Created the barebones Unity project and instantiated `GameSetup.cs`.
+2. **Asset Generation:** Set up `GameSetup.cs` to write code-generated primitive textures, then transitioned to using AI-generated pixel-art sprites (Player CEO, Enemies, Coins).
+3. **Basic Loop:** Implemented the player controller with a virtual camera follow script, floating enemies that track the player, and barebones OnGUI tracking.
+
+---
 
 ## Phase 2: Solving "Bullet Heaven" Complexity
-1.  **Weapon Instantiation:** Implemented `LevelUpManager`. Initially faced errors attaching `Rigidbody2D` to weapons that weren't meant to use them (like the sweeping Bill Whip and the Orbiting Dividend Shield).
-2.  **Physics vs. Transforms:** 
-    *   *Issue:* Shield coins were stuck in place or jittering. 
-    *   *Fix:* Disabled `rb.simulated = false` on instantiation for specific orbital weapons so `Update()` trigonometric loops weren't fighting Unity's physics engine.
-3.  **Visual Flare:** The Whip originally spawned just a single ugly square. Upgraded it to spawn an array of boomerang sprites in a sweeping 180-degree arc using `WhipVisualFader` coroutines to stagger fading out.
-4.  **Item Scales:** Re-scaled the credit card, dividend shield, and physical chests to be more visible. Adjusted the chest from 1.5x up to 2.5x manually through the Editor setup forcing cache invalidations.
+
+1. **Weapon Instantiation:** Implemented `LevelUpManager`. Initially faced errors attaching `Rigidbody2D` to weapons that weren’t meant to use them (e.g. Bill Whip, orbital-style weapons).
+2. **Physics vs. Transforms:** Shield coins were stuck or jittering; fixed by disabling physics simulation where position is driven manually (e.g. orbitals).
+3. **Visual Flare:** Bill Whip upgraded to spawn an array of sprites in a sweeping arc with `WhipVisualFader` for staggered fade-out.
+4. **Item Scales:** Credit card, shield, and chests rescaled for visibility; chest size and cache invalidation handled in Editor setup.
+
+---
 
 ## Phase 3: Menus and Thematic Overhaul
-1.  **Pause Feature:** Added the ability to hook the `Escape` key inside the `GameManager` to toggle a `GameState.Paused` state, effectively stopping `Time.timeScale`.
-2.  **Comprehensive UI:** Rewrote the `HUDController.cs` to display a detailed run-summary pause menu showing base stats (speed, pickup radius, HP) and iterating over all uniquely equipped `WeaponBase` objects the player collected.
-3.  **Cyberpunk Finance Re-skin:** 
-    *   Prompted the AI to generate a cool "Banker/CEO" Splash Screen using `generate_image`.
-    *   Updated the `GameSetup.cs` parser to load this Image Texture into variables dynamically injected into `MainMenuUI`, `GameOverUI`, etc.
-    *   Updated the player sprite to a standing pixel-art replica of the new splash screen artwork.
-    *   Regenerated the procedural gray grid background into a seamless Cyberpunk Server Floor office tileset.
-    *   Rewrote the `HUDController` primitive boxes to utilize faux-neon lighting shadows by rendering duplicated slightly larger rectangles with low alphas across the health and XP bars.
-4.  **Sprite Caching Bugs:** Ran into several issues where the `GameSetup.Editor` wasn't properly updating the textures because of Unity's `.asset` caching pipeline. We utilized PowerShell commands inside the AI agent to brutally `Remove-Item` both `_Sprite.asset` and `_Tex.asset` hidden files alongside the prefabs folder to force pure, clean rebuilds.
+
+1. **Pause Feature:** Escape toggles `GameState.Paused` and `Time.timeScale` via `GameManager`.
+2. **Comprehensive UI:** HUDController shows a run-summary pause menu with base stats and all equipped `WeaponBase` objects.
+3. **Cyberpunk Finance Re-skin:** Splash screen, player sprite, and HUD styled to finance/CEO theme; background updated to office/cyberpunk look.
+4. **Sprite Caching:** Addressed Unity `.asset` caching by forcing clean rebuilds of sprites and prefabs where needed.
+
+---
 
 ## Phase 4: GitHub Ready
-1.  **Documentation:** Wrote a dynamic `README.md` natively in the directory.
-2.  **Transparency Pass:** The game relies on stripping `#FF00FF` magenta natively. This broke the README images. The AI wrote a PowerShell script to inject into `Assets/Sprites/*` to cleanly calculate the pixel alpha transparency for the GitHub markdown views.
-3.  **Git Isolation:** Transparency broke the `GameSetup.cs` file parser! Fixed by reverting the original files, duplicating them into a `ReadmeImages/` folder purely for GitHub display, stripping the clones, and committing standard magenta sprites back into the game structure.
 
-## Phase 5: Chest System Overhaul & Expanded Item Pool
-1.  **Chest Rebalance:** Deprecated the random-spawning `ChestSpawner.cs`. Boss enemies (IRS Inspector, CEO) were flagged specifically to drop a highly customized Chest payload on death instead. Open the Chests to trigger a massive, erupting golden particle fountain.
-2.  **Item Roster Shakeup:** 
-    *   Removed `Dividend Shield`.
-    *   Added **Cryptominer** (Weapon): Drops stationary Area-of-Effect mining rigs that apply burning tick damage to enemies.
-    *   Added **Stock Options** (Weapon): Spits out volatile neon arrows (Up/Down curves). Damage payloads heavily randomize +/- 50% of the base value on each hit, visually scaling dynamically based on the random multiplier!
-    *   Added **Insider Trading** (Powerup): Magnifies XP gain from orbs directly.
-    *   Added **Tax Evasion** (Powerup): Passively buffs your post-damage Invincibility Frames.
+1. **Documentation:** README and markdown docs added.
+2. **Transparency:** Prompt history, walkthrough, and implementation plan written and linked.
+3. **Art Handling:** ReadmeImages folder used for display; game assets kept in main Sprites structure.
+
+---
+
+## Phase 5: Chest System & Expanded Item Pool
+
+1. **Chest Rebalance:** Random `ChestSpawner` deprecated; bosses (IRS, CEO) drop a chest on death. Chest open triggers golden particle burst.
+2. **Item Roster:** Cryptominer (stationary AOE rigs), Stock Options (volatile arrows), Insider Trading (XP gain), Tax Evasion (i-frames). Dividend Shield removed.
+
+---
+
+## Phase 6: Background, Obstacles & Bounds
+
+1. **Simpler Background:** Replaced busy background with a flat colour and faint vertical stripes (editor-generated texture).
+2. **Tiled Foreground & Parallax:** Foreground became a tiled pattern with rectangular “glass” windows (striped blue) revealing a second layer; underneath layer redesigned as blue sky with clouds (Perlin noise). Both layers scroll for parallax.
+3. **Obstacles:** Office furniture (desks, chairs, walls) added as insurmountable obstacles: generated sprites in GameSetup, prefabs with `BoxCollider2D` (non-trigger), random placement in Game scene, parented to the foreground quad so they move with the ground.
+4. **Player Bounds:** `PlayerController` gained `useMovementBounds`, `minBounds`, `maxBounds`; position clamped so the player cannot leave the play area. GameSetup enables bounds on the Player prefab and when updating existing prefab.
+5. **Enemies vs. Obstacles:** Enemies given a second, non-trigger collider so they are blocked by office obstacles and cannot cross them.
+6. **Foreground Scroll Sync:** So obstacles, XP orbs, and crypto miner rigs don’t slide on the ground, `ScrollingBackground` got `moveTransformWithScroll`: when true, the foreground quad’s transform is moved by the scroll delta instead of only the texture offset, and XP orbs and `LingeringAOE` instances are moved by the same delta.
+
+---
+
+## Phase 7: MegaBoss & Polish
+
+1. **MegaBoss:** New boss spawning every 2 minutes: large (scale 2.8), 600 HP, 40 contact damage, 300 XP, drops chest. Uses same enemy pipeline (EnemyData, prefab, EnemySpawner timer).
+2. **Boss Aura:** MegaBoss prefab given a child ParticleSystem (“BossAura”): local-space, red-tinted, sphere-shaped aura for visual emphasis.
+3. **Bug Fix:** Resolved CS0106 (invalid `private` on “item”) by fixing a missing closing brace in `MakeEnemyPrefab` so `AddBossAuraParticles` is a class-level method, not a local function.

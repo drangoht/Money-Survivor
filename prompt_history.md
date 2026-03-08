@@ -1,11 +1,17 @@
 # Money Survivor: Prompt History Backup
 
-This document serves as a backup of the prompt history and user requests used to build **Money Survivor**. This can be fed into future AI-assisted development sessions to provide full context on how the game evolved.
+This document serves as a backup of the prompt history and user requests used to build **Money Survivor**. It can be used in future AI-assisted development sessions to provide full context on how the game evolved.
+
+---
 
 ## Initial Setup & Game Foundation
+
 * **Prompt:** Create a "vampire survivor" style game in Unity called "Money-Survivor" using only standard Unity components and OnGUI for the UI. Do not use any external packages (no Unity UI, no Cinemachine). Generate all prefabs, scenes, and scriptable objects automatically from a single editor script.
 
-### 1. Fixing Weapons & Core Gameplay
+---
+
+## 1. Fixing Weapons & Core Gameplay
+
 * **Prompt:** "i don't see coin toss and credit card weapon"
 * **Prompt:** "credit card is not visible neither than shield, and whip display a square instead of a cool arc circle animated with effect"
 * **Prompt:** "Assets\Editor\GameSetup.cs(761,80): error CS0103: The name '_booPrefab' does not exist in the current context"
@@ -20,17 +26,26 @@ This document serves as a backup of the prompt history and user requests used to
 * **Prompt:** "you raise the size of dividend shield and not the chest found on the map revert it, and apply my request on the chest"
 * **Prompt:** "Continue"
 
-### 2. UI Overhaul & Menus
+---
+
+## 2. UI Overhaul & Menus
+
 * **Prompt:** "add pause menu with stats about actually equipped object, speed, numbers of bullets, all stats related to this run, we can also go back to main menu from here"
 
-### 3. Visual & Aesthetic Redesign (Cyberpunk Finance)
+---
+
+## 3. Visual & Aesthetic Redesign (Cyberpunk Finance)
+
 * **Prompt:** "add a splash screen with image inspired by sprite player, with some bills and coin. Redesign all the menus this way, with design part related to this gaming theme."
 * **Prompt:** "redesign player sprite with inspiration from the cool character on splash screen background"
 * **Prompt:** "the sprite did nt change on game"
 * **Prompt:** "ok now redesign in game overlay (progress bar life and xp, score) inspired by this new design. redeisgn game background to represent financial company office too"
 * **Prompt:** "the background did not change"
 
-### 4. Git & Markdown Documentation
+---
+
+## 4. Git & Markdown Documentation
+
 * **Prompt:** "create readme.MD for github, explaining how this game was made using Google gravity and a documentation of this game with screenshot based on assets"
 * **Prompt:** "for readme use asset with transparent background inside of purple"
 * **Prompt:** "copy the assert for readme with transparent backgrouund, it does not work now"
@@ -38,6 +53,47 @@ This document serves as a backup of the prompt history and user requests used to
 * **Prompt:** "updtae readme.MD wtih link to prompt_history.md, implementation_plan.ms and walkthrough.md"
 * **Prompt:** "so for now each time i prompt update the prompt_history.md file too"
 
-### 5. Advanced Enemy Roster (Planned)
+---
+
+## 5. Advanced Enemy Roster
+
 * **Prompt:** "Add different type of enemies with different sprites: Ex-wife, children, inspecteur des impots, fisc... Each type has is particular life point and animations and specific particule when hitted and die"
 * **Prompt:** "save the implementation plan, so we will continue tomorrow"
+
+---
+
+## 6. Background Redesign & Parallax
+
+* **Prompt:** "look for md files to gather some details about this unity game and browse all files to understand how this survivor game is working"
+* **Prompt:** "i want to change background image in game to something more simple, it is too messy for now. So generate new background and update the old one"
+* **Prompt:** "flat color with faint vertical stripes"
+* **Prompt:** "create the image yourself"
+* **Prompt:** "you can use the editor script to do that"
+* **Prompt:** "update background with tiles instead of vertical sprite, more light color, can you add some hole in background for a parallax scrolling with another background under it"
+* **Prompt:** "flat color with faint vertical stripes" (refined)
+* **Prompt:** "the hole in foreground background a littlet more large with an effect like stripped blue line to represent a window. Update the underneath background with more motif to see the parralax scrolling in action maybe making cloud in underneath background"
+* **Prompt:** "redesign underneath background with clouds and blue sky"
+* **Prompt:** "avoid player to exit the background, add border all around it, make a smooth finish of the underneath background to"
+* **Prompt:** "as seen in image the player can move outside the background it must not be able too"
+
+---
+
+## 7. Office Obstacles & Collision
+
+* **Prompt:** "ok now add some random tables, chair, walls, all these obstacle mus be insurmountable they need to be design like in financial office"
+* **Prompt:** "the obstacles must follows the foreground, and enemies cannot cross obstacle too"
+* **Prompt:** "the scrolling of foreground background must be synchronized with obstacle, xp orb, crypto miner, so we feel the don't move on the ground"
+
+---
+
+## 8. MegaBoss & Visual Polish
+
+* **Prompt:** "now i want a big boss to appear every 2 minutes dropping lot of xp, it must be at least twice larger and stronger to kill than other enemie"
+* **Prompt:** "raise the size of the boss and add some particle effect on it"
+* **Prompt:** (Compiler) "Assets\Editor\GameSetup.cs(957,5): error CS0106: The modifier 'private' is not valid for this item"
+
+---
+
+## 9. Documentation
+
+* **Prompt:** "update all md files with new weapons, enemies, rules, alle the prompts use and implementation plans"

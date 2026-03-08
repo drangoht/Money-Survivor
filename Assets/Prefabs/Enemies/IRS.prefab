@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 8180382697270831014}
   - component: {fileID: 6290051217172046449}
   - component: {fileID: 5168742410629216720}
+  - component: {fileID: 7625370636859363416}
   m_Layer: 0
   m_Name: IRS
   m_TagString: Untagged
@@ -113,7 +114,44 @@ MonoBehaviour:
   data: {fileID: 11400000, guid: 367e1eaed67153f439bedd91e1500dbc, type: 2}
   xpOrbPrefab: {fileID: 6135278874558500445, guid: 68067151309cb0b4bb873ab80b39045e, type: 3}
   hitParticlePrefab: {fileID: 1615597018830496104, guid: 8887b13d945fad6428b3a64045c59b65, type: 3}
+  chestPrefab: {fileID: 0}
   poolTag: IRS
+--- !u!58 &7625370636859363416
+CircleCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 136180789389988231}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 0
+  m_UsedByEffector: 0
+  m_CompositeOperation: 0
+  m_CompositeOrder: 0
+  m_Offset: {x: 0, y: 0}
+  m_Radius: 0.38
 --- !u!1 &6360615911526026539
 GameObject:
   m_ObjectHideFlags: 0

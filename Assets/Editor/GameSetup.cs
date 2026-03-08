@@ -14,6 +14,7 @@ public static class GameSetup
 {
     private const string PrefabsPath   = "Assets/Prefabs";
     private const string EnemyPath     = "Assets/Prefabs/Enemies";
+    private const string ObstaclesPath  = "Assets/Prefabs/Obstacles";
     private const string ScenesPath    = "Assets/Scenes";
     private const string SOPath        = "Assets/ScriptableObjects";
     private const string EnemySOPath   = "Assets/ScriptableObjects/Enemies";
@@ -89,7 +90,7 @@ public static class GameSetup
         // Order matters: parent must exist before child
         string[] dirs =
         {
-            ScenesPath, SpritesPath, PrefabsPath, EnemyPath,
+            ScenesPath, SpritesPath, PrefabsPath, EnemyPath, ObstaclesPath,
             SOPath, EnemySOPath, WeaponSOPath, PowerUpSOPath,
         };
 
@@ -114,6 +115,7 @@ public static class GameSetup
 
     private static Sprite _circle, _square;
     private static Sprite _playerSprite, _enemySprite, _coinSprite, _bgSpriteFront, _bgSpriteBack;
+    private static Sprite _deskSprite, _chairSprite, _wallSprite;
     private static Sprite _xpOrbSprite, _boomerangSprite, _shieldSprite, _splashSprite, _chestSprite;
     private static Sprite _exWifeSprite, _childrenSprite, _irsSprite, _cryptoSprite, _stockSprite;
 
@@ -145,6 +147,11 @@ public static class GameSetup
         _chestSprite     = LoadSingleSprite(SpritesPath + "/chest_sprite_1772809376512.png", "chest");
         _cryptoSprite    = LoadSingleSprite(SpritesPath + "/cryptominer_sprite_1772827344346.png", "cryptominer_V2");
         _stockSprite     = LoadSingleSprite(SpritesPath + "/stock_options_sprite_1772827497492.png", "stock_options_V2");
+
+        // Office obstacles (financial office style)
+        _deskSprite  = GetOrCreateSprite(SpritesPath + "/office_desk.png",  CreateOfficeDeskTex(128, 64));
+        _chairSprite = GetOrCreateSprite(SpritesPath + "/office_chair.png", CreateOfficeChairTex(64, 64));
+        _wallSprite  = GetOrCreateSprite(SpritesPath + "/office_wall.png",  CreateOfficeWallTex(32, 128));
 
         Log($"  Sprites ready");
     }
@@ -484,11 +491,74 @@ public static class GameSetup
         return tex;
     }
 
+    private static Texture2D CreateOfficeDeskTex(int width, int height)
+    {
+        var tex = new Texture2D(width, height, TextureFormat.RGBA32, false);
+        Color woodDark  = new Color(0.35f, 0.22f, 0.12f);  // dark wood
+        Color woodMid   = new Color(0.52f, 0.38f, 0.22f); // desk surface
+        Color woodEdge  = new Color(0.28f, 0.18f, 0.10f); // edge
+        int edge = 2;
+        for (int y = 0; y < height; y++)
+        for (int x = 0; x < width; x++)
+        {
+            bool atEdge = x < edge || x >= width - edge || y < edge || y >= height - edge;
+            bool topStrip = y >= height - edge - 2 && y < height - edge; // thin darker "front"
+            if (atEdge) tex.SetPixel(x, y, woodEdge);
+            else if (topStrip) tex.SetPixel(x, y, woodDark);
+            else tex.SetPixel(x, y, woodMid);
+        }
+        tex.filterMode = FilterMode.Bilinear;
+        tex.Apply();
+        return tex;
+    }
+
+    private static Texture2D CreateOfficeChairTex(int width, int height)
+    {
+        var tex = new Texture2D(width, height, TextureFormat.RGBA32, false);
+        Color seatDark = new Color(0.15f, 0.15f, 0.18f);   // black/gray seat
+        Color seatHigh = new Color(0.25f, 0.25f, 0.30f);   // highlight
+        Vector2 center = new Vector2(width / 2f, height / 2f);
+        float rx = width / 2f - 2f, ry = height / 2f - 2f;
+        for (int y = 0; y < height; y++)
+        for (int x = 0; x < width; x++)
+        {
+            float nx = (x - center.x) / rx;
+            float ny = (y - center.y) / ry;
+            if (nx * nx + ny * ny <= 1f)
+            {
+                bool highlight = (x + y) % 4 < 2 && y > height / 2;
+                tex.SetPixel(x, y, highlight ? seatHigh : seatDark);
+            }
+            else
+                tex.SetPixel(x, y, Color.clear);
+        }
+        tex.filterMode = FilterMode.Bilinear;
+        tex.Apply();
+        return tex;
+    }
+
+    private static Texture2D CreateOfficeWallTex(int width, int height)
+    {
+        var tex = new Texture2D(width, height, TextureFormat.RGBA32, false);
+        Color wallMain = new Color(0.75f, 0.76f, 0.78f);  // light gray cubicle
+        Color wallEdge = new Color(0.55f, 0.56f, 0.58f);  // frame
+        int edge = 1;
+        for (int y = 0; y < height; y++)
+        for (int x = 0; x < width; x++)
+        {
+            bool atEdge = x < edge || x >= width - edge || y < edge || y >= height - edge;
+            tex.SetPixel(x, y, atEdge ? wallEdge : wallMain);
+        }
+        tex.filterMode = FilterMode.Bilinear;
+        tex.Apply();
+        return tex;
+    }
+
     // ══════════════════════════════════════════════════════════════════════════
     // SCRIPTABLE OBJECTS
     // ══════════════════════════════════════════════════════════════════════════
 
-    private static EnemyData  _bankman, _exWife, _children, _irs, _bouncer, _ceo;
+    private static EnemyData  _bankman, _exWife, _children, _irs, _bouncer, _ceo, _megaBoss;
     private static WeaponData _coinData, _whipData,  _auraData, _cardData, _singleShotData, _cryptoData, _stockData;
     private static PowerUpData _healPU, _speedPU, _damagePU, _magnetPU, _radiusPU, _repelPU, _insiderPU, _taxPU;
 
@@ -500,6 +570,7 @@ public static class GameSetup
         _irs      = MakeEnemy("IRS",      new Color(.1f,.8f,.2f), 250f, 0.9f, 25f, 50,  1.2f, 1.01f, new Color(.1f,.8f,.2f));
         _bouncer  = MakeEnemy("Bouncer",  new Color(.3f,.3f,.3f), 150f, 0.6f, 15f, 40,  1.1f, 1.02f, new Color(.3f,.3f,.3f));
         _ceo      = MakeEnemy("CEO",      new Color(1f,.9f,.1f), 2500f, 2.5f, 30f, 500, 1.02f,1.01f, new Color(1f,.9f,.1f));
+        _megaBoss = MakeEnemy("MegaBoss", new Color(0.6f, 0.1f, 0.1f), 600f, 0.5f, 40f, 300, 1.15f, 1.01f, new Color(0.9f, 0.2f, 0.2f), true);
 
         _singleShotData = MakeWeapon("SingleShotData", "Aimed Bullet",
             "Fires a projectile directly at the nearest enemy.",
@@ -638,7 +709,8 @@ public static class GameSetup
 
     private static GameObject _playerPrefab, _coinPrefab, _orbPrefab, _chestPrefab;
     private static GameObject _cardPrefab, _cryptoPrefab, _stockPrefab, _hitParticlesPrefab;
-    private static GameObject _p1, _p2, _p3, _p4, _p5, _p6; // enemy prefabs
+    private static GameObject _deskPrefab, _chairPrefab, _wallPrefab;
+    private static GameObject _p1, _p2, _p3, _p4, _p5, _p6, _p7; // enemy prefabs
 
     private static void CreatePrefabs()
     {
@@ -656,6 +728,10 @@ public static class GameSetup
         _chestPrefab        = MakeChest();
         _hitParticlesPrefab = MakeHitParticles();
         _playerPrefab       = MakePlayer();
+
+        _deskPrefab  = MakeObstaclePrefab("OfficeDesk",  _deskSprite,  2.4f, 1.2f);
+        _chairPrefab = MakeObstaclePrefab("OfficeChair", _chairSprite, 0.9f, 0.9f);
+        _wallPrefab  = MakeObstaclePrefab("OfficeWall",  _wallSprite,  0.4f, 3f);
         
         _p1 = MakeEnemyPrefab("Bankman",  _bankman,  _enemySprite,   0.7f, 0.03f, 5f);
         _p2 = MakeEnemyPrefab("ExWife",   _exWife,   _exWifeSprite,  0.8f, 0.04f, 4f);
@@ -663,12 +739,15 @@ public static class GameSetup
         _p4 = MakeEnemyPrefab("IRS",      _irs,      _irsSprite,     0.9f, 0.02f, 3f);
         _p5 = MakeEnemyPrefab("Bouncer",  _bouncer,  _enemySprite,   1.2f, 0.03f, 4f);
         _p6 = MakeEnemyPrefab("CEO",      _ceo,      _enemySprite,   2.0f, 0.03f, 4f);
+        _p7 = MakeEnemyPrefab("MegaBoss", _megaBoss, _enemySprite,   2.8f, 0.02f, 3f, true);
 
         // Update the SOs with the boss flag
         _irs.isBoss = true;
         _ceo.isBoss = true;
+        _megaBoss.isBoss = true;
         UnityEditor.EditorUtility.SetDirty(_irs);
         UnityEditor.EditorUtility.SetDirty(_ceo);
+        UnityEditor.EditorUtility.SetDirty(_megaBoss);
         
         Log("  All prefabs created");
     }
@@ -789,11 +868,61 @@ public static class GameSetup
         return Save(root, path);
     }
 
-    private static GameObject MakeEnemyPrefab(string name, EnemyData data, Sprite sprite, float scale, float bobAmt, float bobSpd)
+    private static GameObject MakeObstaclePrefab(string name, Sprite sprite, float worldW, float worldH)
+    {
+        string path = ObstaclesPath + "/" + name + ".prefab";
+        var ex = AssetDatabase.LoadAssetAtPath<GameObject>(path);
+        if (ex != null) return ex;
+
+        var root = new GameObject(name);
+        root.tag = "Untagged";
+        float suW = sprite.rect.width / 100f;
+        float suH = sprite.rect.height / 100f;
+        float scaleX = worldW / suW;
+        float scaleY = worldH / suH;
+        var srChild = Sprite2D(root, sprite, Color.white, 0, 1f);
+        srChild.transform.localScale = new Vector3(scaleX, scaleY, 1f);
+
+        var col = root.AddComponent<BoxCollider2D>();
+        col.size = new Vector2(worldW, worldH);
+        col.isTrigger = false;
+        col.offset = Vector2.zero;
+
+        return Save(root, path);
+    }
+
+    private static GameObject MakeEnemyPrefab(string name, EnemyData data, Sprite sprite, float scale, float bobAmt, float bobSpd, bool addAuraParticles = false)
     {
         string path = EnemyPath + "/" + name + ".prefab";
         var ex = AssetDatabase.LoadAssetAtPath<GameObject>(path);
-        if (ex != null) return ex;
+        if (ex != null)
+        {
+            if (addAuraParticles && ex.transform.Find("BossAura") == null)
+            {
+                AssetDatabase.DeleteAsset(path);
+                AssetDatabase.Refresh();
+            }
+            else if (!addAuraParticles)
+            {
+                var cols = ex.GetComponents<CircleCollider2D>();
+                if (cols.Length < 2)
+            {
+                var contents = PrefabUtility.LoadPrefabContents(path);
+                if (contents != null)
+                {
+                    var add = contents.AddComponent<CircleCollider2D>();
+                    add.isTrigger = false;
+                    add.radius = 0.38f;
+                    PrefabUtility.SaveAsPrefabAsset(contents, path);
+                    PrefabUtility.UnloadPrefabContents(contents);
+                    Log($"  Enemy prefab updated with obstacle collider: {name}");
+                }
+                return ex;
+            }
+            else
+                return ex; // already has BossAura
+        }
+        }
 
         var root = new GameObject(name);
         root.tag = "Enemy";
@@ -809,13 +938,64 @@ public static class GameSetup
         
         var rb = root.AddComponent<Rigidbody2D>();
         rb.gravityScale = 0f; rb.freezeRotation = true;
-        var col = root.AddComponent<CircleCollider2D>();
-        col.isTrigger = true; col.radius = 0.4f;
+        var colTrigger = root.AddComponent<CircleCollider2D>();
+        colTrigger.isTrigger = true;
+        colTrigger.radius = 0.4f;
+        var colBlock = root.AddComponent<CircleCollider2D>();
+        colBlock.isTrigger = false;
+        colBlock.radius = 0.38f;
         var eb = root.AddComponent<EnemyBase>();
         eb.data = data; eb.poolTag = name;
         eb.xpOrbPrefab = _orbPrefab;
         eb.hitParticlePrefab = _hitParticlesPrefab; // Assign the particle prefab
+
+        if (addAuraParticles)
+            AddBossAuraParticles(root, data != null ? data.hitParticleColor : new Color(0.9f, 0.2f, 0.2f));
+
         return Save(root, path);
+    }
+
+    private static void AddBossAuraParticles(GameObject parent, Color auraColor)
+    {
+        var go = new GameObject("BossAura");
+        go.transform.SetParent(parent.transform);
+        go.transform.localPosition = Vector3.zero;
+        go.transform.localScale = Vector3.one;
+
+        var ps = go.AddComponent<ParticleSystem>();
+        var psr = go.GetComponent<ParticleSystemRenderer>();
+        psr.material = new Material(Shader.Find("Sprites/Default"));
+        psr.sortingOrder = 0;
+
+        var main = ps.main;
+        main.duration = 9999f;
+        main.loop = true;
+        main.startLifetime = new ParticleSystem.MinMaxCurve(0.8f, 1.4f);
+        main.startSpeed = new ParticleSystem.MinMaxCurve(0.3f, 0.8f);
+        main.startSize = new ParticleSystem.MinMaxCurve(0.25f, 0.5f);
+        main.startColor = new ParticleSystem.MinMaxGradient(auraColor, new Color(auraColor.r, auraColor.g, auraColor.b, 0.3f));
+        main.simulationSpace = ParticleSystemSimulationSpace.Local;
+        main.maxParticles = 80;
+
+        var em = ps.emission;
+        em.rateOverTime = 25f;
+
+        var shape = ps.shape;
+        shape.shapeType = ParticleSystemShapeType.Sphere;
+        shape.radius = 1.2f;
+
+        var col = ps.colorOverLifetime;
+        col.enabled = true;
+        var grad = new Gradient();
+        grad.SetKeys(
+            new GradientColorKey[] { new GradientColorKey(auraColor, 0f), new GradientColorKey(auraColor, 1f) },
+            new GradientAlphaKey[] { new GradientAlphaKey(0.6f, 0f), new GradientAlphaKey(0f, 1f) }
+        );
+        col.color = new ParticleSystem.MinMaxGradient(grad);
+
+        var size = ps.sizeOverLifetime;
+        size.enabled = true;
+        size.size = new ParticleSystem.MinMaxCurve(1f, 0.2f);
     }
 
     private static GameObject MakeHitParticles()
@@ -1008,6 +1188,35 @@ public static class GameSetup
         bgNearRenderer.sortingOrder = -1500; // in front of far layer, still behind gameplay sprites
         var nearScroll = bgNear.AddComponent<ScrollingBackground>();
         nearScroll.scrollScale = 0.025f;
+        nearScroll.moveTransformWithScroll = true; // sync with obstacles, orbs, crypto miners so they don't slide on the ground
+
+        // Office obstacles (insurmountable): parent to foreground so they follow it; block player and enemies
+        float boundsMargin = 88f;
+        float clearRadius = 5f;
+        UnityEngine.Random.InitState(12345);
+        for (int i = 0; i < 12; i++)
+        {
+            Vector2 pos = RandomPositionInBounds(boundsMargin, clearRadius);
+            var o = (GameObject)PrefabUtility.InstantiatePrefab(_deskPrefab);
+            o.transform.SetParent(bgNear.transform);
+            o.transform.localPosition = new Vector3(pos.x / 200f, pos.y / 200f, -50f);
+        }
+        for (int i = 0; i < 20; i++)
+        {
+            Vector2 pos = RandomPositionInBounds(boundsMargin, clearRadius);
+            var o = (GameObject)PrefabUtility.InstantiatePrefab(_chairPrefab);
+            o.transform.SetParent(bgNear.transform);
+            o.transform.localPosition = new Vector3(pos.x / 200f, pos.y / 200f, -50f);
+        }
+        for (int i = 0; i < 15; i++)
+        {
+            Vector2 pos = RandomPositionInBounds(boundsMargin, clearRadius);
+            var o = (GameObject)PrefabUtility.InstantiatePrefab(_wallPrefab);
+            o.transform.SetParent(bgNear.transform);
+            o.transform.localPosition = new Vector3(pos.x / 200f, pos.y / 200f, -50f);
+            o.transform.rotation = Quaternion.Euler(0f, 0f, UnityEngine.Random.Range(0, 2) * 90f);
+        }
+        Log("  Office obstacles placed (parented to foreground)");
 
         // Player
         if (_playerPrefab == null)
@@ -1028,6 +1237,7 @@ public static class GameSetup
         sp.irsPrefab          = _p4;
         sp.bouncerPrefab      = _p5;
         sp.ceoPrefab          = _p6;
+        sp.megaBossPrefab     = _p7;
 
         var cs = sys.AddComponent<ChestSpawner>();
         cs.chestPrefab = _chestPrefab;
@@ -1115,6 +1325,18 @@ public static class GameSetup
         if (prefab == null) throw new Exception($"Failed to save prefab at {path}");
         Log($"  Saved prefab: {path}");
         return prefab;
+    }
+
+    private static Vector2 RandomPositionInBounds(float margin, float clearRadius)
+    {
+        for (int attempt = 0; attempt < 50; attempt++)
+        {
+            float x = UnityEngine.Random.Range(-margin, margin);
+            float y = UnityEngine.Random.Range(-margin, margin);
+            if (new Vector2(x, y).magnitude >= clearRadius)
+                return new Vector2(x, y);
+        }
+        return new Vector2(margin * 0.5f, margin * 0.5f);
     }
 }
 #endif
