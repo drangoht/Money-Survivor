@@ -16,17 +16,19 @@ The project structure is fundamentally unique: It avoids messy, unmergable Unity
 ---
 
 ## ⚔️ Weapons (Wealth Acquisition)
-Expand your portfolio by leveling up to get new items.
+Expand your portfolio by leveling up to get new items. You can hold **at most 3 weapons**; each weapon can be upgraded up to **level 10**. Weapon icons appear in the HUD thumbnails and on level-up cards.
 
-| Weapon | Description |
-|--------|-------------|
-| **Single Shot** | Reliable initial investment. Fires a high-speed projectile at the nearest enemy. |
-| **Coin Toss** | Throws heavy coins in all directions that deal collateral damage. |
-| **Bill Whip** | Sweeps a massive arc of dollar bills to hit all nearby enemies. |
-| **Compound Interest** | A persistent aura of damaging energy surrounding the player. |
-| **Credit Card** | Throws a piercing credit card that boomerangs back to you. |
-| **Cryptominer** | Deploys stationary mining rigs that act as area-of-effect damage zones. |
-| **Stock Options** | Shoots volatile market arrows with highly randomized damage per hit. |
+| Icon | Weapon | Description |
+|------|--------|-------------|
+| ![Aimed Bullet](Assets/Art/WeaponIcons/AimedBullet.png) | **Aimed Bullet** | Fires a high-speed projectile directly at the nearest enemy. Reliable single-target DPS. |
+| ![Coin Toss](Assets/Art/WeaponIcons/CoinToss.png) | **Coin Toss** | Throws gold coins in all directions that deal damage and pierce. Overkill-style spread. |
+| ![Bill Whip](Assets/Art/WeaponIcons/BillWhip.png) | **Bill Whip** | Sweeps a massive arc of dollar bills to hit all nearby enemies in range. |
+| ![Compound Interest](Assets/Art/WeaponIcons/CompoundInterest.png) | **Compound Interest** | A persistent aura around the player that damages and lightly pushes nearby enemies. Grows with level. |
+| ![Credit Card](Assets/Art/WeaponIcons/CreditCard.png) | **Credit Card** | Throws a piercing credit card that boomerangs back. High pierce, multiple cards at higher levels. |
+| ![Cryptominer](Assets/Art/WeaponIcons/Cryptominer.png) | **Cryptominer** | Drops stationary mining rigs that burn enemies in an area over time. |
+| ![Stock Options](Assets/Art/WeaponIcons/StockOptions.png) | **Stock Options** | Shoots volatile market arrows; damage randomizes significantly per hit. |
+
+All weapon icons use a **consistent square format** and **mauve (#E0B0FF) background** that is stripped to transparency at import (same approach as the XP orb). Icons are stored in `Assets/Art/WeaponIcons/` and are assigned when you run **MoneySurvivor → Setup Entire Project** or **Assign Weapon Icons**.
 
 ## 👹 Enemies & Bosses
 | Type | Role | Notes |
@@ -35,15 +37,16 @@ Expand your portfolio by leveling up to get new items.
 | **ExWife** | Mid | Higher HP and damage. |
 | **Children** | Swarm | Fast, low HP. |
 | **Bouncer** | Tank | Slow, high HP. |
-| **IRS** | Boss | Spawns every 3 min. Drops chest. |
-| **CEO** | Boss | Spawns at 10 min. Drops chest. |
-| **MegaBoss** | Boss | Spawns every 2 min. Large (2.8× scale), 600 HP, 300 XP, red aura particles. Drops chest. |
+| **IRS** | Boss | Spawns every 3 min. Large (1.8× scale), 600 HP, 55 contact damage, 120 XP. Drops chest. |
+| **CEO** | Boss | Spawns at 10 min. Very large (4× scale), 6000 HP, 70 contact damage, 1200 XP. Drops chest. |
+| **MegaBoss** | Boss | Spawns every 2 min. Huge (5.6× scale), 1500 HP, 90 contact damage, 700 XP, red aura particles. Drops chest. |
 
 ## 🎁 Power-Ups (Chests & Level-Up)
 - **Heal** / **Max HP** / **Speed** / **Damage** / **Pickup Radius** – Stat boosts.
 - **Restraining Order** – Weapons push enemies further away.
 - **Insider Trading** – +50% XP from orbs.
 - **Tax Evasion** – Longer invincibility after taking damage.
+- **Overclock** – Multiplier to projectile count (weapons fire more projectiles per shot).
 
 ---
 
@@ -53,7 +56,7 @@ Expand your portfolio by leveling up to get new items.
 - **Obstacles:** Office furniture (desks, chairs, walls) is placed randomly; player and enemies cannot walk through them (insurmountable, blocking colliders).
 - **Foreground sync:** The tiled foreground background scrolls with the camera; obstacles, XP orbs, and crypto miner rigs move with it so they don’t slide on the ground.
 - **Score:** Net Worth = number of enemies killed (no time-based score).
-- **Difficulty:** Spawn rate and enemy mix escalate every 30 s (tier). **Bosses:** IRS every 3 min, MegaBoss every 2 min, CEO once at 10 min. **After 15 min:** IRS every 1.5 min, MegaBoss every 1 min. **After 20 min:** IRS and MegaBoss every 10 s.
+- **Difficulty:** Spawn rate and enemy mix escalate every 30 s (tier). **Bosses:** IRS every 3 min, MegaBoss every 2 min, CEO once at 10 min. **After 15 min:** IRS every 1.5 min, MegaBoss every 1 min. **After 20 min:** IRS and MegaBoss every 10 s. **After 22 min:** spawn rate becomes **insane** (very fast regular spawns).
 
 ---
 

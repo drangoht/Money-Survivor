@@ -12,7 +12,7 @@ public class BoomerangWeapon : WeaponBase
         if (boomerangPrefab == null) return;
 
         var stats = CurrentStats;
-        int count = stats.projectileCount;
+        int count = GetProjectileCount(stats.projectileCount);
         
         // Spread projectiles evenly in a circle around the player
         float angleStep = 360f / count;

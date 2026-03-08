@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::WeaponData
   weaponName: Coin Toss
   description: 'Overkill: Throws gold coins in all directions.'
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: 80af836cdd03df446b6be9af613da027, type: 3}
   levels:
   - damage: 10
     fireRate: 1

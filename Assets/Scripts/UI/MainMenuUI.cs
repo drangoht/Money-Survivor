@@ -137,6 +137,18 @@ public class MainMenuUI : MonoBehaviour
 
         GUI.backgroundColor = Color.white;
 
+        // Best run (if exists)
+        float bestT = GameManager.GetBestRunTime();
+        int bestK = GameManager.GetBestRunKills();
+        if (bestT > 0f || bestK > 0)
+        {
+            int bm = (int)(bestT / 60f), bs = (int)(bestT % 60f);
+            var bestStyle = new GUIStyle(GUI.skin.label) { fontSize = 16, alignment = TextAnchor.MiddleCenter };
+            bestStyle.normal.textColor = new Color(0.75f, 0.75f, 0.65f);
+            string bestRunText = $"Best run:  {bm:00}:{bs:00}  |  {bestK} kills  |  ${GameManager.GetBestRunScore()}";
+            GUI.Label(new Rect(0, sh / 2f + 130f, sw, 28f), bestRunText, bestStyle);
+        }
+
         // Footer
         var footerStyle = new GUIStyle(GUI.skin.label) { fontSize = 12, alignment = TextAnchor.LowerCenter };
         footerStyle.normal.textColor = new Color(0.4f, 0.4f, 0.4f);

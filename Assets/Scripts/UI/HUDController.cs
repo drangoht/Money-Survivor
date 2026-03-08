@@ -24,6 +24,7 @@ public class HUDController : MonoBehaviour
     // Cached styles
     private GUIStyle _barBG, _hpFill, _xpFill, _labelStyle;
     private bool     _stylesReady;
+    private Texture2D _weaponSlotPlaceholder;
 
     private void OnEnable()
     {
@@ -62,6 +63,8 @@ public class HUDController : MonoBehaviour
         _labelStyle.fontSize  = 18;
         _labelStyle.fontStyle = FontStyle.Bold;
         _labelStyle.normal.textColor = Color.white;
+
+        _weaponSlotPlaceholder = MakeTex(1, 1, new Color(0.45f, 0.48f, 0.55f, 0.92f)); // light slate placeholder
     }
 
     private void Update()
@@ -72,6 +75,7 @@ public class HUDController : MonoBehaviour
         bool togglePause = false;
         if (Gamepad.current != null && Gamepad.current.startButton.wasPressedThisFrame) togglePause = true;
         if (Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame) togglePause = true;
+        if (Input.GetKeyDown(KeyCode.Escape)) togglePause = true; // fallback so Escape always works
 
         if (togglePause)
         {
@@ -177,6 +181,40 @@ public class HUDController : MonoBehaviour
         var lvlStyle = new GUIStyle(_labelStyle) { fontSize = 24, fontStyle = FontStyle.Bold };
         lvlStyle.normal.textColor = new Color(0f, 0.8f, 1f); // match XP bar
         GUI.Label(new Rect(barX, barY + xpBarH + 8f, 400f, 40f), $"AUTHORITY LVL <color=white>{_level}</color>", lvlStyle);
+
+        // ── Weapon slots (3 thumbnails) ───────────────────────────────────────
+        float slotSize = 52f;
+        float slotGap = 8f;
+        float slotsY = barY + xpBarH + 52f;
+        var player = GameObject.FindWithTag("Player");
+        var weapons = player != null ? player.GetComponentsInChildren<WeaponBase>() : System.Array.Empty<WeaponBase>();
+        for (int i = 0; i < 3; i++)
+        {
+            float sx = barX + i * (slotSize + slotGap);
+            var slotRect = new Rect(sx, slotsY, slotSize, slotSize);
+            GUI.Box(slotRect, GUIContent.none, _barBG);
+            if (i < weapons.Length && weapons[i] != null && weapons[i].data != null)
+            {
+                var w = weapons[i];
+                Texture2D iconTex = null;
+                if (w.data.icon != null && w.data.icon.texture != null)
+                    iconTex = w.data.icon.texture;
+                if (iconTex == null && _weaponSlotPlaceholder != null)
+                    iconTex = _weaponSlotPlaceholder;
+                if (iconTex != null)
+                {
+                    // Alpha blend so mauve-stripped (transparent) background shows correctly
+                    GUI.DrawTexture(slotRect, iconTex, ScaleMode.ScaleToFit, true);
+                }
+                var lvStyle = new GUIStyle(_labelStyle) { fontSize = 12, alignment = TextAnchor.LowerRight };
+                GUI.Label(slotRect, $"Lv{w.CurrentLevel + 1}", lvStyle);
+            }
+            else
+            {
+                if (_weaponSlotPlaceholder != null)
+                    GUI.DrawTexture(slotRect, _weaponSlotPlaceholder);
+            }
+        }
 
         // ── Top Center Timer Box ─────────────────────────────────────────────
         float t     = GameManager.Instance.TimeSurvived;

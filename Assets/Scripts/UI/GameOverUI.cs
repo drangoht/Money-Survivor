@@ -59,18 +59,13 @@ public class GameOverUI : MonoBehaviour
 
         if (confirm)
         {
+            GameManager.Instance.SaveBestRunIfBetter();
+            _visible = false;
+            Time.timeScale = 1f;
             if (_selectedIndex == 0)
-            {
-                _visible = false;
-                Time.timeScale = 1f;
                 GameManager.Instance.StartGame();
-            }
             else
-            {
-                _visible = false;
-                Time.timeScale = 1f;
                 GameManager.Instance.ReturnToMainMenu();
-            }
         }
     }
 
@@ -124,9 +119,19 @@ public class GameOverUI : MonoBehaviour
         int   mins = (int)(t / 60f);
         int   secs = (int)(t % 60f);
 
-        GUI.Label(new Rect(px, py + 110, pw, 36f), $"Time Survived:  {mins:00}:{secs:00}", _statStyle);
-        GUI.Label(new Rect(px, py + 155, pw, 36f), $"Enemies Killed:  {GameManager.Instance.EnemiesKilled}", _statStyle);
+        GUI.Label(new Rect(px, py + 95, pw, 36f), $"Time Survived:  {mins:00}:{secs:00}", _statStyle);
+        GUI.Label(new Rect(px, py + 130, pw, 36f), $"Enemies Killed:  {GameManager.Instance.EnemiesKilled}", _statStyle);
+        GUI.Label(new Rect(px, py + 165, pw, 36f), $"Net Worth:  ${GameManager.Instance.EnemiesKilled * 50}", _statStyle);
         GUI.Label(new Rect(px, py + 200, pw, 36f), $"Level Reached:  {GameManager.Instance.CurrentLevel}", _statStyle);
+        float bestT = GameManager.GetBestRunTime();
+        int bestK = GameManager.GetBestRunKills();
+        if (bestT > 0f || bestK > 0)
+        {
+            int bm = (int)(bestT / 60f), bs = (int)(bestT % 60f);
+            var bestStyle = new GUIStyle(_statStyle) { fontSize = 16 };
+            bestStyle.normal.textColor = new Color(0.8f, 0.8f, 0.8f);
+            GUI.Label(new Rect(px, py + 238, pw, 24f), $"Best run: {bm:00}:{bs:00} | {bestK} kills | ${GameManager.GetBestRunScore()}", bestStyle);
+        }
 
         // Buttons
         GUI.backgroundColor = _selectedIndex == 0 ? new Color(0.2f, 0.9f, 0.2f) : new Color(0.1f, 0.6f, 0.15f);

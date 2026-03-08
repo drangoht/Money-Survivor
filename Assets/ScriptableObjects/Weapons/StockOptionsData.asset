@@ -15,7 +15,7 @@ MonoBehaviour:
   weaponName: Stock Options
   description: Shoots volatile market arrows. Damage randomizes significantly per
     hit.
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: b18902c50c8a77d49aae93116e2132ff, type: 3}
   levels:
   - damage: 18
     fireRate: 1.2

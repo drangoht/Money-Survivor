@@ -59,8 +59,8 @@ Damage is multiplied by **`PlayerStats.damageMultiplier`**. Level-up can add a n
   - **Regular waves:** Weighted mix of Bankman, ExWife, Children, Bouncer by difficulty tier (tier every 30 s; spawn interval shortens over time).
   - **IRS boss:** Every `bossInterval` (180 s). After 15 min: `bossIntervalLate` (90 s). After 20 min: `bossIntervalVeryLate` (10 s).
   - **CEO boss:** Once at `ceoSpawnTime` (600 s).
-  - **MegaBoss:** Every `megaBossInterval` (120 s). After 15 min: `megaBossIntervalLate` (60 s). After 20 min: `bossIntervalVeryLate` (10 s). Large, high HP, 300 XP, aura particles, drops chest.
-  - **Thresholds:** `moreBossesAfterTime` = 900 s (15 min), `moreBossesAfterTime2` = 1200 s (20 min).
+  - **MegaBoss:** Every `megaBossInterval` (120 s). After 15 min: `megaBossIntervalLate` (60 s). After 20 min: `bossIntervalVeryLate` (10 s). Huge (5.6× scale), 1500 HP, 90 contact damage, 700 XP, aura particles, drops chest.
+  - **Thresholds:** `moreBossesAfterTime` = 900 s (15 min), `moreBossesAfterTime2` = 1200 s (20 min). **After 22 min:** regular spawn interval uses `insaneSpawnInterval` (very fast).
 
 Spawn position is at `spawnRadius` from the player (off-screen). Difficulty tier is set on the spawned enemy for HP/speed scaling.
 
@@ -104,7 +104,7 @@ Spawn position is at `spawnRadius` from the player (off-screen). Difficulty tier
   Tracks current XP and level; level-up threshold increases by curve. On level-up, triggers **`LevelUpManager`** and raises events.
 
 - **`LevelUpManager`**  
-  Pauses game, offers three choices (new weapon, weapon upgrade, or power-up from a configured list), then resumes.
+  Pauses game, offers three choices (new weapon, weapon upgrade, or power-up from a configured list). A one-time **Refresh choices** option can appear as a fourth selectable card. Max 3 weapons, each weapon up to level 10. Then resumes.
 
 - **Chests**  
   Dropped by bosses. On open: random **PowerUpData** applied, chest open animation/particles, reward UI.
@@ -118,7 +118,7 @@ To avoid Canvas/RectTransform complexity, all runtime UI uses **OnGUI**:
 - **MainMenuUI** – Play / Quit.
 - **HUDController** – HP bar, XP bar, level, timer, Net Worth (kill count), pause panel with run stats and weapon list.
 - **LevelUpUI** – Three upgrade cards (keyboard/gamepad).
-- **GameOverUI** – Shown on `OnPlayerDeath`; time survived, kills, level; Retry / Menu.
+- **GameOverUI** – Shown on `OnPlayerDeath`; time survived, kills, level; optional **Previous run** (last run’s time, kills, score from PlayerPrefs); Retry / Menu.
 - **ChestRewardUI** – Toast for chest reward.
 
 ---
@@ -130,7 +130,13 @@ To avoid Canvas/RectTransform complexity, all runtime UI uses **OnGUI**:
 
 ---
 
-## 11. Boss-Specifics (MegaBoss)
+## 11. Boss-Specifics (IRS, CEO, MegaBoss)
+
+- **IRS**  
+  EnemyData: 600 HP, 0.9 speed, 55 contact damage, 120 XP, `isBoss = true`. Prefab scale 1.8. Drops chest on death.
+
+- **CEO**  
+  EnemyData: 6000 HP, 2.5 speed, 70 contact damage, 1200 XP, `isBoss = true`. Prefab scale 4.0. Drops chest on death.
 
 - **MegaBoss**  
-  EnemyData: 600 HP, 0.5 speed, 40 contact damage, 300 XP, `isBoss = true`. Prefab scale 2.8; has a child **BossAura** ParticleSystem (local space, red-tinted, sphere shape) for a persistent aura effect. Drops chest on death like IRS and CEO.
+  EnemyData: 1500 HP, 0.5 speed, 90 contact damage, 700 XP, `isBoss = true`. Prefab scale 5.6; has a child **BossAura** ParticleSystem (local space, red-tinted, sphere shape) for a persistent aura effect. Drops chest on death like IRS and CEO.

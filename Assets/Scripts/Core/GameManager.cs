@@ -97,7 +97,25 @@ public class GameManager : MonoBehaviour
     // ── Event handlers ───────────────────────────────────────────────────────
 
     private void HandleEnemyKilled(Vector3 _, int __) => EnemiesKilled++;
-    private void HandlePlayerDeath()                  => SetState(GameState.GameOver);
+    private void HandlePlayerDeath()
+    {
+        SetState(GameState.GameOver);
+    }
+
+    /// <summary>Call when game over; persists this run only if score is better than best.</summary>
+    public void SaveBestRunIfBetter()
+    {
+        int score = EnemiesKilled * 50;
+        if (score <= GetBestRunScore()) return;
+        PlayerPrefs.SetFloat("MoneySurvivor_BestTime", TimeSurvived);
+        PlayerPrefs.SetInt("MoneySurvivor_BestKills", EnemiesKilled);
+        PlayerPrefs.SetInt("MoneySurvivor_BestScore", score);
+        PlayerPrefs.Save();
+    }
+
+    public static float GetBestRunTime()   => PlayerPrefs.GetFloat("MoneySurvivor_BestTime", 0f);
+    public static int   GetBestRunKills()  => PlayerPrefs.GetInt("MoneySurvivor_BestKills", 0);
+    public static int   GetBestRunScore()  => PlayerPrefs.GetInt("MoneySurvivor_BestScore", 0);
     private void HandleLevelUp(int lvl)              => CurrentLevel = lvl;
 
     private void SetState(GameState newState)

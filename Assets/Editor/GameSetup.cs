@@ -21,8 +21,19 @@ public static class GameSetup
     private const string WeaponSOPath  = "Assets/ScriptableObjects/Weapons";
     private const string PowerUpSOPath = "Assets/ScriptableObjects/PowerUps";
     private const string SpritesPath   = "Assets/Sprites";
+    private const string WeaponIconsPath = "Assets/Art/WeaponIcons";
 
     // ── Entry point ──────────────────────────────────────────────────────────
+
+    [MenuItem("MoneySurvivor/Assign Weapon Icons (refresh HUD & level-up)")]
+    public static void AssignWeaponIcons()
+    {
+        if (EditorApplication.isPlaying) return;
+        CreateScriptableObjects(); // re-run to load icons and assign to existing WeaponData
+        AssetDatabase.SaveAssets();
+        AssetDatabase.Refresh();
+        Debug.Log("Weapon icons assigned. If weapons still show no icon, run MoneySurvivor > Setup Entire Project.");
+    }
 
     [MenuItem("MoneySurvivor/Setup Entire Project")]
     public static void SetupProject()
@@ -313,6 +324,64 @@ public static class GameSetup
         tex.Apply();
     }
 
+    /// <summary>Same as StripBackground but uses an explicit key color (e.g. mauve for weapon icons).</summary>
+    private static void StripBackgroundWithKey(Texture2D tex, Color key, float threshold = 0.25f)
+    {
+        int w = tex.width, h = tex.height;
+        Color[] pixels = tex.GetPixels();
+        bool[] visited = new bool[w * h];
+        var queue = new System.Collections.Generic.Queue<int>();
+
+        System.Action<int> enqueue = (idx) =>
+        {
+            if (idx < 0 || idx >= pixels.Length || visited[idx]) return;
+            Color c = pixels[idx];
+            float dist = Mathf.Abs(c.r - key.r) + Mathf.Abs(c.g - key.g) + Mathf.Abs(c.b - key.b);
+            if (dist > threshold) return;
+            visited[idx] = true;
+            queue.Enqueue(idx);
+        };
+
+        for (int bx = 0; bx < w; bx++) { enqueue(bx); enqueue((h - 1) * w + bx); }
+        for (int by = 0; by < h; by++) { enqueue(by * w); enqueue(by * w + w - 1); }
+
+        while (queue.Count > 0)
+        {
+            int idx = queue.Dequeue();
+            pixels[idx] = Color.clear;
+            int x = idx % w, y = idx / w;
+            if (x > 0) enqueue(idx - 1);
+            if (x < w - 1) enqueue(idx + 1);
+            if (y > 0) enqueue(idx - w);
+            if (y < h - 1) enqueue(idx + w);
+        }
+
+        float edgeThreshold = 0.45f;
+        for (int i = 0; i < pixels.Length; i++)
+        {
+            if (visited[i]) continue;
+            int ex = i % w, ey = i / w;
+            bool nearCleared = (ex > 0 && visited[i - 1]) || (ex < w - 1 && visited[i + 1])
+                || (ey > 0 && visited[i - w]) || (ey < h - 1 && visited[i + w]);
+            if (!nearCleared) continue;
+            float dist = Mathf.Abs(pixels[i].r - key.r) + Mathf.Abs(pixels[i].g - key.g) + Mathf.Abs(pixels[i].b - key.b);
+            if (dist < edgeThreshold) pixels[i] = Color.clear;
+        }
+
+        // Global pass: remove ALL pixels close to key color (catches non-connected mauve, gradients, partial fills)
+        float globalThreshold = Mathf.Max(threshold + 0.15f, 0.48f);
+        for (int i = 0; i < pixels.Length; i++)
+        {
+            Color c = pixels[i];
+            float dist = Mathf.Abs(c.r - key.r) + Mathf.Abs(c.g - key.g) + Mathf.Abs(c.b - key.b);
+            if (dist <= globalThreshold)
+                pixels[i] = Color.clear;
+        }
+
+        tex.SetPixels(pixels);
+        tex.Apply();
+    }
+
     private static Sprite GetOrCreateSprite(string path, Texture2D generated, bool forceRegenerate = false)
     {
         string texPath = path;
@@ -585,17 +654,17 @@ public static class GameSetup
 
     private static EnemyData  _bankman, _exWife, _children, _irs, _bouncer, _ceo, _megaBoss;
     private static WeaponData _coinData, _whipData,  _auraData, _cardData, _singleShotData, _cryptoData, _stockData;
-    private static PowerUpData _healPU, _speedPU, _damagePU, _magnetPU, _radiusPU, _repelPU, _insiderPU, _taxPU;
+    private static PowerUpData _healPU, _speedPU, _damagePU, _magnetPU, _radiusPU, _repelPU, _insiderPU, _taxPU, _overclockPU;
 
     private static void CreateScriptableObjects()
     {
         _bankman  = MakeEnemy("Bankman",  new Color(.2f,.4f,.9f),  30f, 1.5f,  5f, 10,  1.1f, 1.05f, new Color(.2f,.4f,.9f));
         _exWife   = MakeEnemy("ExWife",   new Color(.8f,.2f,.8f),  60f, 1.2f, 15f, 25,  1.15f,1.02f, new Color(.8f,.2f,.8f));
         _children = MakeEnemy("Children", new Color(1f, 1f, 0f),   15f, 2.5f,  3f, 5,   1.05f,1.08f, new Color(1f, 1f, 0f));
-        _irs      = MakeEnemy("IRS",      new Color(.1f,.8f,.2f), 250f, 0.9f, 25f, 50,  1.2f, 1.01f, new Color(.1f,.8f,.2f));
+        _irs      = MakeEnemy("IRS",      new Color(.1f,.8f,.2f), 600f, 0.9f, 55f, 120, 1.2f, 1.01f, new Color(.1f,.8f,.2f));
         _bouncer  = MakeEnemy("Bouncer",  new Color(.3f,.3f,.3f), 150f, 0.6f, 15f, 40,  1.1f, 1.02f, new Color(.3f,.3f,.3f));
-        _ceo      = MakeEnemy("CEO",      new Color(1f,.9f,.1f), 2500f, 2.5f, 30f, 500, 1.02f,1.01f, new Color(1f,.9f,.1f));
-        _megaBoss = MakeEnemy("MegaBoss", new Color(0.6f, 0.1f, 0.1f), 600f, 0.5f, 40f, 300, 1.15f, 1.01f, new Color(0.9f, 0.2f, 0.2f), true);
+        _ceo      = MakeEnemy("CEO",      new Color(1f,.9f,.1f), 6000f, 2.5f, 70f, 1200, 1.02f,1.01f, new Color(1f,.9f,.1f));
+        _megaBoss = MakeEnemy("MegaBoss", new Color(0.6f, 0.1f, 0.1f), 1500f, 0.5f, 90f, 700, 1.15f, 1.01f, new Color(0.9f, 0.2f, 0.2f), true);
 
         _singleShotData = MakeWeapon("SingleShotData", "Aimed Bullet",
             "Fires a projectile directly at the nearest enemy.",
@@ -606,7 +675,7 @@ public static class GameSetup
                 new() { damage=22, fireRate=1.0f, projectileSpeed=16, projectileCount=2, pierceCount=2, duration=3f },
                 new() { damage=28, fireRate=1.1f, projectileSpeed=16, projectileCount=3, pierceCount=2, duration=3f },
                 new() { damage=35, fireRate=1.2f, projectileSpeed=17, projectileCount=4, pierceCount=3, duration=3f },
-            });
+            }, "AimedBullet");
 
         _coinData = MakeWeapon("CoinTossData", "Coin Toss",
             "Overkill: Throws gold coins in all directions.",
@@ -617,7 +686,7 @@ public static class GameSetup
                 new() { damage=18, fireRate=1.2f, projectileSpeed=9, projectileCount=6, pierceCount=2, duration=3f },
                 new() { damage=24, fireRate=1.3f, projectileSpeed=9, projectileCount=8, pierceCount=2, duration=3.5f},
                 new() { damage=32, fireRate=1.5f, projectileSpeed=10,projectileCount=8, pierceCount=3, duration=4f },
-            });
+            }, "CoinToss");
 
         _whipData = MakeWeapon("BillWhipData", "Bill Whip",
             "Sweeps an arc of bills, hitting all nearby enemies.",
@@ -628,18 +697,18 @@ public static class GameSetup
                 new() { damage=36, fireRate=1.0f, aoeRadius=3.5f },
                 new() { damage=46, fireRate=1.1f, aoeRadius=4.0f },
                 new() { damage=60, fireRate=1.2f, aoeRadius=5.0f },
-            });
+            }, "BillWhip");
 
         _auraData = MakeWeapon("CompoundInterestData", "Compound Interest",
             "A growing aura that deals constant damage to nearby enemies.",
             new WeaponLevelStats[]
             {
-                new() { damage=5,  fireRate=2f, aoeRadius=2.0f },
-                new() { damage=7,  fireRate=2f, aoeRadius=2.5f },
-                new() { damage=10, fireRate=2f, aoeRadius=3.0f },
-                new() { damage=14, fireRate=2f, aoeRadius=3.5f },
-                new() { damage=20, fireRate=2f, aoeRadius=4.5f },
-            });
+                new() { damage=3,  fireRate=1.8f, aoeRadius=1.2f },
+                new() { damage=4,  fireRate=1.8f, aoeRadius=1.35f },
+                new() { damage=5,  fireRate=1.9f, aoeRadius=1.5f },
+                new() { damage=6,  fireRate=1.9f, aoeRadius=1.65f },
+                new() { damage=8,  fireRate=2f,   aoeRadius=1.8f },
+            }, "CompoundInterest");
 
         _cardData = MakeWeapon("CreditCardData", "Credit Card",
             "Throws a piercing credit card that boomerangs back to you.",
@@ -650,7 +719,7 @@ public static class GameSetup
                 new() { damage=25, fireRate=1.3f, projectileSpeed=14, projectileCount=3, pierceCount=4, duration=2f },
                 new() { damage=35, fireRate=1.2f, projectileSpeed=16, projectileCount=3, pierceCount=99, duration=2.5f },
                 new() { damage=50, fireRate=1.0f, projectileSpeed=18, projectileCount=4, pierceCount=99, duration=2.5f },
-            });
+            }, "CreditCard");
 
         string cryptoPath = WeaponSOPath + "/CryptominerData.asset";
         if (AssetDatabase.LoadAssetAtPath<WeaponData>(cryptoPath) != null) AssetDatabase.DeleteAsset(cryptoPath);
@@ -663,7 +732,7 @@ public static class GameSetup
                 new() { damage=40, fireRate=0.33f, aoeRadius=3.2f, projectileCount=2, duration=4f }, // 1 every 3.0 sec
                 new() { damage=65, fireRate=0.40f, aoeRadius=3.6f, projectileCount=2, duration=4.5f },// 1 every 2.5 sec
                 new() { damage=100, fireRate=0.50f, aoeRadius=4.0f, projectileCount=3, duration=5f },// 1 every 2.0 sec
-            });
+            }, "Cryptominer");
 
         string stockPath = WeaponSOPath + "/StockOptionsData.asset";
         if (AssetDatabase.LoadAssetAtPath<WeaponData>(stockPath) != null) AssetDatabase.DeleteAsset(stockPath);
@@ -676,7 +745,7 @@ public static class GameSetup
                 new() { damage=32, fireRate=1.0f, projectileSpeed=17, projectileCount=3, pierceCount=3, duration=2f },
                 new() { damage=45, fireRate=0.9f, projectileSpeed=18, projectileCount=4, pierceCount=3, duration=2.5f },
                 new() { damage=60, fireRate=0.8f, projectileSpeed=20, projectileCount=5, pierceCount=4, duration=2.5f },
-            });
+            }, "StockOptions");
 
         _repelPU  = MakePU("RestrainingOrder", "Restraining Order", "Weapons push enemies further away.",
                         PowerUpEffectType.RepelEnemies, 2f, new Color(0.9f, 0.4f, 0.8f));
@@ -684,6 +753,8 @@ public static class GameSetup
                         PowerUpEffectType.IncreaseXPGain, 50f, new Color(0.1f, 0.9f, 0.3f));
         _taxPU = MakePU("TaxEvasion", "Tax Evasion", "Increases your invincibility time after taking damage.",
                         PowerUpEffectType.IncreaseIFrames, 0.5f, new Color(0.5f, 0.5f, 0.9f));
+        _overclockPU = MakePU("Overclock", "Overclock", "Weapons fire more projectiles per shot (+25% count).",
+                        PowerUpEffectType.IncreaseProjectileCount, 25f, new Color(0.2f, 0.7f, 1f));
 
         Log($"  All ScriptableObjects created");
     }
@@ -703,16 +774,86 @@ public static class GameSetup
         return d;
     }
 
-    private static WeaponData MakeWeapon(string id, string label, string desc, WeaponLevelStats[] levels)
+    private static WeaponData MakeWeapon(string id, string label, string desc, WeaponLevelStats[] levels, string iconFileName)
     {
         string path = WeaponSOPath + "/" + id + ".asset";
         var ex = AssetDatabase.LoadAssetAtPath<WeaponData>(path);
-        if (ex != null) { Log($"  Weapon exists: {id}"); return ex; }
+        var icon = LoadWeaponIcon(iconFileName);
+        if (ex != null)
+        {
+            if (icon != null) { ex.icon = icon; EditorUtility.SetDirty(ex); AssetDatabase.SaveAssets(); }
+            Log($"  Weapon exists: {id}");
+            return ex;
+        }
         var d = ScriptableObject.CreateInstance<WeaponData>();
-        d.weaponName = label; d.description = desc; d.levels = levels;
+        d.weaponName = label; d.description = desc; d.levels = levels; d.icon = icon;
         AssetDatabase.CreateAsset(d, path);
         Log($"  Weapon created: {id}");
         return d;
+    }
+
+    // Mauve background for weapon icons; stripped to transparency (same idea as XP orb color-key).
+    private static readonly Color WeaponIconMauve = new Color(0.878f, 0.69f, 1f); // #E0B0FF
+
+    /// <summary>Center-crop texture to a square so all weapon icons have the same ratio.</summary>
+    private static Texture2D MakeSquareIcon(Texture2D tex)
+    {
+        int w = tex.width, h = tex.height;
+        if (w == h) return tex;
+        int s = Mathf.Min(w, h);
+        int ox = (w - s) / 2, oy = (h - s) / 2;
+        Color[] pixels = tex.GetPixels(ox, oy, s, s);
+        var square = new Texture2D(s, s, TextureFormat.RGBA32, false);
+        square.filterMode = FilterMode.Bilinear;
+        square.SetPixels(pixels);
+        square.Apply();
+        return square;
+    }
+
+    private static Sprite LoadWeaponIcon(string iconFileName)
+    {
+        if (string.IsNullOrEmpty(iconFileName)) return null;
+        string iconPath = WeaponIconsPath + "/" + iconFileName + ".png";
+        string fullPath = Path.GetFullPath(Path.Combine(Application.dataPath, "..", iconPath));
+        if (!File.Exists(fullPath)) return null;
+
+        // Load PNG into RGBA32 so alpha is preserved when we write back
+        Texture2D loaded = LoadTexFromDisk(fullPath);
+        Texture2D tex = new Texture2D(loaded.width, loaded.height, TextureFormat.RGBA32, false);
+        tex.SetPixels(loaded.GetPixels());
+        tex.Apply();
+        StripBackgroundWithKey(tex, WeaponIconMauve, 0.35f);
+        tex = MakeSquareIcon(tex);
+        byte[] png = tex.EncodeToPNG();
+        if (png != null && png.Length > 0)
+            File.WriteAllBytes(fullPath, png);
+        AssetDatabase.Refresh();
+        AssetDatabase.ImportAsset(iconPath, ImportAssetOptions.ForceUpdate);
+
+        var importer = AssetImporter.GetAtPath(iconPath) as TextureImporter;
+        if (importer == null) return null;
+        bool needReimport = importer.textureType != TextureImporterType.Sprite
+            || importer.spriteImportMode != SpriteImportMode.Single
+            || !importer.alphaIsTransparency;
+        if (needReimport)
+        {
+            importer.textureType = TextureImporterType.Sprite;
+            importer.spriteImportMode = SpriteImportMode.Single;
+            importer.spritePixelsPerUnit = 100f;
+            importer.alphaIsTransparency = true;
+            importer.alphaSource = TextureImporterAlphaSource.FromInput;
+            // Preserve alpha so transparency shows in HUD/level-up
+            var platform = importer.GetPlatformTextureSettings("DefaultTexturePlatform");
+            platform.overridden = true;
+            platform.format = TextureImporterFormat.RGBA32;
+            importer.SetPlatformTextureSettings(platform);
+            importer.SaveAndReimport();
+        }
+        var sprites = AssetDatabase.LoadAllAssetsAtPath(iconPath);
+        foreach (var o in sprites) if (o is Sprite s) return s;
+        var loadedTex = AssetDatabase.LoadAssetAtPath<Texture2D>(iconPath);
+        if (loadedTex != null) return Sprite.Create(loadedTex, new Rect(0, 0, loadedTex.width, loadedTex.height), new Vector2(0.5f, 0.5f), 100f);
+        return null;
     }
 
     private static PowerUpData MakePU(string id, string label, string desc,
@@ -761,10 +902,10 @@ public static class GameSetup
         _p1 = MakeEnemyPrefab("Bankman",  _bankman,  _enemySprite,   0.7f, 0.03f, 5f);
         _p2 = MakeEnemyPrefab("ExWife",   _exWife,   _exWifeSprite,  0.8f, 0.04f, 4f);
         _p3 = MakeEnemyPrefab("Children", _children, _childrenSprite,0.5f, 0.06f, 8f);
-        _p4 = MakeEnemyPrefab("IRS",      _irs,      _irsSprite,     0.9f, 0.02f, 3f);
+        _p4 = MakeEnemyPrefab("IRS",      _irs,      _irsSprite,     1.8f, 0.02f, 3f);
         _p5 = MakeEnemyPrefab("Bouncer",  _bouncer,  _enemySprite,   1.2f, 0.03f, 4f);
-        _p6 = MakeEnemyPrefab("CEO",      _ceo,      _enemySprite,   2.0f, 0.03f, 4f);
-        _p7 = MakeEnemyPrefab("MegaBoss", _megaBoss, _enemySprite,   2.8f, 0.02f, 3f, true);
+        _p6 = MakeEnemyPrefab("CEO",      _ceo,      _enemySprite,   4.0f, 0.03f, 4f);
+        _p7 = MakeEnemyPrefab("MegaBoss", _megaBoss, _enemySprite,   5.6f, 0.02f, 3f, true);
 
         // Update the SOs with the boss flag
         _irs.isBoss = true;
@@ -888,8 +1029,7 @@ public static class GameSetup
         var col = root.AddComponent<CircleCollider2D>();
         col.isTrigger = true; col.radius = 2.0f;
         var c = root.AddComponent<Chest>();
-        c.possibleRewards = new[] { _healPU, _speedPU, _damagePU, _magnetPU, _radiusPU, _repelPU, _insiderPU, _taxPU };
-        c.openParticlePrefab = MakeChestOpenParticles(); // Assign particle effect
+        c.openParticlePrefab = MakeChestOpenParticles(); // Rewards come from LevelUpManager at runtime (weapon / weapon upgrade / power-up)
         return Save(root, path);
     }
 
@@ -916,6 +1056,12 @@ public static class GameSetup
         return Save(root, path);
     }
 
+    private static void ApplyEnemyPrefabScale(GameObject contents, float scale)
+    {
+        var spriteT = contents.transform.Find("Sprite");
+        if (spriteT != null) spriteT.localScale = Vector3.one * scale;
+    }
+
     private static GameObject MakeEnemyPrefab(string name, EnemyData data, Sprite sprite, float scale, float bobAmt, float bobSpd, bool addAuraParticles = false)
     {
         string path = EnemyPath + "/" + name + ".prefab";
@@ -940,6 +1086,7 @@ public static class GameSetup
                         add.radius = 0.38f;
                         var enemyBase = contents.GetComponent<EnemyBase>();
                         if (enemyBase != null && enemyBase.chestPrefab == null) enemyBase.chestPrefab = _chestPrefab;
+                        ApplyEnemyPrefabScale(contents, scale);
                         PrefabUtility.SaveAsPrefabAsset(contents, path);
                         PrefabUtility.UnloadPrefabContents(contents);
                         Log($"  Enemy prefab updated with obstacle collider: {name}");
@@ -951,8 +1098,11 @@ public static class GameSetup
                     if (contents != null)
                     {
                         var enemyBase = contents.GetComponent<EnemyBase>();
-                        if (enemyBase != null && enemyBase.chestPrefab == null) { enemyBase.chestPrefab = _chestPrefab; PrefabUtility.SaveAsPrefabAsset(contents, path); Log($"  Enemy prefab updated with chest: {name}"); }
+                        if (enemyBase != null && enemyBase.chestPrefab == null) enemyBase.chestPrefab = _chestPrefab;
+                        ApplyEnemyPrefabScale(contents, scale);
+                        PrefabUtility.SaveAsPrefabAsset(contents, path);
                         PrefabUtility.UnloadPrefabContents(contents);
+                        Log($"  Enemy prefab updated with chest: {name}");
                     }
                 }
                 return ex;
@@ -963,7 +1113,9 @@ public static class GameSetup
                 if (contents != null)
                 {
                     var enemyBase = contents.GetComponent<EnemyBase>();
-                    if (enemyBase != null && enemyBase.chestPrefab == null) { enemyBase.chestPrefab = _chestPrefab; PrefabUtility.SaveAsPrefabAsset(contents, path); Log($"  Enemy prefab updated with chest: {name}"); }
+                    if (enemyBase != null && enemyBase.chestPrefab == null) enemyBase.chestPrefab = _chestPrefab;
+                    ApplyEnemyPrefabScale(contents, scale);
+                    PrefabUtility.SaveAsPrefabAsset(contents, path);
                     PrefabUtility.UnloadPrefabContents(contents);
                 }
                 return ex;
@@ -972,7 +1124,7 @@ public static class GameSetup
 
         var root = new GameObject(name);
         root.tag = "Enemy";
-        var spriteChild = Sprite2D(root, sprite, Color.white, 1, 1f);
+        var spriteChild = Sprite2D(root, sprite, Color.white, 1, scale);
         
         // Only use bodyColor tint if we're using the generic recycled enemy sprite
         if (sprite == _enemySprite) spriteChild.color = Color.Lerp(Color.white, data.bodyColor, 0.2f);
@@ -1299,7 +1451,7 @@ public static class GameSetup
         sys.AddComponent<XPManager>();
 
         var lm = sys.AddComponent<LevelUpManager>();
-        lm.powerUps      = new List<PowerUpData> { _healPU, _speedPU, _damagePU, _magnetPU, _radiusPU, _insiderPU, _taxPU };
+        lm.powerUps      = new List<PowerUpData> { _healPU, _speedPU, _damagePU, _magnetPU, _radiusPU, _repelPU, _insiderPU, _taxPU, _overclockPU };
         lm.weaponPrefabs = new List<GameObject>
         {
             CreateWeaponPrefabWrapper("SingleShot", typeof(SingleShot), _singleShotData, _coinPrefab),

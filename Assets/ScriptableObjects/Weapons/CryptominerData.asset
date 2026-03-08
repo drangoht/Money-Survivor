@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::WeaponData
   weaponName: Cryptominer
   description: Drops a stationary mining rig that burns nearby enemies.
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: 5b452e15b3e66244094a102383d5467d, type: 3}
   levels:
   - damage: 15
     fireRate: 0.25

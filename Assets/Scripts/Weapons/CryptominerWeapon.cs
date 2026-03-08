@@ -13,7 +13,7 @@ public class CryptominerWeapon : WeaponBase
     {
         if (minerPrefab == null || CurrentStats == null) return;
 
-        int count = CurrentStats.projectileCount > 0 ? CurrentStats.projectileCount : 1;
+        int count = GetProjectileCount(CurrentStats.projectileCount > 0 ? CurrentStats.projectileCount : 1);
         float radius = CurrentStats.aoeRadius > 0f ? CurrentStats.aoeRadius : 2f;
         float spreadDist = 1.0f; // Distance from player when dropping multiple
 

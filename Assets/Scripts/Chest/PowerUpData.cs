@@ -11,7 +11,8 @@ public enum PowerUpEffectType
     ExtraLevelUpChoice,
     RepelEnemies,
     IncreaseXPGain,
-    IncreaseIFrames
+    IncreaseIFrames,
+    IncreaseProjectileCount
 }
 
 /// <summary>

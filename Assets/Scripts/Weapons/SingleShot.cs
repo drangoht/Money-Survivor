@@ -35,7 +35,7 @@ public class SingleShot : WeaponBase
             baseDir = (closest.position - transform.position).normalized;
         }
 
-        int count = CurrentStats.projectileCount;
+        int count = GetProjectileCount(CurrentStats.projectileCount);
         float spreadAngle = 15f; // degrees between shots
         
         float startAngle = -(spreadAngle * (count - 1)) / 2f;

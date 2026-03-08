@@ -50,6 +50,12 @@ public class EnemySpawner : MonoBehaviour
     [Tooltip("IRS and Mega boss interval after 20 mins")]
     public float bossIntervalVeryLate = 10f;
 
+    [Header("After 22 Minutes (Insane)")]
+    [Tooltip("After this many seconds, regular spawn interval becomes very fast")]
+    public float insaneSpawnAfterTime = 1320f; // 22 mins
+    [Tooltip("Spawn interval cap when insane")]
+    public float insaneSpawnInterval = 0.15f;
+
     private float _spawnTimer;
     private float _tierTimer;
     private float _bossTimer;
@@ -91,17 +97,18 @@ public class EnemySpawner : MonoBehaviour
         if (GameManager.Instance != null &&
             GameManager.Instance.State != GameState.Playing) return;
 
+        float timeSurvived = GameManager.Instance != null ? GameManager.Instance.TimeSurvived : 0f;
+
         // Difficulty tier escalation
         _tierTimer += Time.deltaTime;
         if (_tierTimer >= tierInterval)
         {
             _tierTimer = 0f;
             _tier++;
-            // Also shrink spawn interval (faster spawns)
-            baseSpawnInterval = Mathf.Max(0.3f, baseSpawnInterval * 0.9f);
+            // Also shrink spawn interval (faster spawns); after 22 min cap at insane rate
+            float minInterval = (timeSurvived >= insaneSpawnAfterTime) ? insaneSpawnInterval : 0.3f;
+            baseSpawnInterval = Mathf.Max(minInterval, baseSpawnInterval * 0.9f);
         }
-
-        float timeSurvived = GameManager.Instance != null ? GameManager.Instance.TimeSurvived : 0f;
         float currentBossInterval = timeSurvived >= moreBossesAfterTime2 ? bossIntervalVeryLate
             : (timeSurvived >= moreBossesAfterTime ? bossIntervalLate : bossInterval);
         float currentMegaBossInterval = timeSurvived >= moreBossesAfterTime2 ? bossIntervalVeryLate
@@ -130,11 +137,12 @@ public class EnemySpawner : MonoBehaviour
             SpawnEnemy(megaBossPrefab);
         }
 
-        // Regular spawns
+        // Regular spawns (after 22 min use insane interval)
+        float effectiveInterval = (timeSurvived >= insaneSpawnAfterTime) ? Mathf.Min(baseSpawnInterval, insaneSpawnInterval) : baseSpawnInterval;
         _spawnTimer -= Time.deltaTime;
         if (_spawnTimer <= 0f)
         {
-            _spawnTimer = baseSpawnInterval;
+            _spawnTimer = effectiveInterval;
             SpawnRegularEnemy();
         }
     }

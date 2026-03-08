@@ -41,8 +41,8 @@ public class CompoundInterest : WeaponBase
     {
         if (CurrentStats == null) return;
 
-        float radius = CurrentStats.aoeRadius > 0f ? CurrentStats.aoeRadius : 2f;
-        radius += CurrentLevel * 0.5f;
+        float radius = CurrentStats.aoeRadius > 0f ? CurrentStats.aoeRadius : 1.5f;
+        radius += CurrentLevel * 0.05f; // minimal growth per level
 
         // We lookup stats to get the global repel force
         var playerStats = GetComponentInParent<PlayerStats>();
@@ -54,10 +54,9 @@ public class CompoundInterest : WeaponBase
             if (col.TryGetComponent<EnemyBase>(out var enemy))
             {
                 enemy.TakeDamage(GetDamage());
-                
-                // Repel mechanics: push outward from aura center
+                // Repel: reduced so aura doesn’t trivialize positioning
                 Vector2 repelDir = (enemy.transform.position - transform.position).normalized;
-                enemy.ApplyKnockback(repelDir, 3f + extraRepel);
+                enemy.ApplyKnockback(repelDir, 0.25f + extraRepel * 0.25f);
             }
         }
     }
@@ -65,7 +64,7 @@ public class CompoundInterest : WeaponBase
     private void UpdateAuraScale()
     {
         if (_auraSprite == null || CurrentStats == null) return;
-        float radius = (CurrentStats.aoeRadius > 0f ? CurrentStats.aoeRadius : 2f) + CurrentLevel * 0.5f;
+        float radius = (CurrentStats.aoeRadius > 0f ? CurrentStats.aoeRadius : 1.5f) + CurrentLevel * 0.05f;
         _auraSprite.transform.localScale = Vector3.one * radius * 2f;
     }
 

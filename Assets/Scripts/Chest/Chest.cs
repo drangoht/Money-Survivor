@@ -2,15 +2,12 @@ using System.Collections;
 using UnityEngine;
 
 /// <summary>
-/// Chest: spawns periodically in the world. Player walks over it to open it
-/// and receive a random power-up reward.
+/// Chest: opened by player contact. Gives one random possible reward (new weapon, weapon upgrade, or power-up)
+/// using the same rules as level-up (max 3 weapons, max level 10, etc.). Notification is shown via ChestRewardUI.
 /// </summary>
 [RequireComponent(typeof(CircleCollider2D))]
 public class Chest : MonoBehaviour
 {
-    [Header("Rewards")]
-    public PowerUpData[] possibleRewards;
-
     [Header("Spawn timing")]
     public static float SpawnInterval = 60f; // seconds between chest spawns
 
@@ -20,12 +17,9 @@ public class Chest : MonoBehaviour
     private bool _opened;
     private SpriteRenderer _sr;
 
-
-
     private void Awake()
     {
         _sr = GetComponentInChildren<SpriteRenderer>();
-
         var col = GetComponent<CircleCollider2D>();
         col.isTrigger = true;
         col.radius    = 0.8f;
@@ -42,38 +36,39 @@ public class Chest : MonoBehaviour
         if (_opened) return;
         _opened = true;
 
-        // Pick a random reward
-        if (possibleRewards == null || possibleRewards.Length == 0) { Destroy(gameObject); return; }
-        var reward = possibleRewards[Random.Range(0, possibleRewards.Length)];
+        var levelUp = FindFirstObjectByType<LevelUpManager>();
+        if (levelUp == null) { Destroy(gameObject); return; }
 
-        EventBus.RaiseChestOpened(reward);
-        StartCoroutine(OpenAnimation(reward));
+        var option = levelUp.GetRandomChestReward();
+        if (option == null) { Destroy(gameObject); return; }
+        levelUp.ApplyReward(option);
+        EventBus.RaiseChestOpened(option);
+        StartCoroutine(OpenAnimation(option));
     }
 
-    private IEnumerator OpenAnimation(PowerUpData reward)
+    private IEnumerator OpenAnimation(UpgradeOption option)
     {
-        // Quick bounce animation
         if (_sr != null)
         {
             float t = 0f;
             while (t < 0.4f)
             {
                 t += Time.deltaTime;
-                float scale = 1f + 0.6f * Mathf.Sin(t / 0.4f * Mathf.PI); // Bigger bounce
+                float scale = 1f + 0.6f * Mathf.Sin(t / 0.4f * Mathf.PI);
                 transform.localScale = Vector3.one * scale;
                 yield return null;
             }
         }
 
-        // Spawn explosion particles before destroying
         if (openParticlePrefab != null)
-        {
             Instantiate(openParticlePrefab, transform.position, Quaternion.identity);
-        }
 
-        // Show the reward UI
-        var chestUI = FindFirstObjectByType<ChestRewardUI>();
-        chestUI?.Show(reward);
+        var chestUI = FindFirstObjectByType<ChestRewardUI>(FindObjectsInactive.Include);
+        if (chestUI != null)
+        {
+            chestUI.gameObject.SetActive(true);
+            chestUI.Show(option);
+        }
 
         Destroy(gameObject);
     }

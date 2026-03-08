@@ -9,7 +9,7 @@ public class StockOptionsWeapon : WeaponBase
     {
         if (arrowPrefab == null || CurrentStats == null) return;
 
-        int count = CurrentStats.projectileCount;
+        int count = GetProjectileCount(CurrentStats.projectileCount);
         
         var enemies = FindObjectsByType<EnemyBase>(FindObjectsSortMode.None);
         Transform closest = null;

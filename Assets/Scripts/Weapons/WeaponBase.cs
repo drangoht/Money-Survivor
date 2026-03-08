@@ -11,7 +11,7 @@ public abstract class WeaponBase : MonoBehaviour
     public WeaponData data;
 
     public int  CurrentLevel { get; private set; } = 0; // 0-indexed → level 1
-    public int  MaxLevel     => data != null ? data.levels.Length : 1;
+    public int  MaxLevel     => data != null && data.levels != null ? Mathf.Min(10, data.levels.Length) : 1;
     public bool IsMaxLevel   => CurrentLevel >= MaxLevel - 1;
 
     protected WeaponLevelStats CurrentStats =>
@@ -59,5 +59,12 @@ public abstract class WeaponBase : MonoBehaviour
     {
         float mult = _playerStats != null ? _playerStats.damageMultiplier : 1f;
         return CurrentStats.damage * mult;
+    }
+
+    /// <summary>Apply projectile count multiplier from power-ups. Returns at least 1.</summary>
+    protected int GetProjectileCount(int baseCount)
+    {
+        float mult = _playerStats != null ? _playerStats.projectileCountMultiplier : 1f;
+        return Mathf.Max(1, Mathf.RoundToInt(baseCount * mult));
     }
 }

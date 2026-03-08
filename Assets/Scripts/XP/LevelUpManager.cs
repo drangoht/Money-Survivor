@@ -32,19 +32,21 @@ public class LevelUpManager : MonoBehaviour
         if (options.Count == 0) { GameManager.Instance?.ResumeGame(); return; }
 
         GameManager.Instance?.EnterLevelUp();
-        _ui?.Show(options, ApplyChoice);
+        _ui?.Show(options, ApplyChoice, () => BuildOptions(3));
     }
 
     // ── Option building ──────────────────────────────────────────────────────
 
-    private List<UpgradeOption> BuildOptions(int count)
+    /// <summary>Builds the full list of possible rewards (new weapons, weapon upgrades, power-ups).</summary>
+    public List<UpgradeOption> BuildCandidates()
     {
         var candidates = new List<UpgradeOption>();
 
-        // New weapons the player doesn't have yet
         var player = GameObject.FindWithTag("Player");
         if (player != null) _equippedWeapons.Clear();
         _equippedWeapons.AddRange(player != null ? player.GetComponentsInChildren<WeaponBase>() : System.Array.Empty<WeaponBase>());
+
+        bool atMaxWeapons = _equippedWeapons.Count >= 3;
 
         foreach (var prefab in weaponPrefabs)
         {
@@ -52,22 +54,23 @@ public class LevelUpManager : MonoBehaviour
             var wb = prefab.GetComponent<WeaponBase>();
             if (wb == null || wb.data == null) continue;
 
-            // Not yet equipped → offer as new weapon
             bool alreadyEquipped = _equippedWeapons.Any(e => e.data == wb.data);
             if (!alreadyEquipped)
             {
-                candidates.Add(new UpgradeOption
+                if (!atMaxWeapons)
                 {
-                    type       = UpgradeType.NewWeapon,
-                    weaponPrefab = prefab,
-                    data       = wb.data,
-                    label      = wb.data.weaponName,
-                    description = wb.data.description,
-                });
+                    candidates.Add(new UpgradeOption
+                    {
+                        type       = UpgradeType.NewWeapon,
+                        weaponPrefab = prefab,
+                        data       = wb.data,
+                        label      = wb.data.weaponName,
+                        description = wb.data.description,
+                    });
+                }
                 continue;
             }
 
-            // Already equipped → offer upgrade if not maxed
             var equipped = _equippedWeapons.FirstOrDefault(e => e.data == wb.data);
             if (equipped != null && !equipped.IsMaxLevel)
             {
@@ -82,28 +85,37 @@ public class LevelUpManager : MonoBehaviour
             }
         }
 
-        // Power-ups
         foreach (var pu in powerUps)
         {
             if (pu == null) continue;
             candidates.Add(new UpgradeOption { type = UpgradeType.PowerUp, powerUp = pu, label = pu.powerUpName, description = pu.description });
         }
 
-        // Shuffle and take N
-        candidates = candidates.OrderBy(_ => Random.value).ToList();
+        return candidates.OrderBy(_ => Random.value).ToList();
+    }
+
+    private List<UpgradeOption> BuildOptions(int count)
+    {
+        var candidates = BuildCandidates();
         return candidates.Take(count).ToList();
     }
 
-    // ── Applying choices ─────────────────────────────────────────────────────
+    /// <summary>Returns one random possible reward for chests (weapon, weapon upgrade, or power-up). Null if none available.</summary>
+    public UpgradeOption? GetRandomChestReward()
+    {
+        var candidates = BuildCandidates();
+        if (candidates.Count == 0) return null;
+        return candidates[Random.Range(0, candidates.Count)];
+    }
 
-    private void ApplyChoice(UpgradeOption option)
+    /// <summary>Applies a reward (used by chest and level-up). Does not resume game.</summary>
+    public void ApplyReward(UpgradeOption option)
     {
         var player = GameObject.FindWithTag("Player");
 
         switch (option.type)
         {
             case UpgradeType.NewWeapon when player != null:
-                // Instantiate the prefab as a child to keep all serialized fields (like projectile references)
                 var spawnedW = Instantiate(option.weaponPrefab, player.transform);
                 var wb       = spawnedW.GetComponent<WeaponBase>();
                 if (wb != null) wb.data = option.data;
@@ -117,7 +129,13 @@ public class LevelUpManager : MonoBehaviour
                 ApplyPowerUp(option.powerUp, player);
                 break;
         }
+    }
 
+    // ── Applying choices ─────────────────────────────────────────────────────
+
+    private void ApplyChoice(UpgradeOption option)
+    {
+        ApplyReward(option);
         GameManager.Instance?.ResumeGame();
     }
 
@@ -134,6 +152,10 @@ public class LevelUpManager : MonoBehaviour
             case PowerUpEffectType.IncreaseSpeed:     stats.moveSpeed      += pu.value;    break;
             case PowerUpEffectType.IncreaseDamage:    stats.damageMultiplier += pu.value / 100f; break;
             case PowerUpEffectType.IncreasePickupRadius: stats.pickupRadius += pu.value;   break;
+            case PowerUpEffectType.RepelEnemies:      stats.repelForce     += pu.value;    break;
+            case PowerUpEffectType.IncreaseXPGain:    stats.xpMultiplier   += pu.value / 100f; break;
+            case PowerUpEffectType.IncreaseIFrames:   stats.invincibilityDuration += pu.value; break;
+            case PowerUpEffectType.IncreaseProjectileCount: stats.projectileCountMultiplier += pu.value / 100f; break;
             case PowerUpEffectType.MagnetAllOrbs:
                 foreach (var orb in FindObjectsByType<XPOrb>(FindObjectsSortMode.None))
                     orb.ForceAttract();

@@ -14,7 +14,7 @@ public class CoinToss : WeaponBase
     {
         if (coinPrefab == null || CurrentStats == null) return;
 
-        int   count     = CurrentStats.projectileCount;
+        int   count     = GetProjectileCount(CurrentStats.projectileCount);
         float angleStep = 360f / count;
 
         for (int i = 0; i < count; i++)

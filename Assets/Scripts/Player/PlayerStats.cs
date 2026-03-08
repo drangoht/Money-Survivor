@@ -14,6 +14,8 @@ public class PlayerStats : MonoBehaviour
     public float xpMultiplier   = 1f;
     public float invincibilityDuration = 0.8f;
     public float repelForce     = 0f;
+    /// <summary>Multiplier applied to weapon projectile count (e.g. 1.25 = +25% projectiles).</summary>
+    public float projectileCountMultiplier = 1f;
 
     [Header("Runtime")]
     public float CurrentHP { get; private set; }

@@ -108,3 +108,5 @@ This document serves as a backup of the prompt history and user requests used to
 * **Prompt:** "ok now chest works you can revrt the spawn time, but these will appears more often after 15 minutes, not under every 10 s"
 * **Prompt:** "and after 20 minutes boss spawn every 10 seconds"
 * **Prompt:** "pdate md files with these new rules"
+* **Prompt:** "make all the boss even more stronger and raise their size twice"
+* **Prompt:** "update all the md files"

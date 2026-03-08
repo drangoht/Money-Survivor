@@ -69,3 +69,11 @@ This document records the step-by-step process used to build and refine the game
 1. **Chest Drop:** Enemy prefabs were not assigned `chestPrefab`; GameSetup now sets it when creating or updating enemy prefabs so bosses (IRS, CEO, MegaBoss) drop chests on death.
 2. **Chest Visual & Particles:** When the chest image file is missing, a procedural chest texture is used. ChestOpenParticles velocity curves were fixed (all axes use same MinMaxCurve mode) and the prefab is recreated on setup to avoid “Particle Velocity curves must all be in the same mode”.
 3. **Boss Spawn Tiers:** After 15 min, IRS and MegaBoss spawn more often (90 s and 60 s). After 20 min, both spawn every 10 s. CEO remains once at 10 min. `EnemySpawner` uses `moreBossesAfterTime`, `moreBossesAfterTime2`, and late-interval fields for this.
+
+---
+
+## Phase 9: Boss Buff & Scale, 22 Min Insane Spawn, Docs
+
+1. **Bosses stronger and double size:** All bosses (IRS, CEO, MegaBoss) made significantly stronger (higher HP, contact damage, XP) and prefab scale doubled: IRS 1.8×, CEO 4×, MegaBoss 5.6×. `MakeEnemyPrefab` now applies the scale parameter to the sprite child; `ApplyEnemyPrefabScale` updates scale when existing prefabs are loaded so re-running Game Setup keeps boss sizes in sync.
+2. **22 min insane spawn:** After 22 minutes, regular spawns use `insaneSpawnInterval` (0.15 s) for very fast waves.
+3. **Documentation:** README, implementation plan, walkthrough, and prompt history updated to reflect current bosses, scales, and rules.
