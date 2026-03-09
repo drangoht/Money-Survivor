@@ -41,7 +41,10 @@ public class CompoundInterest : WeaponBase
     {
         if (CurrentStats == null) return;
 
-        float radius = CurrentStats.aoeRadius > 0f ? CurrentStats.aoeRadius : 1f;
+        // Base radius: scale from data, but make it clearly larger than the player sprite.
+        // At level 1 this is roughly ~1.5× the player sprite width.
+        float baseRadius = CurrentStats.aoeRadius > 0f ? CurrentStats.aoeRadius * 1.5f : 1.5f;
+        float radius = baseRadius;
         radius += CurrentLevel * 0.02f; // very small growth per level
 
         // We lookup stats to get the global repel force
@@ -64,7 +67,8 @@ public class CompoundInterest : WeaponBase
     private void UpdateAuraScale()
     {
         if (_auraSprite == null || CurrentStats == null) return;
-        float radius = (CurrentStats.aoeRadius > 0f ? CurrentStats.aoeRadius : 1f) + CurrentLevel * 0.02f;
+        float baseRadius = CurrentStats.aoeRadius > 0f ? CurrentStats.aoeRadius * 1.5f : 1.5f;
+        float radius = baseRadius + CurrentLevel * 0.02f;
         _auraSprite.transform.localScale = Vector3.one * radius * 2f;
     }
 

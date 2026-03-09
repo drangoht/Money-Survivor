@@ -8,6 +8,14 @@ using UnityEngine;
 [RequireComponent(typeof(CircleCollider2D))]
 public class ProjectileBase : MonoBehaviour, IPoolable
 {
+    /// <summary>Global count of active projectiles (for soft caps / performance).</summary>
+    public static int ActiveCount = 0;
+
+    [Header("Homing")]
+    [Tooltip("If true, projectile will continuously steer toward homingTarget.")]
+    public bool homing = false;
+    public Transform homingTarget;
+
     [HideInInspector] public float damage;
     [HideInInspector] public float speed;
     [HideInInspector] public int   pierceCount;
@@ -24,6 +32,8 @@ public class ProjectileBase : MonoBehaviour, IPoolable
         _rb = GetComponent<Rigidbody2D>();
         _rb.gravityScale   = 0f;
         _rb.freezeRotation = true;
+        _rb.collisionDetectionMode = CollisionDetectionMode2D.Discrete;
+        _rb.interpolation = RigidbodyInterpolation2D.None;
 
         var col = GetComponent<CircleCollider2D>();
         col.isTrigger = true;
@@ -39,6 +49,8 @@ public class ProjectileBase : MonoBehaviour, IPoolable
     /// <summary>Call right after instantiating to set properties.</summary>
     public virtual void Initialize(WeaponLevelStats stats, Vector2 direction)
     {
+        ActiveCount++;
+
         damage      = stats.damage;
         speed       = stats.projectileSpeed;
         pierceCount = stats.pierceCount;
@@ -54,7 +66,30 @@ public class ProjectileBase : MonoBehaviour, IPoolable
     protected virtual void Update()
     {
         _lifeTimer -= Time.deltaTime;
-        if (_lifeTimer <= 0f) Despawn();
+        if (_lifeTimer <= 0f)
+        {
+            Despawn();
+            return;
+        }
+
+        // Cull far-off projectiles to avoid simulating useless ones off-screen.
+        var cam = Camera.main;
+        if (cam != null)
+        {
+            float maxDist = 60f;
+            if (Vector2.SqrMagnitude((Vector2)transform.position - (Vector2)cam.transform.position) > maxDist * maxDist)
+            {
+                Despawn();
+                return;
+            }
+        }
+
+        // Simple homing: continuously aim velocity at target if set.
+        if (homing && homingTarget != null && _rb != null)
+        {
+            Vector2 dir = ((Vector2)homingTarget.position - _rb.position).normalized;
+            _rb.linearVelocity = dir * speed;
+        }
     }
 
     protected virtual void OnTriggerEnter2D(Collider2D other)
@@ -95,6 +130,8 @@ public class ProjectileBase : MonoBehaviour, IPoolable
 
     private void Despawn()
     {
+        if (ActiveCount > 0) ActiveCount--;
+
         if (ObjectPool.Instance != null && !string.IsNullOrEmpty(poolTag))
             ObjectPool.Instance.Return(poolTag, gameObject);
         else

@@ -66,6 +66,19 @@ public abstract class WeaponBase : MonoBehaviour
     protected int GetProjectileCount(int baseCount)
     {
         float mult = _playerStats != null ? _playerStats.projectileCountMultiplier : 1f;
-        return Mathf.Max(1, Mathf.RoundToInt(baseCount * mult));
+        int count = Mathf.Max(1, Mathf.RoundToInt(baseCount * mult));
+
+        // Soft cap per-shot projectiles so we don't spawn absurd numbers.
+        count = Mathf.Min(count, 30);
+
+        // If the scene is already full of projectiles, thin out further spawns.
+        if (ProjectileBase.ActiveCount > 250)
+            count = Mathf.Max(1, Mathf.RoundToInt(count * 0.5f));
+        if (ProjectileBase.ActiveCount > 350)
+            count = Mathf.Max(1, Mathf.RoundToInt(count * 0.35f));
+        if (ProjectileBase.ActiveCount > 450)
+            count = Mathf.Max(1, Mathf.RoundToInt(count * 0.25f));
+
+        return count;
     }
 }

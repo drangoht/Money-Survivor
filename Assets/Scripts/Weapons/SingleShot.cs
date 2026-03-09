@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
@@ -14,25 +15,25 @@ public class SingleShot : WeaponBase
     {
         if (projectilePrefab == null || CurrentStats == null) return;
 
-        // Find closest enemy
+        // Find enemies once
         var enemies = FindObjectsByType<EnemyBase>(FindObjectsSortMode.None);
-        Transform closest = null;
-        float minDist = float.MaxValue;
+        var enemyList = new List<EnemyBase>(enemies);
 
-        foreach (var e in enemies)
+        // Fallback direction if no enemies exist
+        Vector2 baseDir = Vector2.right;
+        if (enemyList.Count > 0)
         {
-            float d = Vector2.Distance(transform.position, e.transform.position);
-            if (d < minDist)
+            // Aim roughly at closest for fallback direction
+            float minDist = float.MaxValue;
+            foreach (var e in enemyList)
             {
-                minDist = d;
-                closest = e.transform;
+                float d = Vector2.Distance(transform.position, e.transform.position);
+                if (d < minDist)
+                {
+                    minDist = d;
+                    baseDir = (e.transform.position - transform.position).normalized;
+                }
             }
-        }
-
-        Vector2 baseDir = Vector2.right; // fallback
-        if (closest != null)
-        {
-            baseDir = (closest.position - transform.position).normalized;
         }
 
         int count = GetProjectileCount(CurrentStats.projectileCount);
@@ -42,9 +43,37 @@ public class SingleShot : WeaponBase
 
         for (int i = 0; i < count; i++)
         {
+            // Choose a target for this projectile if available (different bullets can follow different enemies)
+            Transform target = null;
+            if (enemyList.Count > 0)
+            {
+                float best = float.MaxValue;
+                int bestIndex = -1;
+                for (int ei = 0; ei < enemyList.Count; ei++)
+                {
+                    var e = enemyList[ei];
+                    if (e == null) continue;
+                    float d = Vector2.Distance(transform.position, e.transform.position);
+                    if (d < best)
+                    {
+                        best = d;
+                        bestIndex = ei;
+                    }
+                }
+                if (bestIndex >= 0)
+                {
+                    target = enemyList[bestIndex].transform;
+                    enemyList.RemoveAt(bestIndex); // next projectile can pick another enemy
+                }
+            }
+
             // Calculate direction with spread
             float currentAngle = startAngle + (i * spreadAngle);
-            Vector2 dir = Quaternion.Euler(0, 0, currentAngle) * baseDir;
+            Vector2 baseDirection = baseDir;
+            if (target != null)
+                baseDirection = (target.position - transform.position).normalized;
+
+            Vector2 dir = Quaternion.Euler(0, 0, currentAngle) * baseDirection;
 
             var go = Instantiate(projectilePrefab, transform.position, Quaternion.identity);
 
@@ -56,6 +85,8 @@ public class SingleShot : WeaponBase
             {
                 proj.Initialize(CurrentStats, dir);
                 proj.damage = GetDamage(); 
+                proj.homing = target != null;
+                proj.homingTarget = target;
             }
         }
     }
