@@ -12,6 +12,7 @@ public class SoundManager : MonoBehaviour
     private AudioClip _clipShoot;
     private AudioClip _clipHit;
     private AudioClip _clipEnemyDie;
+    private AudioClip _clipBossDie;
     private AudioClip _clipPowerUp;
     private AudioClip _clipWeaponGet;
     private AudioClip _clipWeaponUpgrade;
@@ -28,6 +29,7 @@ public class SoundManager : MonoBehaviour
         _clipShoot         = CreateShootClip();
         _clipHit           = CreateHitClip();
         _clipEnemyDie      = CreateEnemyDieClip();
+        _clipBossDie       = CreateBossDieClip();
         _clipPowerUp       = CreatePowerUpClip();
         _clipWeaponGet     = CreateWeaponGetClip();
         _clipWeaponUpgrade = CreateWeaponUpgradeClip();
@@ -57,7 +59,11 @@ public class SoundManager : MonoBehaviour
 
     private void OnWeaponFired(Vector3 _)         => Play(_clipShoot);
     private void OnEnemyHit(Vector3 _)            => Play(_clipHit);
-    private void OnEnemyKilled(Vector3 _, int __) => Play(_clipEnemyDie);
+    private void OnEnemyKilled(Vector3 _, int xpValue)
+    {
+        if (xpValue >= 30) Play(_clipBossDie); // Boss/elite: heavier sound
+        else Play(_clipEnemyDie);
+    }
     private void OnLevelUpScreenShown()           => Play(_clipLevelUpScreen);
     private void OnChestOpened(System.Collections.Generic.List<UpgradeOption> _) => Play(_clipChestOpen);
 
@@ -74,8 +80,10 @@ public class SoundManager : MonoBehaviour
 
     private void Play(AudioClip clip)
     {
-        if (clip != null && _source != null)
-            _source.PlayOneShot(clip);
+        if (clip == null || _source == null) return;
+        _source.pitch = UnityEngine.Random.Range(0.92f, 1.08f);
+        _source.PlayOneShot(clip);
+        _source.pitch = 1f;
     }
 
     // ── Procedural clip generation ───────────────────────────────────────────
@@ -114,6 +122,20 @@ public class SoundManager : MonoBehaviour
             data[i] = Mathf.Sin(2f * Mathf.PI * freq * t) * env;
         }
         return CreateClip("EnemyDie", data);
+    }
+
+    private static AudioClip CreateBossDieClip()
+    {
+        int len = (int)(SampleRate * 0.25f);
+        var data = new float[len];
+        float freq = 80f;
+        for (int i = 0; i < len; i++)
+        {
+            float t = i / (float)SampleRate;
+            float env = 1f - t * 4f;
+            data[i] = Mathf.Sin(2f * Mathf.PI * freq * t) * env * 0.6f;
+        }
+        return CreateClip("BossDie", data);
     }
 
     private static AudioClip CreatePowerUpClip()

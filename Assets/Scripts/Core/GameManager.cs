@@ -83,6 +83,7 @@ public class GameManager : MonoBehaviour
     public void ReturnToMainMenu()
     {
         Time.timeScale = 1f;
+        MusicController.Instance?.StopMusic();
         EventBus.ClearAll();
         SetState(GameState.MainMenu);
         SceneManager.LoadScene("MainMenu");
@@ -94,6 +95,7 @@ public class GameManager : MonoBehaviour
     private void HandlePlayerDeath()
     {
         SetState(GameState.GameOver);
+        EventBus.RaiseGameOver();
     }
 
     /// <summary>Call when game over; persists this run only if score is better than best.</summary>

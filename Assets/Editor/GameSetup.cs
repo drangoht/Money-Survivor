@@ -924,7 +924,7 @@ public static class GameSetup
     // ══════════════════════════════════════════════════════════════════════════
 
     private static GameObject _playerPrefab, _coinPrefab, _orbPrefab, _chestPrefab;
-    private static GameObject _cardPrefab, _cryptoPrefab, _stockPrefab, _hitParticlesPrefab;
+    private static GameObject _cardPrefab, _cryptoPrefab, _stockPrefab, _hitParticlesPrefab, _deathParticlesPrefab, _levelUpBurstPrefab;
     private static GameObject _deskPrefab, _chairPrefab, _wallPrefab;
     private static GameObject _p1, _p2, _p3, _p4, _p5, _p6, _p7; // enemy prefabs
 
@@ -943,6 +943,8 @@ public static class GameSetup
         _orbPrefab          = MakeOrb();
         _chestPrefab        = MakeChest();
         _hitParticlesPrefab = MakeHitParticles();
+        _deathParticlesPrefab = MakeDeathParticles();
+        _levelUpBurstPrefab = MakeLevelUpBurstParticles();
         _playerPrefab       = MakePlayer();
 
         _deskPrefab  = MakeObstaclePrefab("OfficeDesk",  _deskSprite,  2.4f, 1.2f);
@@ -988,6 +990,9 @@ public static class GameSetup
 
         var root = new GameObject("Player");
         root.tag = "Player";
+        // Soft glow behind player (juice: light-like halo)
+        var glowChild = Sprite2D(root, _circle, new Color(1f, 0.95f, 0.75f, 0.45f), 0, 1.7f);
+        glowChild.transform.SetAsFirstSibling();
         var spriteChild = Sprite2D(root, _playerSprite, Color.white, 2, 1f);
         // Bobbing animation + directional flip (uses Input.GetAxisRaw internally)
         var bobber = spriteChild.gameObject.AddComponent<SpriteBobber>();
@@ -1145,7 +1150,7 @@ public static class GameSetup
                         add.isTrigger = false;
                         add.radius = EnemyColliderBlockRadiusBase * scale;
                         var enemyBase = contents.GetComponent<EnemyBase>();
-                        if (enemyBase != null && enemyBase.chestPrefab == null) enemyBase.chestPrefab = _chestPrefab;
+                        if (enemyBase != null) { if (enemyBase.chestPrefab == null) enemyBase.chestPrefab = _chestPrefab; enemyBase.deathParticlePrefab = _deathParticlesPrefab; }
                         ApplyEnemyPrefabScale(contents, scale);
                         PrefabUtility.SaveAsPrefabAsset(contents, path);
                         PrefabUtility.UnloadPrefabContents(contents);
@@ -1158,7 +1163,7 @@ public static class GameSetup
                     if (contents != null)
                     {
                         var enemyBase = contents.GetComponent<EnemyBase>();
-                        if (enemyBase != null && enemyBase.chestPrefab == null) enemyBase.chestPrefab = _chestPrefab;
+                        if (enemyBase != null) { if (enemyBase.chestPrefab == null) enemyBase.chestPrefab = _chestPrefab; enemyBase.deathParticlePrefab = _deathParticlesPrefab; }
                         ApplyEnemyPrefabScale(contents, scale);
                         PrefabUtility.SaveAsPrefabAsset(contents, path);
                         PrefabUtility.UnloadPrefabContents(contents);
@@ -1173,7 +1178,7 @@ public static class GameSetup
                 if (contents != null)
                 {
                     var enemyBase = contents.GetComponent<EnemyBase>();
-                    if (enemyBase != null && enemyBase.chestPrefab == null) enemyBase.chestPrefab = _chestPrefab;
+                    if (enemyBase != null) { if (enemyBase.chestPrefab == null) enemyBase.chestPrefab = _chestPrefab; enemyBase.deathParticlePrefab = _deathParticlesPrefab; }
                     ApplyEnemyPrefabScale(contents, scale);
                     PrefabUtility.SaveAsPrefabAsset(contents, path);
                     PrefabUtility.UnloadPrefabContents(contents);
@@ -1206,6 +1211,7 @@ public static class GameSetup
         eb.data = data; eb.poolTag = name;
         eb.xpOrbPrefab = _orbPrefab;
         eb.hitParticlePrefab = _hitParticlesPrefab;
+        eb.deathParticlePrefab = _deathParticlesPrefab;
         eb.chestPrefab = _chestPrefab; // Bosses drop chest on death
 
         if (addAuraParticles)
@@ -1302,6 +1308,97 @@ public static class GameSetup
         return Save(root, path);
     }
 
+    private static GameObject MakeDeathParticles()
+    {
+        string path = PrefabsPath + "/DeathParticles.prefab";
+        var ex = AssetDatabase.LoadAssetAtPath<GameObject>(path);
+        if (ex != null) return ex;
+
+        var root = new GameObject("DeathParticles");
+        var ps = root.AddComponent<ParticleSystem>();
+        var psr = root.GetComponent<ParticleSystemRenderer>();
+        psr.material = new Material(Shader.Find("Sprites/Default"));
+
+        var main = ps.main;
+        main.duration = 0.4f;
+        main.loop = false;
+        main.startLifetime = new ParticleSystem.MinMaxCurve(0.35f, 0.65f);
+        main.startSpeed = new ParticleSystem.MinMaxCurve(3f, 7f);
+        main.startSize = new ParticleSystem.MinMaxCurve(0.2f, 0.4f);
+        main.simulationSpace = ParticleSystemSimulationSpace.World;
+        main.playOnAwake = true;
+        main.stopAction = ParticleSystemStopAction.Destroy;
+
+        var em = ps.emission;
+        em.rateOverTime = 0;
+        em.SetBursts(new[] { new ParticleSystem.Burst(0f, 12, 20) });
+
+        var shape = ps.shape;
+        shape.shapeType = ParticleSystemShapeType.Sphere;
+        shape.radius = 0.35f;
+
+        var col = ps.colorOverLifetime;
+        col.enabled = true;
+        Gradient grad = new Gradient();
+        grad.SetKeys(
+            new GradientColorKey[] { new GradientColorKey(Color.white, 0f), new GradientColorKey(Color.white, 1f) },
+            new GradientAlphaKey[] { new GradientAlphaKey(0.9f, 0f), new GradientAlphaKey(0f, 1f) }
+        );
+        col.color = new ParticleSystem.MinMaxGradient(grad);
+
+        var size = ps.sizeOverLifetime;
+        size.enabled = true;
+        size.size = new ParticleSystem.MinMaxCurve(1f, 0f);
+
+        return Save(root, path);
+    }
+
+    private static GameObject MakeLevelUpBurstParticles()
+    {
+        string path = PrefabsPath + "/LevelUpBurst.prefab";
+        var ex = AssetDatabase.LoadAssetAtPath<GameObject>(path);
+        if (ex != null) return ex;
+
+        var root = new GameObject("LevelUpBurst");
+        var ps = root.AddComponent<ParticleSystem>();
+        var psr = root.GetComponent<ParticleSystemRenderer>();
+        psr.material = new Material(Shader.Find("Sprites/Default"));
+
+        var main = ps.main;
+        main.duration = 0.5f;
+        main.loop = false;
+        main.startLifetime = new ParticleSystem.MinMaxCurve(0.4f, 0.8f);
+        main.startSpeed = new ParticleSystem.MinMaxCurve(2f, 5f);
+        main.startSize = new ParticleSystem.MinMaxCurve(0.25f, 0.5f);
+        main.startColor = new Color(1f, 0.95f, 0.5f);
+        main.simulationSpace = ParticleSystemSimulationSpace.World;
+        main.playOnAwake = true;
+        main.stopAction = ParticleSystemStopAction.Destroy;
+
+        var em = ps.emission;
+        em.rateOverTime = 0;
+        em.SetBursts(new[] { new ParticleSystem.Burst(0f, 25, 35) });
+
+        var shape = ps.shape;
+        shape.shapeType = ParticleSystemShapeType.Sphere;
+        shape.radius = 0.3f;
+
+        var col = ps.colorOverLifetime;
+        col.enabled = true;
+        Gradient grad = new Gradient();
+        grad.SetKeys(
+            new GradientColorKey[] { new GradientColorKey(new Color(1f, 0.95f, 0.6f), 0f), new GradientColorKey(new Color(1f, 0.7f, 0.2f), 1f) },
+            new GradientAlphaKey[] { new GradientAlphaKey(0.9f, 0f), new GradientAlphaKey(0f, 1f) }
+        );
+        col.color = new ParticleSystem.MinMaxGradient(grad);
+
+        var size = ps.sizeOverLifetime;
+        size.enabled = true;
+        size.size = new ParticleSystem.MinMaxCurve(1f, 0f);
+
+        return Save(root, path);
+    }
+
     private static GameObject MakeChestOpenParticles()
     {
         string path = PrefabsPath + "/ChestOpenParticles.prefab";
@@ -1384,8 +1481,10 @@ public static class GameSetup
         c.backgroundColor = new Color(.03f,.08f,.03f);
         cam.AddComponent<AudioListener>();
 
-        // GameManager
-        new GameObject("_GameManager").AddComponent<GameManager>();
+        // GameManager (persists; MusicController for BGM)
+        var gmGo = new GameObject("_GameManager");
+        gmGo.AddComponent<GameManager>();
+        gmGo.AddComponent<MusicController>();
 
         // UI
         var ui = new GameObject("_UI").AddComponent<MainMenuUI>();
@@ -1410,7 +1509,6 @@ public static class GameSetup
         cam.backgroundColor = new Color(.05f,.09f,.05f);
         camGO.AddComponent<AudioListener>();
         camGO.AddComponent<CameraFollow>();
-        camGO.AddComponent<ScreenShake>();
 
         // Background – two-layer parallax:
         // Far layer: soft dark gradient.
@@ -1514,6 +1612,7 @@ public static class GameSetup
 
         var lm = sys.AddComponent<LevelUpManager>();
         lm.powerUps      = new List<PowerUpData> { _healPU, _speedPU, _damagePU, _magnetPU, _radiusPU, _insiderPU, _taxPU, _overclockPU, _duplicatePU };
+        lm.levelUpBurstPrefab = _levelUpBurstPrefab;
         lm.weaponPrefabs = new List<GameObject>
         {
             CreateWeaponPrefabWrapper("SingleShot", typeof(SingleShot), _singleShotData, _coinPrefab),

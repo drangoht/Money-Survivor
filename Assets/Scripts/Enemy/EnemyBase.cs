@@ -12,6 +12,7 @@ public class EnemyBase : MonoBehaviour, IPoolable
     public EnemyData data;
     public GameObject xpOrbPrefab; // assign in Inspector or via GameSetup
     public GameObject hitParticlePrefab; // assign via GameSetup
+    public GameObject deathParticlePrefab; // optional: burst on death (assign via GameSetup)
     public GameObject chestPrefab; // assigned globally via GameSetup
 
     // Runtime
@@ -37,7 +38,18 @@ public class EnemyBase : MonoBehaviour, IPoolable
         float hpMult = Mathf.Pow(data.hpScaleFactor, _difficultyTier) * _timeStrengthMult;
         _currentHP   = data.hp * hpMult;
 
-        if (_sr != null) _sr.color = data.bodyColor;
+        ApplyStrengthVisual();
+    }
+
+    /// <summary>Differentiate enemies by difficulty: stronger = warmer tint (orange/red).</summary>
+    private void ApplyStrengthVisual()
+    {
+        if (_sr == null || data == null) return;
+        float tierFactor = Mathf.Clamp01(_difficultyTier * 0.12f);
+        float timeFactor = Mathf.Clamp01((_timeStrengthMult - 1f) * 0.25f);
+        float strengthFactor = Mathf.Clamp01(tierFactor + timeFactor);
+        Color strengthTint = Color.Lerp(Color.white, new Color(1f, 0.5f, 0.2f), strengthFactor * 0.7f);
+        _sr.color = data.bodyColor * strengthTint;
     }
 
     public void OnDespawn() { }
@@ -73,7 +85,7 @@ public class EnemyBase : MonoBehaviour, IPoolable
         {
             float hpMult = Mathf.Pow(data.hpScaleFactor, _difficultyTier) * _timeStrengthMult;
             _currentHP   = data.hp * hpMult;
-            if (_sr != null) _sr.color = data.bodyColor;
+            ApplyStrengthVisual();
         }
     }
 
@@ -152,6 +164,14 @@ public class EnemyBase : MonoBehaviour, IPoolable
     {
         _isDead = true;
         EventBus.RaiseEnemyKilled(transform.position, data.xpValue);
+
+        // Death particle burst (color from data)
+        if (deathParticlePrefab != null)
+        {
+            var parts = Instantiate(deathParticlePrefab, transform.position, Quaternion.identity);
+            var main = parts.GetComponent<ParticleSystem>().main;
+            main.startColor = data != null ? data.hitParticleColor : Color.white;
+        }
 
         if (xpOrbPrefab != null)
         {

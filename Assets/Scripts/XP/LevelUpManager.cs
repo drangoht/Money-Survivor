@@ -14,6 +14,10 @@ public class LevelUpManager : MonoBehaviour
     [Header("All available power-up definitions")]
     public List<PowerUpData> powerUps;
 
+    [Header("Juice (optional)")]
+    [Tooltip("Particle burst spawned at player when level-up screen appears.")]
+    public GameObject levelUpBurstPrefab;
+
     private LevelUpUI _ui;
     private PlayerStats _playerStats;
 
@@ -33,6 +37,11 @@ public class LevelUpManager : MonoBehaviour
 
         GameManager.Instance?.EnterLevelUp();
         EventBus.RaiseLevelUpScreenShown();
+        if (levelUpBurstPrefab != null && _playerStats != null)
+        {
+            var burst = Object.Instantiate(levelUpBurstPrefab, _playerStats.transform.position, Quaternion.identity);
+            Object.Destroy(burst, 1.5f);
+        }
         _ui?.Show(options, ApplyChoice, () => BuildOptions(3));
     }
 
