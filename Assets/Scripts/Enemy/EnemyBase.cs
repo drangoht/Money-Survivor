@@ -156,7 +156,10 @@ public class EnemyBase : MonoBehaviour, IPoolable
 
         if (data != null && data.isBoss && chestPrefab != null)
         {
-            Instantiate(chestPrefab, transform.position, Quaternion.identity);
+            var chestGO = Instantiate(chestPrefab, transform.position, Quaternion.identity);
+            // MegaBoss chest: roll 3 rewards and show them in a single notification.
+            if (data.enemyName == "MegaBoss" && chestGO.TryGetComponent<Chest>(out var chest))
+                chest.rewardCount = 3;
         }
 
         if (ObjectPool.Instance != null && !string.IsNullOrEmpty(poolTag))

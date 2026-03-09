@@ -51,3 +51,38 @@ MonoBehaviour:
     pierceCount: 3
     aoeRadius: 0
     duration: 4
+  - damage: 40
+    fireRate: 1.6
+    projectileSpeed: 10
+    projectileCount: 10
+    pierceCount: 3
+    aoeRadius: 0
+    duration: 4
+  - damage: 50
+    fireRate: 1.7
+    projectileSpeed: 11
+    projectileCount: 12
+    pierceCount: 4
+    aoeRadius: 0
+    duration: 4.2
+  - damage: 62
+    fireRate: 1.8
+    projectileSpeed: 11
+    projectileCount: 14
+    pierceCount: 4
+    aoeRadius: 0
+    duration: 4.2
+  - damage: 76
+    fireRate: 2
+    projectileSpeed: 12
+    projectileCount: 16
+    pierceCount: 5
+    aoeRadius: 0
+    duration: 4.4
+  - damage: 92
+    fireRate: 2.2
+    projectileSpeed: 13
+    projectileCount: 18
+    pierceCount: 6
+    aoeRadius: 0
+    duration: 4.6

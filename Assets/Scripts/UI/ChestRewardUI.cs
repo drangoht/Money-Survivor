@@ -15,11 +15,24 @@ public class ChestRewardUI : MonoBehaviour
     private void Awake() => EventBus.OnChestOpened += Show;
     private void OnDestroy() => EventBus.OnChestOpened -= Show;
 
-    public void Show(UpgradeOption option)
+    public void Show(System.Collections.Generic.List<UpgradeOption> rewards)
     {
-        if (string.IsNullOrEmpty(option.label)) return;
-        _rewardName = option.label;
-        _rewardDesc = option.description ?? "";
+        if (rewards == null || rewards.Count == 0) return;
+
+        // Header line: if multiple rewards, show count.
+        _rewardName = rewards.Count == 1 ? rewards[0].label : $"{rewards.Count} rewards collected!";
+
+        // List reward labels (one per line). Keep it compact and readable.
+        var lines = new System.Text.StringBuilder();
+        for (int i = 0; i < rewards.Count; i++)
+        {
+            var r = rewards[i];
+            if (r == null) continue;
+            if (string.IsNullOrEmpty(r.label)) continue;
+            lines.Append("• ").Append(r.label);
+            if (i < rewards.Count - 1) lines.Append('\n');
+        }
+        _rewardDesc = lines.ToString();
         _visible    = true;
         _hideTime   = Time.unscaledTime + displayDuration;
     }
@@ -37,7 +50,7 @@ public class ChestRewardUI : MonoBehaviour
         if (!_visible) return;
 
         float sw = Screen.width, sh = Screen.height;
-        float w = 320f, h = 110f;
+        float w = 340f, h = 150f;
         float x = sw - w - 20f, y = sh - h - 20f;
 
         var bg = new Texture2D(1, 1);
@@ -61,6 +74,6 @@ public class ChestRewardUI : MonoBehaviour
 
         var descStyle = new GUIStyle(GUI.skin.label) { fontSize = 13, wordWrap = true };
         descStyle.normal.textColor = new Color(0.85f, 0.85f, 0.85f);
-        GUI.Label(new Rect(x + 10, y + 60, w - 20, 44f), _rewardDesc, descStyle);
+        GUI.Label(new Rect(x + 10, y + 60, w - 20, h - 70f), _rewardDesc, descStyle);
     }
 }

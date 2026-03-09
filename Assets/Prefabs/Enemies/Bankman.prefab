@@ -234,7 +234,7 @@ MonoBehaviour:
   data: {fileID: 11400000, guid: 578e6cb86daf6534f8eb69fddea9c7e2, type: 2}
   xpOrbPrefab: {fileID: 6135278874558500445, guid: 68067151309cb0b4bb873ab80b39045e, type: 3}
   hitParticlePrefab: {fileID: 1615597018830496104, guid: 8887b13d945fad6428b3a64045c59b65, type: 3}
-  chestPrefab: {fileID: 3013784722325576207, guid: 438bd0165d736f0439f89e620e1cf6c1, type: 3}
+  chestPrefab: {fileID: 9121780073808507211, guid: 438bd0165d736f0439f89e620e1cf6c1, type: 3}
   poolTag: Bankman
 --- !u!58 &6335132878474415458
 CircleCollider2D:

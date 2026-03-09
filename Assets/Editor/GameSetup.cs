@@ -675,6 +675,11 @@ public static class GameSetup
                 new() { damage=22, fireRate=1.0f, projectileSpeed=16, projectileCount=2, pierceCount=2, duration=3f },
                 new() { damage=28, fireRate=1.1f, projectileSpeed=16, projectileCount=3, pierceCount=2, duration=3f },
                 new() { damage=35, fireRate=1.2f, projectileSpeed=17, projectileCount=4, pierceCount=3, duration=3f },
+                new() { damage=42, fireRate=1.25f,projectileSpeed=18, projectileCount=4, pierceCount=4, duration=3.2f },
+                new() { damage=50, fireRate=1.3f, projectileSpeed=19, projectileCount=5, pierceCount=4, duration=3.2f },
+                new() { damage=60, fireRate=1.35f,projectileSpeed=20, projectileCount=6, pierceCount=5, duration=3.4f },
+                new() { damage=72, fireRate=1.4f, projectileSpeed=21, projectileCount=7, pierceCount=6, duration=3.4f },
+                new() { damage=86, fireRate=1.5f, projectileSpeed=22, projectileCount=8, pierceCount=7, duration=3.6f },
             }, "AimedBullet");
 
         _coinData = MakeWeapon("CoinTossData", "Coin Toss",
@@ -686,6 +691,11 @@ public static class GameSetup
                 new() { damage=18, fireRate=1.2f, projectileSpeed=9, projectileCount=6, pierceCount=2, duration=3f },
                 new() { damage=24, fireRate=1.3f, projectileSpeed=9, projectileCount=8, pierceCount=2, duration=3.5f},
                 new() { damage=32, fireRate=1.5f, projectileSpeed=10,projectileCount=8, pierceCount=3, duration=4f },
+                new() { damage=40, fireRate=1.6f, projectileSpeed=10,projectileCount=10,pierceCount=3, duration=4f },
+                new() { damage=50, fireRate=1.7f, projectileSpeed=11,projectileCount=12,pierceCount=4, duration=4.2f },
+                new() { damage=62, fireRate=1.8f, projectileSpeed=11,projectileCount=14,pierceCount=4, duration=4.2f },
+                new() { damage=76, fireRate=2.0f, projectileSpeed=12,projectileCount=16,pierceCount=5, duration=4.4f },
+                new() { damage=92, fireRate=2.2f, projectileSpeed=13,projectileCount=18,pierceCount=6, duration=4.6f },
             }, "CoinToss");
 
         _whipData = MakeWeapon("BillWhipData", "Bill Whip",
@@ -697,6 +707,11 @@ public static class GameSetup
                 new() { damage=36, fireRate=1.0f, aoeRadius=3.5f },
                 new() { damage=46, fireRate=1.1f, aoeRadius=4.0f },
                 new() { damage=60, fireRate=1.2f, aoeRadius=5.0f },
+                new() { damage=76, fireRate=1.25f,aoeRadius=5.4f },
+                new() { damage=94, fireRate=1.3f, aoeRadius=5.8f },
+                new() { damage=114,fireRate=1.35f,aoeRadius=6.2f },
+                new() { damage=138,fireRate=1.4f, aoeRadius=6.6f },
+                new() { damage=166,fireRate=1.5f, aoeRadius=7.2f },
             }, "BillWhip");
 
         _auraData = MakeWeapon("CompoundInterestData", "Compound Interest",
@@ -708,6 +723,11 @@ public static class GameSetup
                 new() { damage=2.5f, fireRate=2.1f, aoeRadius=1.1f },
                 new() { damage=3f,   fireRate=2.1f, aoeRadius=1.2f },
                 new() { damage=4f,   fireRate=2.2f, aoeRadius=1.3f },
+                new() { damage=5f,   fireRate=2.25f,aoeRadius=1.35f },
+                new() { damage=6f,   fireRate=2.3f, aoeRadius=1.4f },
+                new() { damage=7.5f, fireRate=2.35f,aoeRadius=1.45f },
+                new() { damage=9f,   fireRate=2.4f, aoeRadius=1.5f },
+                new() { damage=11f,  fireRate=2.5f, aoeRadius=1.6f },
             }, "CompoundInterest");
 
         _cardData = MakeWeapon("CreditCardData", "Credit Card",
@@ -719,6 +739,11 @@ public static class GameSetup
                 new() { damage=25, fireRate=1.3f, projectileSpeed=14, projectileCount=3, pierceCount=4, duration=2f },
                 new() { damage=35, fireRate=1.2f, projectileSpeed=16, projectileCount=3, pierceCount=99, duration=2.5f },
                 new() { damage=50, fireRate=1.0f, projectileSpeed=18, projectileCount=4, pierceCount=99, duration=2.5f },
+                new() { damage=62, fireRate=1.05f,projectileSpeed=18, projectileCount=5, pierceCount=99, duration=2.6f },
+                new() { damage=76, fireRate=1.1f, projectileSpeed=19, projectileCount=6, pierceCount=99, duration=2.7f },
+                new() { damage=92, fireRate=1.15f,projectileSpeed=20, projectileCount=7, pierceCount=99, duration=2.8f },
+                new() { damage=110,fireRate=1.2f, projectileSpeed=21, projectileCount=8, pierceCount=99, duration=2.9f },
+                new() { damage=130,fireRate=1.3f, projectileSpeed=22, projectileCount=9, pierceCount=99, duration=3.0f },
             }, "CreditCard");
 
         string cryptoPath = WeaponSOPath + "/CryptominerData.asset";
@@ -732,6 +757,11 @@ public static class GameSetup
                 new() { damage=40, fireRate=0.33f, aoeRadius=3.2f, projectileCount=2, duration=4f }, // 1 every 3.0 sec
                 new() { damage=65, fireRate=0.40f, aoeRadius=3.6f, projectileCount=2, duration=4.5f },// 1 every 2.5 sec
                 new() { damage=100, fireRate=0.50f, aoeRadius=4.0f, projectileCount=3, duration=5f },// 1 every 2.0 sec
+                new() { damage=135, fireRate=0.60f, aoeRadius=4.4f, projectileCount=3, duration=5.2f },// ~1.7 sec
+                new() { damage=175, fireRate=0.70f, aoeRadius=4.8f, projectileCount=4, duration=5.4f },// ~1.4 sec
+                new() { damage=220, fireRate=0.80f, aoeRadius=5.2f, projectileCount=4, duration=5.6f },// ~1.25 sec
+                new() { damage=270, fireRate=0.95f, aoeRadius=5.6f, projectileCount=5, duration=5.8f },// ~1.05 sec
+                new() { damage=330, fireRate=1.10f, aoeRadius=6.0f, projectileCount=5, duration=6.0f },// ~0.9 sec
             }, "Cryptominer");
 
         string stockPath = WeaponSOPath + "/StockOptionsData.asset";
@@ -745,6 +775,11 @@ public static class GameSetup
                 new() { damage=32, fireRate=1.0f, projectileSpeed=17, projectileCount=3, pierceCount=3, duration=2f },
                 new() { damage=45, fireRate=0.9f, projectileSpeed=18, projectileCount=4, pierceCount=3, duration=2.5f },
                 new() { damage=60, fireRate=0.8f, projectileSpeed=20, projectileCount=5, pierceCount=4, duration=2.5f },
+                new() { damage=78, fireRate=0.85f, projectileSpeed=20, projectileCount=6, pierceCount=4, duration=2.6f },
+                new() { damage=98, fireRate=0.9f,  projectileSpeed=21, projectileCount=7, pierceCount=5, duration=2.7f },
+                new() { damage=122,fireRate=0.95f, projectileSpeed=22, projectileCount=8, pierceCount=5, duration=2.8f },
+                new() { damage=150,fireRate=1.0f,  projectileSpeed=23, projectileCount=9, pierceCount=6, duration=2.9f },
+                new() { damage=182,fireRate=1.1f,  projectileSpeed=24, projectileCount=10,pierceCount=7, duration=3.0f },
             }, "StockOptions");
 
         _healPU   = MakePU("HealthInsurance", "Health Insurance", "Restores 30 HP.",
@@ -791,7 +826,12 @@ public static class GameSetup
         var icon = LoadWeaponIcon(iconFileName);
         if (ex != null)
         {
-            if (icon != null) { ex.icon = icon; EditorUtility.SetDirty(ex); AssetDatabase.SaveAssets(); }
+            ex.weaponName   = label;
+            ex.description  = desc;
+            ex.levels       = levels;
+            if (icon != null) ex.icon = icon;
+            EditorUtility.SetDirty(ex);
+            AssetDatabase.SaveAssets();
             Log($"  Weapon exists: {id}");
             return ex;
         }

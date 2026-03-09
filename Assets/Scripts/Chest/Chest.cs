@@ -14,6 +14,10 @@ public class Chest : MonoBehaviour
     [Header("Visuals")]
     public GameObject openParticlePrefab;
 
+    [Header("Rewards")]
+    [Tooltip("How many rewards to roll and apply when opened.")]
+    public int rewardCount = 1;
+
     private bool _opened;
     private SpriteRenderer _sr;
 
@@ -39,15 +43,24 @@ public class Chest : MonoBehaviour
         var levelUp = FindFirstObjectByType<LevelUpManager>();
         if (levelUp == null) { Destroy(gameObject); return; }
 
-        var option = levelUp.GetRandomChestReward();
-        if (option == null) { Destroy(gameObject); return; }
-        levelUp.ApplyReward(option);
-        EventBus.RaiseChestOpened(option);
-        EventBus.RaiseRewardApplied(option);
-        StartCoroutine(OpenAnimation(option));
+        var rewards = new System.Collections.Generic.List<UpgradeOption>();
+        int rolls = Mathf.Max(1, rewardCount);
+        for (int i = 0; i < rolls; i++)
+        {
+            var option = levelUp.GetRandomChestReward();
+            if (option == null) break;
+            rewards.Add(option);
+            levelUp.ApplyReward(option);
+            EventBus.RaiseRewardApplied(option);
+        }
+
+        if (rewards.Count == 0) { Destroy(gameObject); return; }
+
+        EventBus.RaiseChestOpened(rewards);
+        StartCoroutine(OpenAnimation(rewards));
     }
 
-    private IEnumerator OpenAnimation(UpgradeOption option)
+    private IEnumerator OpenAnimation(System.Collections.Generic.List<UpgradeOption> rewards)
     {
         if (_sr != null)
         {
@@ -68,7 +81,7 @@ public class Chest : MonoBehaviour
         if (chestUI != null)
         {
             chestUI.gameObject.SetActive(true);
-            chestUI.Show(option);
+            chestUI.Show(rewards);
         }
 
         Destroy(gameObject);

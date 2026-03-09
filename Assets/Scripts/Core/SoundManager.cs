@@ -59,7 +59,7 @@ public class SoundManager : MonoBehaviour
     private void OnEnemyHit(Vector3 _)            => Play(_clipHit);
     private void OnEnemyKilled(Vector3 _, int __) => Play(_clipEnemyDie);
     private void OnLevelUpScreenShown()           => Play(_clipLevelUpScreen);
-    private void OnChestOpened(UpgradeOption _)   => Play(_clipChestOpen);
+    private void OnChestOpened(System.Collections.Generic.List<UpgradeOption> _) => Play(_clipChestOpen);
 
     private void OnRewardApplied(UpgradeOption option)
     {

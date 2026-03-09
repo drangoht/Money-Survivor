@@ -15,8 +15,8 @@ public static class EventBus
     // Enemy events
     public static event Action<Vector3, int> OnEnemyKilled;   // position, xpValue
 
-    // Chest events (reward is the chosen upgrade option: weapon, weapon upgrade, or power-up)
-    public static event Action<UpgradeOption> OnChestOpened;
+    // Chest events (rewards are the chosen upgrade options: weapon, weapon upgrade, or power-up)
+    public static event Action<System.Collections.Generic.List<UpgradeOption>> OnChestOpened;
 
     // Sound / gameplay events (for SFX)
     public static event Action<Vector3> OnWeaponFired;       // position (e.g. player)
@@ -35,7 +35,7 @@ public static class EventBus
     public static void RaisePlayerHPChanged(float cur, float max) => OnPlayerHPChanged?.Invoke(cur, max);
     public static void RaiseXPChanged(float cur, float req)       => OnXPChanged?.Invoke(cur, req);
     public static void RaiseEnemyKilled(Vector3 pos, int xp)      => OnEnemyKilled?.Invoke(pos, xp);
-    public static void RaiseChestOpened(UpgradeOption data)     => OnChestOpened?.Invoke(data);
+    public static void RaiseChestOpened(System.Collections.Generic.List<UpgradeOption> data) => OnChestOpened?.Invoke(data);
     public static void RaiseWeaponFired(Vector3 pos)            => OnWeaponFired?.Invoke(pos);
     public static void RaiseEnemyHit(Vector3 pos)              => OnEnemyHit?.Invoke(pos);
     public static void RaiseLevelUpScreenShown()               => OnLevelUpScreenShown?.Invoke();
