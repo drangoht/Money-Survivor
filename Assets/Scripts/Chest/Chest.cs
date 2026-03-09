@@ -57,10 +57,10 @@ public class Chest : MonoBehaviour
         if (rewards.Count == 0) { Destroy(gameObject); return; }
 
         EventBus.RaiseChestOpened(rewards);
-        StartCoroutine(OpenAnimation(rewards));
+        StartCoroutine(OpenAnimation());
     }
 
-    private IEnumerator OpenAnimation(System.Collections.Generic.List<UpgradeOption> rewards)
+    private IEnumerator OpenAnimation()
     {
         if (_sr != null)
         {
@@ -76,13 +76,6 @@ public class Chest : MonoBehaviour
 
         if (openParticlePrefab != null)
             Instantiate(openParticlePrefab, transform.position, Quaternion.identity);
-
-        var chestUI = FindFirstObjectByType<ChestRewardUI>(FindObjectsInactive.Include);
-        if (chestUI != null)
-        {
-            chestUI.gameObject.SetActive(true);
-            chestUI.Show(rewards);
-        }
 
         Destroy(gameObject);
     }

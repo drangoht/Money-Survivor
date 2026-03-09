@@ -37,11 +37,7 @@ public class PlayerController : MonoBehaviour
         if (GameManager.Instance != null &&
             GameManager.Instance.State != GameState.Playing) return;
 
-        float x = Input.GetAxisRaw("Horizontal");
-        float y = Input.GetAxisRaw("Vertical");
-        _moveInput = new Vector2(x, y);
-        if (_moveInput.sqrMagnitude > 1f)
-            _moveInput.Normalize();
+        _moveInput = InputService.Current.GetMoveAxis();
 
         // Sprite faces LEFT by default (flipX=false).
         if (_sr != null && _moveInput.x != 0f)

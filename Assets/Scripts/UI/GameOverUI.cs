@@ -27,7 +27,7 @@ public class GameOverUI : MonoBehaviour
     {
         if (!_visible || GameManager.Instance == null) return;
 
-        float x = Input.GetAxisRaw("Horizontal");
+        float x = InputService.Current.GetHorizontalMenuAxis();
 
         if (x > 0.5f)
         {
@@ -44,7 +44,7 @@ public class GameOverUI : MonoBehaviour
         if (_selectedIndex < 0) _selectedIndex = 1;
         if (_selectedIndex > 1) _selectedIndex = 0;
 
-        if (Input.GetButtonDown("Submit"))
+        if (InputService.Current.GetSubmitPressed())
         {
             GameManager.Instance.SaveBestRunIfBetter();
             _visible = false;

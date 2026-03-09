@@ -24,6 +24,7 @@ public class HUDController : MonoBehaviour
     private GUIStyle _barBG, _hpFill, _xpFill, _labelStyle;
     private bool     _stylesReady;
     private Texture2D _weaponSlotPlaceholder;
+    private PlayerStats _cachedPlayer;
 
     private void OnEnable()
     {
@@ -71,8 +72,7 @@ public class HUDController : MonoBehaviour
         if (GameManager.Instance == null) return;
         if (GameManager.Instance.State == GameState.GameOver) return;
 
-        bool togglePause = Input.GetKeyDown(KeyCode.Escape) || Input.GetButtonDown("Cancel")
-            || Input.GetKeyDown(KeyCode.JoystickButton7); // Controller Start button
+        bool togglePause = InputService.Current.GetPausePressed();
 
         if (togglePause)
         {
@@ -88,7 +88,7 @@ public class HUDController : MonoBehaviour
         // Handle pause menu navigation
         if (GameManager.Instance.State == GameState.Paused)
         {
-            float x = Input.GetAxisRaw("Horizontal");
+            float x = InputService.Current.GetHorizontalMenuAxis();
 
             if (x > 0.5f)
             {
@@ -105,7 +105,7 @@ public class HUDController : MonoBehaviour
             if (_selectedIndex < 0) _selectedIndex = 1;
             if (_selectedIndex > 1) _selectedIndex = 0;
 
-            if (Input.GetButtonDown("Submit"))
+            if (InputService.Current.GetSubmitPressed())
             {
                 if (_selectedIndex == 0) GameManager.Instance.ResumeGame();
                 else GameManager.Instance.ReturnToMainMenu();
@@ -171,8 +171,14 @@ public class HUDController : MonoBehaviour
         float slotSize = 52f;
         float slotGap = 8f;
         float slotsY = barY + xpBarH + 52f;
-        var player = GameObject.FindWithTag("Player");
-        var weapons = player != null ? player.GetComponentsInChildren<WeaponBase>() : System.Array.Empty<WeaponBase>();
+        if (_cachedPlayer == null)
+        {
+            var go = GameObject.FindWithTag("Player");
+            if (go != null) _cachedPlayer = go.GetComponent<PlayerStats>();
+        }
+        var weapons = _cachedPlayer != null
+            ? _cachedPlayer.GetComponentsInChildren<WeaponBase>()
+            : System.Array.Empty<WeaponBase>();
         for (int i = 0; i < 3; i++)
         {
             float sx = barX + i * (slotSize + slotGap);
@@ -273,11 +279,15 @@ public class HUDController : MonoBehaviour
         GUI.Label(new Rect(startX, startY + 20f, panelW, 40f), "- PAUSED -", titleStyle);
 
         // Fetch Player and Stats
-        var player = GameObject.FindWithTag("Player");
-        if (player == null) return;
+        if (_cachedPlayer == null)
+        {
+            var go = GameObject.FindWithTag("Player");
+            if (go != null) _cachedPlayer = go.GetComponent<PlayerStats>();
+        }
+        if (_cachedPlayer == null) return;
 
-        var stats = player.GetComponent<PlayerStats>();
-        var weapons = player.GetComponentsInChildren<WeaponBase>();
+        var stats = _cachedPlayer;
+        var weapons = _cachedPlayer.GetComponentsInChildren<WeaponBase>();
 
         // Player Stats column
         float colX = startX + 40f;

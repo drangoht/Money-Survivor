@@ -57,7 +57,7 @@ Weapon icons use a **square format** and **mauve (#E0B0FF) background** (strippe
 | **Bouncer** | Tank | Slow, high HP. |
 
 ### Bosses
-Bosses are larger, tougher, and **drop a chest** when killed. Enemy strength (HP, contact damage, speed) also scales with **elapsed time** (stronger every 2 minutes).
+Bosses are larger, tougher, and **drop a chest** when killed. Enemy strength (HP, contact damage, speed) also scales with **elapsed time** (stronger every 3 minutes).
 
 | Boss | Scale | HP | Contact damage | XP | Spawn rule |
 |------|-------|-----|----------------|-----|------------|
@@ -93,7 +93,7 @@ Power-ups can appear as **level-up choices** (one of three cards) or as **chest 
 - **Score (Net Worth):** Equals the number of enemies killed (no time-based score).
 - **Level-up:** Collect XP orbs to fill the bar; on level-up the game pauses and you pick one of three cards (new weapon, weapon upgrade, or power-up). A one-time **Refresh choices** option can appear as a fourth card.
 - **Chests:** Dropped by bosses. On open, a random reward (weapon / upgrade / power-up from the same pools) is applied, then a short notification is shown.
-- **Difficulty:** Spawn rate and enemy mix escalate every 30 s (tier). Enemies get **stronger every 2 minutes** (HP, contact damage, and speed scale up). After **22 min**, regular spawn rate becomes **insane** (very fast).
+- **Difficulty:** Spawn rate and enemy mix escalate every 30 s (tier). Enemies get **stronger every 3 minutes** (HP, contact damage, and speed scale up). After **22 min**, regular spawn rate becomes **insane** (very fast).
 
 ---
 
@@ -130,7 +130,7 @@ Custom splash and menus themed to the game.
 
 ## 📈 Systems
 
-- **Dynamic scaling:** Spawn rate and difficulty tier increase over time; enemies scale every 2 minutes.
+- **Dynamic scaling:** Spawn rate and difficulty tier increase over time; enemies scale every 3 minutes.
 - **Event bus:** Decoupled events for game state, level-up, and UI.
 - **Object pooling:** Enemies and particles use pooling for performance.
 - **Juicy combat:** Hit flashing, screen shake, XP orbs, particle emitters on hit/death.

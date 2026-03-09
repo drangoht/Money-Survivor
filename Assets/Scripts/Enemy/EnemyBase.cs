@@ -56,6 +56,16 @@ public class EnemyBase : MonoBehaviour, IPoolable
         col.isTrigger = true;
     }
 
+    private void OnEnable()
+    {
+        EnemyRegistry.Register(this);
+    }
+
+    private void OnDisable()
+    {
+        EnemyRegistry.Unregister(this);
+    }
+
     private void Start()
     {
         // Fallback initialization if OnSpawn wasn't called (e.g., initial spawns)
@@ -104,11 +114,9 @@ public class EnemyBase : MonoBehaviour, IPoolable
 
     public void SetDifficultyTier(int tier) => _difficultyTier = tier;
 
-    /// <summary>Scale HP and contact damage; steps up every 2 minutes. Call after SetDifficultyTier when spawning.</summary>
     public void SetTimeStrength(float timeSurvived)
     {
-        int twoMinuteSteps = Mathf.FloorToInt(timeSurvived / 120f); // 0–2 min: 0, 2–4 min: 1, etc.
-        _timeStrengthMult = 1f + twoMinuteSteps * 0.25f; // +25% per 2 minutes
+        _timeStrengthMult = DifficultyScaler.GetTimeStrengthMultiplier(timeSurvived);
     }
 
     public bool IsDead() => _isDead;

@@ -10,8 +10,9 @@ public class StockOptionsWeapon : WeaponBase
         if (arrowPrefab == null || CurrentStats == null) return;
 
         int count = GetProjectileCount(CurrentStats.projectileCount);
-        
-        var enemies = FindObjectsByType<EnemyBase>(FindObjectsSortMode.None);
+
+        // Use central registry instead of scene-wide search
+        var enemies = EnemyRegistry.Enemies;
         Transform closest = null;
         float minDist = float.MaxValue;
 
@@ -39,17 +40,16 @@ public class StockOptionsWeapon : WeaponBase
             float currentAngle = startAngle + (i * spreadAngle);
             Vector2 dir = Quaternion.Euler(0, 0, currentAngle) * baseDir;
 
-            var go = Instantiate(arrowPrefab, transform.position, Quaternion.identity);
-
             // Orient projectile to face movement direction
             float angleDeg = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
-            go.transform.rotation = Quaternion.Euler(0, 0, angleDeg);
-
-            var proj = go.GetComponent<ProjectileBase>();
-            if (proj != null)
-            {
-                proj.Initialize(CurrentStats, dir);
-            }
+            var go = ProjectileSpawner.SpawnProjectile(
+                arrowPrefab,
+                transform.position,
+                dir,
+                CurrentStats,
+                GetDamage());
+            if (go != null)
+                go.transform.rotation = Quaternion.Euler(0, 0, angleDeg);
         }
     }
 }

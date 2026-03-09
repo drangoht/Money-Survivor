@@ -15,9 +15,8 @@ public class SingleShot : WeaponBase
     {
         if (projectilePrefab == null || CurrentStats == null) return;
 
-        // Find enemies once
-        var enemies = FindObjectsByType<EnemyBase>(FindObjectsSortMode.None);
-        var enemyList = new List<EnemyBase>(enemies);
+        // Get current enemies from registry once
+        var enemyList = new List<EnemyBase>(EnemyRegistry.Enemies);
 
         // Fallback direction if no enemies exist
         Vector2 baseDir = Vector2.right;
@@ -75,19 +74,15 @@ public class SingleShot : WeaponBase
 
             Vector2 dir = Quaternion.Euler(0, 0, currentAngle) * baseDirection;
 
-            var go = Instantiate(projectilePrefab, transform.position, Quaternion.identity);
-
-            var sr = go.GetComponentInChildren<SpriteRenderer>();
-            if (sr != null) sr.color = color;
-
-            var proj = go.GetComponent<ProjectileBase>();
-            if (proj != null)
-            {
-                proj.Initialize(CurrentStats, dir);
-                proj.damage = GetDamage(); 
-                proj.homing = target != null;
-                proj.homingTarget = target;
-            }
+            ProjectileSpawner.SpawnProjectile(
+                projectilePrefab,
+                transform.position,
+                dir,
+                CurrentStats,
+                GetDamage(),
+                color,
+                target,
+                target != null);
         }
     }
 }

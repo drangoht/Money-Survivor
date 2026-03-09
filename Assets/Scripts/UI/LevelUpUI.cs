@@ -58,7 +58,7 @@ public class LevelUpUI : MonoBehaviour
     {
         if (!_visible) return;
 
-        float x = Input.GetAxisRaw("Horizontal");
+        float x = InputService.Current.GetHorizontalMenuAxis();
 
         if (x > 0.5f)
         {
@@ -76,7 +76,7 @@ public class LevelUpUI : MonoBehaviour
         if (_selectedIndex < 0) _selectedIndex = selectableCount - 1;
         if (_selectedIndex >= selectableCount) _selectedIndex = 0;
 
-        if (Input.GetButtonDown("Submit"))
+        if (InputService.Current.GetSubmitPressed())
         {
             if (CanShowRefresh() && _selectedIndex == _options.Count)
             {

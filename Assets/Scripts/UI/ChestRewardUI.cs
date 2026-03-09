@@ -41,7 +41,7 @@ public class ChestRewardUI : MonoBehaviour
     {
         if (!_visible) return;
 
-        if (Time.unscaledTime >= _hideTime || Input.GetButtonDown("Submit"))
+        if (Time.unscaledTime >= _hideTime || InputService.Current.GetSubmitPressed())
             _visible = false;
     }
 

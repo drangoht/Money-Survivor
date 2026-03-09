@@ -1510,6 +1510,7 @@ public static class GameSetup
 
         sys.AddComponent<XPManager>();
         sys.AddComponent<SoundManager>();
+        sys.AddComponent<DebugOverlay>();
 
         var lm = sys.AddComponent<LevelUpManager>();
         lm.powerUps      = new List<PowerUpData> { _healPU, _speedPU, _damagePU, _magnetPU, _radiusPU, _insiderPU, _taxPU, _overclockPU, _duplicatePU };

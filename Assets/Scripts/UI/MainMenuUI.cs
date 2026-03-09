@@ -40,7 +40,7 @@ public class MainMenuUI : MonoBehaviour
 
     private void HandleInput()
     {
-        float y = Input.GetAxisRaw("Vertical");
+        float y = InputService.Current.GetVerticalMenuAxis();
 
         if (y > 0.5f)
         {
@@ -57,7 +57,7 @@ public class MainMenuUI : MonoBehaviour
         if (_selectedIndex < 0) _selectedIndex = 1;
         if (_selectedIndex > 1) _selectedIndex = 0;
 
-        if (Input.GetButtonDown("Submit"))
+        if (InputService.Current.GetSubmitPressed())
         {
             if (_selectedIndex == 0) GameManager.Instance?.StartGame();
             else

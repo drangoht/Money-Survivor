@@ -63,6 +63,8 @@ public class EnemySpawner : MonoBehaviour
     private bool  _ceoSpawned;
     private int   _tier;
 
+    public int CurrentTier => _tier;
+
     private Transform _playerTransform;
 
     // Wave composition: probability weights per tier

@@ -22,20 +22,14 @@ public class CoinToss : WeaponBase
             float angle = angleStep * i * Mathf.Deg2Rad;
             Vector2 dir = new Vector2(Mathf.Cos(angle), Mathf.Sin(angle));
 
-            // Direct instantiate — no pool setup required
-            var coin = Instantiate(coinPrefab, transform.position, Quaternion.identity);
-
-            var sr = coin.GetComponentInChildren<SpriteRenderer>();
-            if (sr != null) sr.color = coinColor;
-
-            var proj = coin.GetComponent<ProjectileBase>();
-            if (proj != null)
-            {
-                // Override damage cleanly to include PlayerStats modifier
-                var stats = CurrentStats;
-                proj.Initialize(stats, dir);
-                proj.damage = GetDamage(); 
-            }
+            // Use shared spawner: includes damage override and color tint.
+            ProjectileSpawner.SpawnProjectile(
+                coinPrefab,
+                transform.position,
+                dir,
+                CurrentStats,
+                GetDamage(),
+                coinColor);
         }
     }
 }

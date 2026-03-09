@@ -76,11 +76,20 @@ public class XPOrb : MonoBehaviour, IPoolable
 
     private void FindReferences()
     {
-        var player = GameObject.FindWithTag("Player");
-        if (player == null) return;
-        _playerTransform = player.transform;
-        _playerStats     = player.GetComponent<PlayerStats>();
-        _xpManager       = FindFirstObjectByType<XPManager>();
+        if (_playerStats == null || _playerTransform == null)
+        {
+            var player = GameObject.FindWithTag("Player");
+            if (player != null)
+            {
+                _playerTransform = player.transform;
+                _playerStats     = player.GetComponent<PlayerStats>();
+            }
+        }
+
+        if (_xpManager == null)
+        {
+            _xpManager = Object.FindFirstObjectByType<XPManager>();
+        }
     }
 
     private void Update()
