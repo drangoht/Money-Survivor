@@ -22,6 +22,7 @@ public static class GameSetup
     private const string PowerUpSOPath = "Assets/ScriptableObjects/PowerUps";
     private const string SpritesPath   = "Assets/Sprites";
     private const string WeaponIconsPath = "Assets/Art/WeaponIcons";
+    private const string OfficeSpritesPath = "Assets/Sprites/Office";
 
     // ── Entry point ──────────────────────────────────────────────────────────
 
@@ -103,6 +104,7 @@ public static class GameSetup
         {
             ScenesPath, SpritesPath, PrefabsPath, EnemyPath, ObstaclesPath,
             SOPath, EnemySOPath, WeaponSOPath, PowerUpSOPath,
+            OfficeSpritesPath,
         };
 
         foreach (var dir in dirs)
@@ -126,7 +128,8 @@ public static class GameSetup
 
     private static Sprite _circle, _square;
     private static Sprite _playerSprite, _enemySprite, _coinSprite, _bgSpriteFront, _bgSpriteBack;
-    private static Sprite _deskSprite, _chairSprite, _wallSprite;
+    private static Sprite _officeFloorTileSprite, _officePartitionWallSprite;
+    private static Sprite _officeDeskSprite, _officeChairSprite, _officeCoffeeMachineSprite, _officePottedPlantSprite, _officeMeetingTableSprite;
     private static Sprite _xpOrbSprite, _boomerangSprite, _shieldSprite, _splashSprite, _chestSprite;
     private static Sprite _exWifeSprite, _childrenSprite, _irsSprite, _cryptoSprite, _stockSprite;
 
@@ -134,6 +137,43 @@ public static class GameSetup
     {
         _circle = GetOrCreateSprite(SpritesPath + "/Circle.png", CreateCircleTex(128));
         _square = GetOrCreateSprite(SpritesPath + "/Square.png",  CreateSolidTex(32, Color.white));
+
+        // New art direction (Top-Down Corporate Open Space Chaos)
+        _officeFloorTileSprite = GetOrCreatePixelSprite(
+            OfficeSpritesPath + "/office_floor_tile.png",
+            CreateOfficeFloorTileTex(128, 128),
+            tiling: true,
+            forceRegenerate: false);
+        _officePartitionWallSprite = GetOrCreatePixelSprite(
+            OfficeSpritesPath + "/office_partition_wall.png",
+            CreateOfficePartitionWallTex(64, 64),
+            tiling: false,
+            forceRegenerate: false);
+        _officeDeskSprite = GetOrCreatePixelSprite(
+            OfficeSpritesPath + "/office_desk.png",
+            null, // No procedural creation, using AI generated
+            tiling: false,
+            forceRegenerate: false);
+        _officeChairSprite = GetOrCreatePixelSprite(
+            OfficeSpritesPath + "/office_chair.png",
+            null,
+            tiling: false,
+            forceRegenerate: false);
+        _officeCoffeeMachineSprite = GetOrCreatePixelSprite(
+            OfficeSpritesPath + "/office_coffee_machine.png",
+            null,
+            tiling: false,
+            forceRegenerate: false);
+        _officePottedPlantSprite = GetOrCreatePixelSprite(
+            OfficeSpritesPath + "/office_potted_plant.png",
+            null,
+            tiling: false,
+            forceRegenerate: false);
+        _officeMeetingTableSprite = GetOrCreatePixelSprite(
+            OfficeSpritesPath + "/office_meeting_table.png",
+            null,
+            tiling: false,
+            forceRegenerate: false);
 
         // Parallax backgrounds: front (tiled with holes) and far (soft gradient).
         _bgSpriteFront = GetOrCreateSprite(
@@ -160,11 +200,6 @@ public static class GameSetup
             _chestSprite = GetOrCreateSprite(SpritesPath + "/chest_fallback.png", CreateChestTex(64, 48));
         _cryptoSprite    = LoadSingleSprite(SpritesPath + "/cryptominer_sprite_1772827344346.png", "cryptominer_V2");
         _stockSprite     = LoadSingleSprite(SpritesPath + "/stock_options_sprite_1772827497492.png", "stock_options_V2");
-
-        // Office obstacles (financial office style)
-        _deskSprite  = GetOrCreateSprite(SpritesPath + "/office_desk.png",  CreateOfficeDeskTex(128, 64));
-        _chairSprite = GetOrCreateSprite(SpritesPath + "/office_chair.png", CreateOfficeChairTex(64, 64));
-        _wallSprite  = GetOrCreateSprite(SpritesPath + "/office_wall.png",  CreateOfficeWallTex(32, 128));
 
         Log($"  Sprites ready");
     }
@@ -290,7 +325,7 @@ public static class GameSetup
 
         // --- Hard edge cleanup pass (pixel art: no semi-transparency) ---
         // Clear any background-adjacent pixels that are close to the background color.
-        float edgeThreshold = 0.45f;
+        float edgeThreshold = 0.85f; // Aggressive cleanup for anti-aliased edges
         for (int i = 0; i < pixels.Length; i++)
         {
             if (visited[i]) continue;
@@ -299,25 +334,38 @@ public static class GameSetup
                 (ex > 0   && visited[i - 1]) ||
                 (ex < w-1 && visited[i + 1]) ||
                 (ey > 0   && visited[i - w]) ||
-                (ey < h-1 && visited[i + w]);
+                (ey < h-1 && visited[i + w]) ||
+                (ex > 0 && ey > 0 && visited[i - w - 1]) ||
+                (ex < w-1 && ey > 0 && visited[i - w + 1]) ||
+                (ex > 0 && ey < h-1 && visited[i + w - 1]) ||
+                (ex < w-1 && ey < h-1 && visited[i + w + 1]);
+            
             if (!nearCleared) continue;
 
             float dist = Mathf.Abs(pixels[i].r - key.r)
                        + Mathf.Abs(pixels[i].g - key.g)
                        + Mathf.Abs(pixels[i].b - key.b);
+            
             if (dist < edgeThreshold)
+            {
                 pixels[i] = Color.clear; // hard cut — no blending for pixel art
+                visited[i] = true; // Mark it as cleared so neighbors can be cleaned too
+            }
         }
 
         // --- Global magenta removal pass (catches any remaining #FF00FF background pixels) ---
-        Color magenta = new Color(1f, 0f, 1f);
         for (int i = 0; i < pixels.Length; i++)
         {
-            float magentaDist = Mathf.Abs(pixels[i].r - magenta.r)
-                              + Mathf.Abs(pixels[i].g - magenta.g)
-                              + Mathf.Abs(pixels[i].b - magenta.b);
-            if (magentaDist < 0.4f)
+            Color c = pixels[i];
+            // Check if it's "magenta-leaning" (R and B are strong, G is weak)
+            // This catches artifacts and semi-transparent edges
+            float magentaDist = Mathf.Abs(c.r - 1f) + Mathf.Abs(c.g - 0f) + Mathf.Abs(c.b - 1f);
+            bool isMagentaLeaning = (c.r > 0.6f && c.b > 0.6f && c.g < 0.4f);
+            
+            if (magentaDist < 0.5f || isMagentaLeaning)
+            {
                 pixels[i] = Color.clear;
+            }
         }
 
         tex.SetPixels(pixels);
@@ -368,13 +416,14 @@ public static class GameSetup
             if (dist < edgeThreshold) pixels[i] = Color.clear;
         }
 
-        // Global pass: remove ALL pixels close to key color (catches non-connected mauve, gradients, partial fills)
-        float globalThreshold = Mathf.Max(threshold + 0.15f, 0.48f);
+        // Global pass: remove ALL pixels close to key color
         for (int i = 0; i < pixels.Length; i++)
         {
             Color c = pixels[i];
             float dist = Mathf.Abs(c.r - key.r) + Mathf.Abs(c.g - key.g) + Mathf.Abs(c.b - key.b);
-            if (dist <= globalThreshold)
+            bool isMagentaLeaning = (c.r > 0.6f && c.b > 0.6f && c.g < 0.4f);
+            
+            if (dist <= 0.45f || isMagentaLeaning)
                 pixels[i] = Color.clear;
         }
 
@@ -409,6 +458,49 @@ public static class GameSetup
         if (tex == null) throw new Exception($"Could not load texture at {texPath}");
 
         // 3. Ensure a standalone Sprite Asset exists pointing to it
+        var sprite = AssetDatabase.LoadAssetAtPath<Sprite>(spritePath);
+        if (sprite == null)
+        {
+            sprite = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0.5f), 100f);
+            sprite.name = Path.GetFileNameWithoutExtension(path);
+            AssetDatabase.CreateAsset(sprite, spritePath);
+            AssetDatabase.SaveAssets();
+        }
+
+        return sprite;
+    }
+
+    private static Sprite GetOrCreatePixelSprite(string path, Texture2D generated, bool tiling, bool forceRegenerate = false)
+    {
+        string texPath = path;
+        string spritePath = path.Replace(".png", "_Sprite.asset");
+
+        if (!File.Exists(texPath) || forceRegenerate)
+        {
+            if (generated != null)
+            {
+                File.WriteAllBytes(texPath, generated.EncodeToPNG());
+                AssetDatabase.ImportAsset(texPath, ImportAssetOptions.ForceUpdate);
+            }
+        }
+
+        var importer = AssetImporter.GetAtPath(texPath) as TextureImporter;
+        if (importer != null)
+        {
+            importer.textureType = TextureImporterType.Sprite;
+            importer.spritePixelsPerUnit = 100f;
+            importer.filterMode = FilterMode.Point;
+            importer.wrapMode = tiling ? TextureWrapMode.Repeat : TextureWrapMode.Clamp;
+            importer.mipmapEnabled = false;
+            importer.textureCompression = TextureImporterCompression.Uncompressed;
+            importer.alphaSource = TextureImporterAlphaSource.FromInput;
+            importer.alphaIsTransparency = true;
+            importer.SaveAndReimport();
+        }
+
+        var tex = AssetDatabase.LoadAssetAtPath<Texture2D>(texPath);
+        if (tex == null) throw new Exception($"Could not load texture at {texPath}");
+
         var sprite = AssetDatabase.LoadAssetAtPath<Sprite>(spritePath);
         if (sprite == null)
         {
@@ -550,6 +642,36 @@ public static class GameSetup
 
         tex.filterMode = FilterMode.Bilinear;
         tex.wrapMode   = TextureWrapMode.Repeat;
+        tex.Apply();
+        return tex;
+    }
+
+    private static Texture2D CreateOfficeFloorTileTex(int width, int height)
+    {
+        var tex = new Texture2D(width, height, TextureFormat.RGBA32, false);
+        Color baseCol = new Color(0.18f, 0.18f, 0.22f); // dark blue-gray
+        Color noiseCol = new Color(0.20f, 0.20f, 0.24f); // slightly lighter
+        for (int y = 0; y < height; y++)
+        for (int x = 0; x < width; x++)
+        {
+            float n = Mathf.PerlinNoise(x * 0.1f, y * 0.1f);
+            tex.SetPixel(x, y, Color.Lerp(baseCol, noiseCol, n));
+        }
+        tex.Apply();
+        return tex;
+    }
+
+    private static Texture2D CreateOfficePartitionWallTex(int width, int height)
+    {
+        var tex = new Texture2D(width, height, TextureFormat.RGBA32, false);
+        Color wallColor = new Color(0.4f, 0.45f, 0.5f); // mid-gray-blue cubicle
+        Color edgeColor = new Color(0.3f, 0.35f, 0.4f); // darker frame
+        for (int y = 0; y < height; y++)
+        for (int x = 0; x < width; x++)
+        {
+            bool edge = x < 2 || x >= width - 2 || y < 2 || y >= height - 2;
+            tex.SetPixel(x, y, edge ? edgeColor : wallColor);
+        }
         tex.Apply();
         return tex;
     }
@@ -926,6 +1048,7 @@ public static class GameSetup
     private static GameObject _playerPrefab, _coinPrefab, _orbPrefab, _chestPrefab;
     private static GameObject _cardPrefab, _cryptoPrefab, _stockPrefab, _hitParticlesPrefab, _deathParticlesPrefab, _levelUpBurstPrefab;
     private static GameObject _deskPrefab, _chairPrefab, _wallPrefab;
+    private static GameObject _officeDeskPrefab, _officeChairPrefab, _officeCoffeeMachinePrefab, _officePottedPlantPrefab, _officeMeetingTablePrefab;
     private static GameObject _p1, _p2, _p3, _p4, _p5, _p6, _p7; // enemy prefabs
 
     private static void CreatePrefabs()
@@ -947,9 +1070,16 @@ public static class GameSetup
         _levelUpBurstPrefab = MakeLevelUpBurstParticles();
         _playerPrefab       = MakePlayer();
 
-        _deskPrefab  = MakeObstaclePrefab("OfficeDesk",  _deskSprite,  2.4f, 1.2f);
-        _chairPrefab = MakeObstaclePrefab("OfficeChair", _chairSprite, 0.9f, 0.9f);
-        _wallPrefab  = MakeObstaclePrefab("OfficeWall",  _wallSprite,  0.4f, 3f);
+        // New Top-Down Office Obstacles
+        _officeDeskPrefab = MakeObstaclePrefab("TopDownOfficeDesk", _officeDeskSprite, 3.0f);
+        _officeChairPrefab = MakeObstaclePrefab("TopDownOfficeChair", _officeChairSprite, 3.2f);
+        _officeCoffeeMachinePrefab = MakeObstaclePrefab("TopDownOfficeCoffeeMachine", _officeCoffeeMachineSprite, 3.2f);
+        _officePottedPlantPrefab = MakeObstaclePrefab("TopDownOfficePottedPlant", _officePottedPlantSprite, 1.8f);
+        _officeMeetingTablePrefab = MakeObstaclePrefab("TopDownOfficeMeetingTable", _officeMeetingTableSprite, 5.0f);
+
+        _deskPrefab  = _officeDeskPrefab;
+        _chairPrefab = _officeChairPrefab;
+        _wallPrefab  = MakeObstaclePrefab("OfficeWall",  _officePartitionWallSprite, 1.2f);
         
         _p1 = MakeEnemyPrefab("Bankman",  _bankman,  _enemySprite,   0.7f, 0.03f, 5f);
         _p2 = MakeEnemyPrefab("ExWife",   _exWife,   _exWifeSprite,  0.8f, 0.04f, 4f);
@@ -1088,25 +1218,36 @@ public static class GameSetup
         return Save(root, path);
     }
 
-    private static GameObject MakeObstaclePrefab(string name, Sprite sprite, float worldW, float worldH)
+    private static GameObject MakeObstaclePrefab(string name, Sprite sprite, float targetWidth)
     {
         string path = ObstaclesPath + "/" + name + ".prefab";
-        var ex = AssetDatabase.LoadAssetAtPath<GameObject>(path);
-        if (ex != null) return ex;
+        // Always recreate to ensure no stale scales
+        if (AssetDatabase.LoadAssetAtPath<GameObject>(path) != null) AssetDatabase.DeleteAsset(path);
 
         var root = new GameObject(name);
         root.tag = "Untagged";
+        
+        // Ensure uniform scale on root
+        root.transform.localScale = Vector3.one;
+        
+        // Use sprite's aspect ratio to avoid stretching
+        float aspect = (float)sprite.rect.height / sprite.rect.width;
+        float targetHeight = targetWidth * aspect;
+        
+        // SpritePixelsPerUnit is 100
         float suW = sprite.rect.width / 100f;
-        float suH = sprite.rect.height / 100f;
-        float scaleX = worldW / suW;
-        float scaleY = worldH / suH;
-        var srChild = Sprite2D(root, sprite, Color.white, 0, 1f);
-        srChild.transform.localScale = new Vector3(scaleX, scaleY, 1f);
-
+        
+        // Scale to achieve targetWidth while maintaining aspect ratio
+        float scale = targetWidth / suW;
+        
+        var srChild = Sprite2D(root, sprite, Color.white, 0, scale);
+        // Explicitly set uniform scale on child to avoid any inheritance issues
+        srChild.transform.localScale = new Vector3(scale, scale, 1f);
+        
         var col = root.AddComponent<BoxCollider2D>();
-        col.size = new Vector2(worldW, worldH);
+        col.size = new Vector2(targetWidth, targetHeight);
         col.isTrigger = false;
-        col.offset = Vector2.zero;
+        col.offset = new Vector2(0, targetHeight / 2f); // Offset collider to match bottom pivot
 
         return Save(root, path);
     }
@@ -1539,8 +1680,14 @@ public static class GameSetup
         bgNear.transform.localScale = new Vector3(200f, 200f, 1f);
         GameObject.DestroyImmediate(bgNear.GetComponent<MeshCollider>());
 
-        var bgNearMat = new Material(Shader.Find("Unlit/Transparent")) { name = "BackgroundNearMaterial" };
-        if (_bgSpriteFront != null)
+        var bgNearMat = new Material(Shader.Find("Unlit/Texture")) { name = "BackgroundNearMaterial" };
+        if (_officeFloorTileSprite != null)
+        {
+            bgNearMat.mainTexture = _officeFloorTileSprite.texture;
+            bgNearMat.mainTexture.wrapMode = TextureWrapMode.Repeat;
+            bgNearMat.mainTextureScale = new Vector2(50f, 50f);
+        }
+        else if (_bgSpriteFront != null)
         {
             bgNearMat.mainTexture = _bgSpriteFront.texture;
             bgNearMat.mainTexture.wrapMode = TextureWrapMode.Repeat;
@@ -1554,7 +1701,11 @@ public static class GameSetup
         nearScroll.scrollScale = 0.025f;
         nearScroll.moveTransformWithScroll = true; // sync with obstacles, orbs, crypto miners so they don't slide on the ground
 
-        // Office obstacles (insurmountable): parent to foreground so they follow it; block player and enemies
+        // Containers for clean sorting
+        var obstacleContainer = new GameObject("_Obstacles").transform;
+        obstacleContainer.position = Vector3.zero;
+
+        // Office obstacles (insurmountable): parent to _Obstacles container so they don't inherit floor scale
         float boundsMargin = 88f;
         float clearRadius = 5f;
         UnityEngine.Random.InitState(12345);
@@ -1562,25 +1713,47 @@ public static class GameSetup
         {
             Vector2 pos = RandomPositionInBounds(boundsMargin, clearRadius);
             var o = (GameObject)PrefabUtility.InstantiatePrefab(_deskPrefab);
-            o.transform.SetParent(bgNear.transform);
-            o.transform.localPosition = new Vector3(pos.x / 200f, pos.y / 200f, -50f);
+            o.transform.SetParent(obstacleContainer);
+            o.transform.position = new Vector3(pos.x, pos.y, -0.1f);
         }
         for (int i = 0; i < 20; i++)
         {
             Vector2 pos = RandomPositionInBounds(boundsMargin, clearRadius);
             var o = (GameObject)PrefabUtility.InstantiatePrefab(_chairPrefab);
-            o.transform.SetParent(bgNear.transform);
-            o.transform.localPosition = new Vector3(pos.x / 200f, pos.y / 200f, -50f);
+            o.transform.SetParent(obstacleContainer);
+            o.transform.position = new Vector3(pos.x, pos.y, -0.1f);
         }
         for (int i = 0; i < 15; i++)
         {
             Vector2 pos = RandomPositionInBounds(boundsMargin, clearRadius);
             var o = (GameObject)PrefabUtility.InstantiatePrefab(_wallPrefab);
-            o.transform.SetParent(bgNear.transform);
-            o.transform.localPosition = new Vector3(pos.x / 200f, pos.y / 200f, -50f);
+            o.transform.SetParent(obstacleContainer);
+            o.transform.position = new Vector3(pos.x, pos.y, -0.1f);
             o.transform.rotation = Quaternion.Euler(0f, 0f, UnityEngine.Random.Range(0, 2) * 90f);
         }
-        Log("  Office obstacles placed (parented to foreground)");
+        for (int i = 0; i < 15; i++)
+        {
+            Vector2 pos = RandomPositionInBounds(boundsMargin, clearRadius);
+            var o = (GameObject)PrefabUtility.InstantiatePrefab(_officeCoffeeMachinePrefab);
+            o.transform.SetParent(obstacleContainer);
+            o.transform.position = new Vector3(pos.x, pos.y, -0.1f);
+        }
+        for (int i = 0; i < 15; i++)
+        {
+            Vector2 pos = RandomPositionInBounds(boundsMargin, clearRadius);
+            var o = (GameObject)PrefabUtility.InstantiatePrefab(_officePottedPlantPrefab);
+            o.transform.SetParent(obstacleContainer);
+            o.transform.position = new Vector3(pos.x, pos.y, -0.1f);
+        }
+        for (int i = 0; i < 8; i++)
+        {
+            Vector2 pos = RandomPositionInBounds(boundsMargin, clearRadius);
+            var o = (GameObject)PrefabUtility.InstantiatePrefab(_officeMeetingTablePrefab);
+            o.transform.SetParent(obstacleContainer);
+            o.transform.position = new Vector3(pos.x, pos.y, -0.1f);
+            o.transform.rotation = Quaternion.Euler(0f, 0f, UnityEngine.Random.Range(0, 4) * 90f);
+        }
+        Log("  Office obstacles placed");
 
         // Player
         if (_playerPrefab == null)
