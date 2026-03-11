@@ -1649,7 +1649,7 @@ public static class GameSetup
         cam.clearFlags = CameraClearFlags.SolidColor;
         cam.backgroundColor = new Color(.05f,.09f,.05f);
         camGO.AddComponent<AudioListener>();
-        camGO.AddComponent<CameraFollow>();
+        var camFollow = camGO.AddComponent<CameraFollow>();
 
         // Background – two-layer parallax:
         // Far layer: soft dark gradient.
@@ -1700,6 +1700,8 @@ public static class GameSetup
         var nearScroll = bgNear.AddComponent<ScrollingBackground>();
         nearScroll.scrollScale = 0.025f;
         nearScroll.moveTransformWithScroll = true; // sync with obstacles, orbs, crypto miners so they don't slide on the ground
+        // Runtime script that clamps player & camera to this background's bounds
+        bgNear.AddComponent<BackgroundBounds>();
 
         // Containers for clean sorting
         var obstacleContainer = new GameObject("_Obstacles").transform;
@@ -1762,6 +1764,24 @@ public static class GameSetup
         var player = (GameObject)PrefabUtility.InstantiatePrefab(_playerPrefab);
         player.transform.position = Vector3.zero;
         Log("  Player instantiated");
+
+        // Clamp both player and camera to the same world bounds so the player
+        // cannot leave the visible background.
+        var playerController = player.GetComponent<PlayerController>();
+        if (playerController != null)
+        {
+            playerController.useMovementBounds = true;
+            playerController.minBounds = new Vector2(-95f, -95f);
+            playerController.maxBounds = new Vector2( 95f,  95f);
+        }
+
+        if (camFollow != null)
+        {
+            camFollow.useBounds = true;
+            camFollow.minBounds = new Vector2(-95f, -95f);
+            camFollow.maxBounds = new Vector2( 95f,  95f);
+            camFollow.target    = player.transform;
+        }
 
         // Systems
         var sys = new GameObject("_Systems");
